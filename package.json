@@ -1,0 +1,52 @@
+{
+  "name": "myAPPointments",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "test": "jest"
+  },
+  "dependencies": {
+    "babel-eslint": "^7.2.3",
+    "eslint-plugin-react-native": "^2.3.2",
+    "firebase": "^4.1.3",
+    "hat": "0.0.3",
+    "lodash": "^4.17.4",
+    "moment": "^2.18.1",
+    "native-base": "^2.2.0",
+    "pouchdb-find": "^6.3.4",
+    "pouchdb-react-native": "^6.2.6",
+    "react": "16.0.0-alpha.12",
+    "react-moment": "^0.6.0",
+    "react-native": "^0.45.1",
+    "react-native-action-button": "^2.7.2",
+    "react-native-contacts": "^0.9.0",
+    "react-native-datepicker": "^1.6.0",
+    "react-native-image-crop-picker": "^0.14.4",
+    "react-native-keyboard-aware-scroll-view": "^0.2.9",
+    "react-native-modal-picker": "0.0.16",
+    "react-native-pathjs-charts": "0.0.29",
+    "react-native-permissions": "^1.0.0",
+    "react-native-router-flux": "^3.40.1",
+    "react-native-vector-icons": "^4.3.0",
+    "react-redux": "^5.0.5",
+    "redux": "^3.7.0",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.2.0"
+  },
+  "devDependencies": {
+    "babel-jest": "20.0.3",
+    "babel-preset-react-native": "2.0.0",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^15.0.1",
+    "eslint-plugin-import": "^2.3.0",
+    "eslint-plugin-jsx-a11y": "^5.0.3",
+    "eslint-plugin-react": "^7.1.0",
+    "jest": "20.0.4",
+    "react-native-vector-icons": "^4.2.0",
+    "react-test-renderer": "16.0.0-alpha.12"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}
