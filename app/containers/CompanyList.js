@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import PouchDB from 'pouchdb-react-native';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { ListView, Alert, AsyncStorage } from 'react-native';
+import { ListView, Alert, AsyncStorage, Platform } from 'react-native';
 import ActionButton from 'react-native-action-button';
 // import Swipeout  from 'react-native-swipe-out';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
@@ -315,6 +315,7 @@ class GetCompanyList extends Component {
 						<Text
 							style={{
 								fontSize: 12,
+								right: 10
 							}}
 						>Leave</Text>
 					</View>
@@ -369,6 +370,7 @@ class GetCompanyList extends Component {
 						<Text
 							style={{
 								fontSize: 12,
+								right: 10
 							}}
 						>Reject</Text>
 					</View>
@@ -380,35 +382,30 @@ class GetCompanyList extends Component {
 
 	render() {
 		return (
-			<Container>
-				<Header style={{ backgroundColor: '#3641a1' }}>
-					<Body>
-					<Title style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }}>
-					Select a company
-					</Title>
-					</Body>
-				</Header>
-				<Content>
-				{this.state.membersCount === 0 && <Text style={{ paddingLeft: 5, fontWeight: 'bold' }}>Member invites not found</Text>}
-				{this.state.membersCount !== 0 && <Text style={{ paddingLeft: 5, fontWeight: 'bold' }}>Member Of</Text>}
+			<Container style={{ paddingTop: (Platform.OS === 'ios') ? 64 : 54 }}>
+				<Content style={{ borderColor: 'steelblue', borderBottomWidth: 0.25, borderWidth: 0.5, paddingTop: 10, borderRadius: 12 }}>
+				{this.state.membersCount === 0 && <Text style={{ fontWeight: 'bold', alignSelf: 'center' }}>Member invites not found</Text>}
+				{this.state.membersCount !== 0 && <Text style={{ fontWeight: 'bold', alignSelf: 'center' }}>Member Of</Text>}
 					<ListView
 						enableEmptySections
 						dataSource={this.state.members}
 						renderRow={this.renderRow}
 					/>
 				</Content>
-				<Content>
-				{this.state.pendingsCount === 0 && <Text style={{ paddingLeft: 5, fontWeight: 'bold' }}>Pending invites not found</Text>}
-				{this.state.pendingsCount !== 0 && <Text style={{ paddingLeft: 5, fontWeight: 'bold' }}>Pending invites</Text>}
+				<Content style={{ borderColor: 'steelblue', borderTopWidth: 0.25, borderWidth: 0.5, paddingTop: 10, borderRadius: 12 }}>
+				{this.state.pendingsCount === 0 && <Text style={{ fontWeight: 'bold', alignSelf: 'center' }}>Pending invites not found</Text>}
+				{this.state.pendingsCount !== 0 && <Text style={{ fontWeight: 'bold', alignSelf: 'center' }}>Pending invites</Text>}
 					<ListView
 						enableEmptySections
 						dataSource={this.state.pendings}
 						renderRow={this.renderRowPendings}
 					/>
 				</Content>
-				<Button onPress={this.createCompanyForm.bind(this)} block info>
-				<Text>Create new Company</Text>
-				</Button>
+				<View style={{ padding: 15 }}>
+					<Button backgroundColor='#9DBDF2' onPress={this.createCompanyForm.bind(this)} block info>
+						<Text>Create company</Text>
+					</Button>
+				</View>
 			</Container>
 		);
 	}

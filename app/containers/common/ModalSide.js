@@ -120,6 +120,7 @@ class ModalSide extends Component {
 				const insettings = this.state.settings;
 				insettings[prop] = newValue;
 				this.setState({ settings: insettings });
+				this.setState({ showspinner: true });
 				this.setState({ showimporting: true });
 				this.saveSettings();
 				this.getContactsFromDevice();
@@ -127,6 +128,7 @@ class ModalSide extends Component {
 				const insettings = this.state.settings;
 				insettings[prop] = newValue;
 				this.setState({ settings: insettings });
+				this.setState({ showspinner: true });
 				this.setState({ showremoving: true });
 				this.saveSettings();
 				this.deleteContactsFromDB();

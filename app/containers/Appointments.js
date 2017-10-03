@@ -12,7 +12,8 @@ import PouchDB from 'pouchdb-react-native';
 import { FooterMain } from '../containers/common';
 import ModalSide from './common/ModalSide';
 import moment from 'moment';
-import ModalPicker from 'react-native-modal-picker';
+// import ModalPicker from 'react-native-modal-picker';
+import ModalPicker from './common/ModalPicker';
 
 const Permissions = require('react-native-permissions');
 
@@ -99,35 +100,9 @@ class Appointments extends Component {
 
 	componentWillUnmount() {}
 
-	// checkPermisions(permisionType) {
-	//
-	// 	console.log('permisionType');
-	// 	console.log(permisionType);
-	// 	console.log('Permissions');
-	// 	console.log(Permissions);
-	//
-	//
-	//
-	// 	// Permissions.getPermissionStatus(permisionType)
-	// 	// .then(response => {
-	// 	// 	//response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
-	// 	// 	console.log('Permission  :; ' + permisionType + ' :: ' + response);
-	// 	// 	if (response !== 'authorized') {
-	// 	// 		this.requestPermission(permisionType);
-	// 	// 	}
-	// 	// });
-	// }
-	//
-	// requestPermission(permissionType) {
-	// 	Permissions.requestPermission(permissionType)
-	// 	.then(response => {
-	// 			//returns once the user has chosen to 'allow' or to 'not allow' access
-	// 			//response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
-	// 		console.log('permission for :: ' + permissionType + ' => ' + response);
-	// 	});
-	// }
-
 	onChangeEmployee(newValue, prop) {
+		console.log('newValue');
+		console.log(newValue);
 		this.userSelected = newValue;
 		this.getAppointments();
 	}
@@ -174,15 +149,9 @@ class Appointments extends Component {
 			}
 			this.employeesList = _.sortBy(this.employeesList, ['label']);
 		}
-		console.log('this.userSelected');
-		console.log(this.userSelected);
-		console.log('this.employeesList');
-		console.log(this.employeesList);
 		if (this.userSelected.value === '') {
 			const queryAppointments = { selector: { doctype: 'appointment', date: this.state.todaysDate }, };
 			const appointmentsList = await DBCompanyConnection.find(queryAppointments);
-			console.log('appointmentList');
-			console.log(appointmentsList);
 			if (appointmentsList.docs.length > 0) {
 				for (let i = 0; i < appointmentsList.docs.length; i += 1) {
 					const queryContact = { selector: { doctype: 'contact', _id: appointmentsList.docs[i].contact_id }, };
@@ -190,20 +159,29 @@ class Appointments extends Component {
 					appointmentsList.docs[i].contact_name = 'Missing contact name';
 					if (contactInfo.docs.length > 0) {
 						appointmentsList.docs[i].contact_name = contactInfo.docs[0].givenName +' '+ contactInfo.docs[0].familyName;
-						appointmentsList.docs[i].telephone = contactInfo.docs[0].telephone;
-					}
-					const queryEmployee = { selector: { doctype: 'user', _id: appointmentsList.docs[i].employee_id }, };
-					const employeeInfo = await DBCompanyConnection.find(queryEmployee);
-					appointmentsList.docs[i].employee_alias = 'Missing employee alias';
-					if (contactInfo.docs.length > 0) {
-						appointmentsList.docs[i].employee_alias = employeeInfo.docs[0].alias;
-						if (employeeInfo.docs[0].alias === '') {
-							appointmentsList.docs[i].employee_alias = employeeInfo.docs[0].name;
-							if (employeeInfo.docs[0].name === '') {
-								appointmentsList.docs[i].employee_alias = employeeInfo.docs[0].email;
+						if (contactInfo.docs[0].phoneNumbers.length > 0) {
+							for (let m = 0; m < contactInfo.docs[0].phoneNumbers.length; m += 1) {
+								if (contactInfo.docs[0].phoneNumbers[m].label === 'mobile') {
+									appointmentsList.docs[i].telephone = contactInfo.docs[0].phoneNumbers[m].number;
+								}
 							}
 						}
 					}
+					if (appointmentsList.docs[i].employee_id !== '') {
+						const queryEmployee = { selector: { doctype: 'user', _id: appointmentsList.docs[i].employee_id }, };
+						const employeeInfo = await DBCompanyConnection.find(queryEmployee);
+						appointmentsList.docs[i].employee_alias = 'Missing employee alias';
+						if (contactInfo.docs.length > 0) {
+							appointmentsList.docs[i].employee_alias = employeeInfo.docs[0].alias;
+							if (employeeInfo.docs[0].alias === '') {
+								appointmentsList.docs[i].employee_alias = employeeInfo.docs[0].name;
+								if (employeeInfo.docs[0].name === '') {
+									appointmentsList.docs[i].employee_alias = employeeInfo.docs[0].email;
+								}
+							}
+						}
+					}
+
 					appointmentsList.docs[i].hour = Math.round(appointmentsList.docs[i].hour * 100) / 100;
 					if (parseInt(appointmentsList.docs[i].minute < 10)) {
 						appointmentsList.docs[i].minute = Math.round(appointmentsList.docs[i].minute * 100) / 100;
@@ -221,52 +199,45 @@ class Appointments extends Component {
 				for (let i = 0; i < appointmentsList.docs.length; i += 1) {
 					const queryContact = { selector: { doctype: 'contact', _id: appointmentsList.docs[i].contact_id }, };
 					const contactInfo = await DBCompanyConnection.find(queryContact);
-					appointmentsList.docs[i].contact_name = 'Missing contact details';
+					appointmentsList.docs[i].contact_name = 'Missing contact name';
 					if (contactInfo.docs.length > 0) {
-						appointmentsList.docs[i].contact_name = contactInfo.docs[0].name;
-						appointmentsList.docs[i].telephone = contactInfo.docs[0].telephone;
+						appointmentsList.docs[i].contact_name = contactInfo.docs[0].givenName +' '+ contactInfo.docs[0].familyName;
+						if (contactInfo.docs[0].phoneNumbers.length > 0) {
+							for (let m = 0; m < contactInfo.docs[0].phoneNumbers.length; m += 1) {
+								if (contactInfo.docs[0].phoneNumbers[m].label === 'mobile') {
+									appointmentsList.docs[i].telephone = contactInfo.docs[0].phoneNumbers[m].number;
+								}
+							}
+						}
 					}
-					const queryEmployee = { selector: { doctype: 'user', _id: appointmentsList.docs[i].employee_id }, };
-					const employeeInfo = await DBCompanyConnection.find(queryEmployee);
-					appointmentsList.docs[i].employee_alias = 'Missing employee alias';
-					if (employeeInfo.docs.length > 0) {
-						appointmentsList.docs[i].employee_alias = employeeInfo.docs[0].alias;
+					if (appointmentsList.docs[i].employee_id !== '') {
+						const queryEmployee = { selector: { doctype: 'user', _id: appointmentsList.docs[i].employee_id }, };
+						const employeeInfo = await DBCompanyConnection.find(queryEmployee);
+						appointmentsList.docs[i].employee_alias = 'Missing employee alias';
+						if (contactInfo.docs.length > 0) {
+							appointmentsList.docs[i].employee_alias = employeeInfo.docs[0].alias;
+							if (employeeInfo.docs[0].alias === '') {
+								appointmentsList.docs[i].employee_alias = employeeInfo.docs[0].name;
+								if (employeeInfo.docs[0].name === '') {
+									appointmentsList.docs[i].employee_alias = employeeInfo.docs[0].email;
+								}
+							}
+						}
 					}
 					appointmentsList.docs[i].hour = Math.round(appointmentsList.docs[i].hour * 100) / 100;
-					if (appointmentsList.docs[i].minute === '0') {
-						console.log('appointmentsList.docs[i].minute');
-						console.log(appointmentsList.docs[i].minute);
+					if (parseInt(appointmentsList.docs[i].minute < 10)) {
+						appointmentsList.docs[i].minute = Math.round(appointmentsList.docs[i].minute * 100) / 100;
 					}
-					appointmentsList.docs[i].minute = Math.round(appointmentsList.docs[i].minute * 100) / 100;
 				}
 				appointmentsList.docs = _.sortBy(appointmentsList.docs, ['hour', 'minute']);
-				this.setState({ appointmentsList: dsAppointmentsList.cloneWithRows(appointmentsList.docs), appointmentsListCount: appointmentsList.docs.length });
+				this.setState({ appointmentsList: dsAppointmentsList.cloneWithRows(appointmentsList.docs), appointmentsListCount: appointmentsList.docs.length});
 			} else {
 				this.setState({ appointmentsList: dsAppointmentsList.cloneWithRows([]), appointmentsListCount: 0 });
 			}
 		}
 	}
 
-	// async getUsersList() {
-	// 	const query = { selector: { doctype: 'user', role: {$in: ['chief','employee'] } }, };
-	// 	const usersList = await DBCompanyConnection.find(query);
-	// 	console.log('usersList');
-	// 	console.log(usersList);
-	// 	this.setState({ usersList: usersList.docs });
-	// }
-
 	createNewAppointment() {
-		// const appointmentid = {
-		//   _id: '',
-		//   doctype: 'appointment',
-		//   date: this.state.todaysDate,
-		//   hour: '',
-		//   minute: '',
-		//   contact_id: '',
-		//   employee_id: '',
-		//   notes: ''
-		// };
-		console.log('create new appointment');
 		Actions.AppointmentsInfo({ appointmentid: '', title: 'Add appointment', appointmentdate: this.todaysDate  });
 	}
 
@@ -278,7 +249,6 @@ class Appointments extends Component {
 		this.companyDBConnected = true;
 		if (isConnected && this.companyDBConnected) {
 			this.getAppointments();
-			// this.getUsersList();
 		}
 	}
 
@@ -286,28 +256,35 @@ class Appointments extends Component {
 		Keyboard.dismiss();
 	}
 
+
+	// <Text note> Employee: {appointment.employee_alias}</Text>
+
 	renderRowAppointments(appointment) {
 		if (appointment !== null) {
 			return (
 				<ListItem style={{ height: 100, backgroundColor: 'white' }} button onPress={() => { Actions.AppointmentsInfo({ appointmentid: appointment._id, title: 'Appointment', appointmentdate: appointment.date }); }}>
 					<Body>
-						<IconMaterial
-						name="access-time"
-						size={20}
-							style={{
-								marginTop: 5
-							}}
-						>
-							<Text> {appointment.hour}:{appointment.minute}
-								<Text note> Employee: {appointment.employee_alias}</Text>
-							</Text>
-						</IconMaterial>
-						<IconMaterial name="perm-identity" size={20}>
-							<Text note style={{ fontWeight: 'bold' }}> {appointment.contact_name}</Text>
-						</IconMaterial>
-						<IconMaterial name="phone" size={20}>
-							<Text note style={{ fontWeight: 'bold' }}> {appointment.telephone}</Text>
-						</IconMaterial>
+						<View style={{ flexDirection: 'row', flex: 1 }}>
+							<IconMaterial
+								name="access-time" size={20}>
+							</IconMaterial>
+							<Text>{appointment.hour}:{appointment.minute}</Text>
+							<IconMaterial
+								style={{
+									marginLeft: 20
+								}}
+								name="local-hospital" size={20}>
+							</IconMaterial>
+							<Text note>{appointment.employee_alias}</Text>
+						</View>
+						<View style={{ flexDirection: 'row', flex: 1 }}>
+							<IconMaterial name="perm-identity" size={20} />
+							<Text note style={{ fontWeight: 'bold' }}>{appointment.contact_name}</Text>
+						</View>
+						<View style={{ flexDirection: 'row', flex: 1 }}>
+							<IconMaterial name="phone" size={20} />
+							<Text note style={{ fontWeight: 'bold' }}>{appointment.telephone}</Text>
+						</View>
 						<MaterialCommunityIcons
 							name="chevron-right"
 							style={{
@@ -358,117 +335,69 @@ class Appointments extends Component {
 
 	render() {
 		return (
-			<Container style={{ paddingTop: (Platform.OS === 'ios') ? 64 : 54 }}>
-				<Tabs
-					ref={(tabView) => {
-						this.mainTabs = tabView;
-					}}
-				>
-					<Tab
-						heading={
-							<TabHeading>
-								<View
-									style={{
-										flex: 0.4,
-										flexDirection: 'row',
-										justifyContent: 'flex-start',
-										alignItems: 'center',
-										alignSelf: 'center',
-										paddingLeft: 8,
-										marginBottom: 8,
-										paddingTop: 6,
-									}}
-								>
-									<DatePicker
-										date={this.state.todaysDate}
-										mode="date"
-										placeholder="Date"
-										format="DD-MM-YYYY"
-										confirmBtnText="Ok"
-										cancelBtnText="Cancel"
-										customStyles={{
-											dateIcon: {
-												alignItems: 'center',
-												alignSelf: 'center'
-											},
-											dateInput: {
-												height: 40,
-												borderColor: '#C0C0C0',
-												borderWidth: 1,
-												borderRadius: 6,
-											}
-										}}
-										onDateChange={(date) => {
-											this.onChangeAppointmentDate(date, 'date');
-										}}
-									/>
-								</View>
-								<View
-									style={{
-										flex: 0.6,
-										flexDirection: 'row',
-										justifyContent: 'flex-end',
-										alignItems: 'center',
-										alignSelf: 'center',
-										paddingLeft: 8,
-										marginBottom: 8,
-										paddingTop: 6,
-									}}
-								>
-									<ModalPicker
-										data={this.employeesList}
-										initValue="Select employee"
-										onChange={(option)=>{ this.onChangeEmployee(option, 'userSelected'); }}>
-										<Text
-											style={{
-												textAlign: 'center',
-												paddingTop: 8,
-												paddingRight: 12,
-												paddingLeft: 12,
-												borderColor: '#C0C0C0',
-												borderWidth: 1,
-												borderRadius: 6,
-												height: 40,
-											}}
-										>
-										{this.userSelected.label}
-										<MaterialCommunityIcons
-											name="chevron-down"
-											style={{
-												fontSize: 20,
-											}}
-										/>
-										</Text>
-									</ModalPicker>
-								</View>
-							</TabHeading>
-						}
-					>
-						<Content>
-							<ListView
-								enableEmptySections
-								dataSource={this.state.appointmentsList}
-								renderRow={this.renderRowAppointments}
-							/>
-							<View style={{ height: 60 }} />
-						</Content>
-						<ActionButton
-							size={40}
-							buttonColor="#9DBDF2"
-							offsetX={10}
-							offsetY={10}
-							ref={(btn) => {
-								this.floatingBtn = btn;
+			<Container style={{ paddingTop: (Platform.OS === 'ios') ? 58 : 54 }}>
+				<Content>
+					<View style={{ flexDirection: 'row', flex: 1, borderColor: 'steelblue', borderBottomWidth: 3 }}>
+						<View
+							style={{
+								paddingTop: 16,
+								paddingLeft: 10,
 							}}
-							onPress={() => { this.hideKeyboard(); }}
-							icon={<IconMaterial name="settings" size={28} color="white" />}
 						>
-							<ActionButton.Item buttonColor="steelblue" title="Create appointment" onPress={() => { this.createNewAppointment(); }}>
-								<MaterialCommunityIcons name="plus" size={28} color="white" />
-							</ActionButton.Item>
-						</ActionButton>
-						</Tab>
-				</Tabs>
+							<DatePicker
+								date={this.state.todaysDate}
+								mode="date"
+								placeholder="Date"
+								format="DD-MM-YYYY"
+								confirmBtnText="Ok"
+								cancelBtnText="Cancel"
+								customStyles={{
+									dateIcon: {
+										alignItems: 'center',
+										alignSelf: 'center',
+									},
+									dateInput: {
+										height: 40,
+										borderColor: '#C0C0C0',
+										borderWidth: 1,
+										borderRadius: 6,
+									}
+								}}
+								onDateChange={(date) => {
+									this.onChangeAppointmentDate(date, 'date');
+								}}
+							/>
+						</View>
+						<ModalPicker
+							style={{
+								paddingRight: 10
+							}}
+							data={this.employeesList} label="" initValue={this.userSelected.label} onChange={(option)=>{ this.onChangeEmployee(option, 'userSelected'); }} />
+					</View>
+					<View>
+						<ListView
+							enableEmptySections
+							dataSource={this.state.appointmentsList}
+							renderRow={this.renderRowAppointments}
+						/>
+					</View>
+					<View style={{ height: 60 }} />
+				</Content>
+				<ActionButton
+					size={40}
+					buttonColor="#9DBDF2"
+					offsetX={10}
+					offsetY={65}
+					ref={(btn) => {
+						this.floatingBtn = btn;
+					}}
+					onPress={() => { this.hideKeyboard(); }}
+					icon={<IconMaterial name="settings" size={28} color="white" />}
+				>
+					<ActionButton.Item buttonColor="steelblue" title="Create appointment" onPress={() => { this.createNewAppointment(); }}>
+						<MaterialCommunityIcons name="plus" size={28} color="white" />
+					</ActionButton.Item>
+				</ActionButton>
 				<ModalSide />
 				<FooterMain activeArea="Appointments" />
 			</Container>

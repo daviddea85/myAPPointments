@@ -4,12 +4,17 @@ import React, { Component } from 'react';
 import PouchDB from 'pouchdb-react-native';
 import { Actions } from 'react-native-router-flux';
 import { Col, Row, Grid } from 'react-native-easy-grid';
-import { Container, Content, Form, Item, Input, Button, Label, Spinner } from 'native-base';
-import { Text, AsyncStorage, Image, Alert } from 'react-native';
+import { Container, Content, Form, Item, Input, Label, Spinner, Button } from 'native-base';
+import { Text, AsyncStorage, Image, Alert, Dimensions, View } from 'react-native';
 import { connect } from 'react-redux';
+import TextFieldLogin from '../containers/common/TextFieldLogin';
+
 // import BaseViewScreen from '../BaseViewScreen';
 
 // PouchDB.plugin(require('pouchdb-find'));
+
+const fullWidth = Dimensions.get('window').width; // full width
+const fullHeight = Dimensions.get('window').height; // full height
 
 class LoginForm extends Component {
 
@@ -96,41 +101,62 @@ class LoginForm extends Component {
 		}
 	}
 
+	// <Button onPress={this.login.bind(this)} block info>
+	// <Text>Login</Text>
+	// </Button>
+
+	// <Button
+	// 	small
+	// 	rounded
+	// 	style={{
+	// 		backgroundColor: 'steelblue',
+	// 		colour: 'green',
+	// 		alignSelf: 'center',
+	// 	}}
+	// 	onPress={() => this.login()}
+	// >
+	// 	<Text>LOGIN</Text>
+	// </Button>
+
 	renderLoginButton() {
 		return (
-			<Row style={{ marginTop: 10 }}>
+			<Row style={{ marginTop: 30 }}>
 				<Col>
-					<Button onPress={this.login.bind(this)} block info>
-					<Text>Login</Text>
+					<Button
+						small
+						rounded
+						style={{
+							backgroundColor: '#9DBDF2',
+							alignSelf: 'center'
+						}}
+						onPress={this.login.bind(this)}
+					>
+						<Text>LOGIN</Text>
 					</Button>
 				</Col>
 			</Row>
 		);
 	}
 
-	renderCreateNewCompanyTextBox() {
-		if (this.state.checkedNewCompany) {
-			return (
-				<Item floatingLabel>
-					<Label>Company name</Label>
-						<Input
-						onChangeText={(text) => {
-							this.onChangeText(text, 'companyName');
-						}}
-						value={this.company.companyName}
-						/>
-				</Item>
-			);
-		}
-		return (null);
-	}
+	// <Button onPress={this.register.bind(this)} block info>
+	// <Text>Register old</Text>
+	// </Button>
+
 
 	renderRegisterButton() {
 		return (
-			<Row style={{ marginTop: 22 }}>
+			<Row style={{ marginTop: 20 }}>
 				<Col>
-					<Button onPress={this.register.bind(this)} block info>
-					<Text>Register</Text>
+					<Button
+						small
+						rounded
+						style={{
+							backgroundColor: '#9DBDF2',
+							alignSelf: 'center'
+						}}
+						onPress={this.register.bind(this)}
+					>
+						<Text>REGISTER</Text>
 					</Button>
 				</Col>
 			</Row>
@@ -139,46 +165,112 @@ class LoginForm extends Component {
 
 	render() {
 		return (
+			<View style={{ flex: 1 }}>
+        <Image source={require('../img/loginbackground.png')} style={{ flex: 1, resizeMode: 'cover', justifyContent: 'center', width: null, height: null }} >
+          <View style={{ backgroundColor: 'transparent', alignItems: 'center', }}>
+						<TextFieldLogin
+							placeholder="Email"
+							style={{ marginTop: 80, paddingLeft: 10, paddingRight: 10, backgroundColor: 'white', textAlign: 'center', width: fullWidth - 100, alignSelf: 'center', borderWidth: 2, borderColor: 'steelblue' }}
+							label=""
+							value={this.state.firebaseUser.firebaseEmail}
+							onChangeText={value => this.onChangeText(value, 'firebaseEmail')} />
+						<TextFieldLogin
+							secureTextEntry
+							placeholder="Password"
+							style={{ marginTop: 150, paddingLeft: 10, paddingRight: 10, backgroundColor: 'white', textAlign: 'center', width: fullWidth - 100, alignSelf: 'center', borderWidth: 2, borderColor: 'steelblue' }}
+							label=""
+							value={this.state.firebaseUser.firebasePassword}
+							onChangeText={value => this.onChangeText(value, 'firebasePassword')} />
+						<Button
+							small
+							rounded
+							style={{
+								backgroundColor: '#9DBDF2',
+								borderWidth: 2,
+								borderColor: 'steelblue',
+								alignSelf: 'center',
+								marginTop: 120
+							}}
+							onPress={this.login.bind(this)}
+						>
+							<Text>LOGIN</Text>
+						</Button>
+						<Button
+							small
+							rounded
+							style={{
+								backgroundColor: '#9DBDF2',
+								borderWidth: 1,
+								borderColor: 'steelblue',
+								alignSelf: 'center',
+								marginTop: 20
+							}}
+							onPress={this.register.bind(this)}
+						>
+							<Text>REGISTER</Text>
+						</Button>
+					</View>
+        </Image>
+      </View>
+
+			// <Image
+			// 	style={{
+			// 		flex: 1,
+			// 		width: null,
+			// 		height: null,
+			// 		resizeMode: 'cover',
+			// 	}}
+			// 	source={require('../img/loginbackground.png')}
+			// >
+			//
+			// 		<TextField placeholder="Username 1" style={{ paddingLeft: 10, paddingRight: 10, marginTop: fullHeight / 3 ,backgroundColor: 'white', width: 200, alignSelf: 'center', borderWidth: 2, borderColor: 'steelblue' }} label="" value={this.state.firebaseUser.firebaseEmail} onChangeText={value => this.onChangeText(value, 'firebaseEmail')} />
+			// 		<TextField placeholder="Username" style={{ paddingLeft: 10, paddingRight: 10, backgroundColor: 'white', width: 200, alignSelf: 'center', borderWidth: 2, borderColor: 'steelblue' }} label="" value={this.state.firebaseUser.firebaseEmail} onChangeText={value => this.onChangeText(value, 'firebaseEmail')} />
+			//
+			//
+			// 	</Image>
 			// source={require('../img/symphonylogo.png')}
 			// <BaseViewScreen>
-				<Content style={{ padding: 22 }}>
-					<Grid>
-						<Row>
-							<Image
-							style={{ width: 250, height: 75 }}
-
-							/>
-						</Row>
-						<Row>
-							<Col>
-								<Form>
-									{this.renderCreateNewCompanyTextBox()}
-									<Item floatingLabel>
-										<Label>Username</Label>
-											<Input
-											onChangeText={(text) => {
-												this.onChangeText(text, 'firebaseEmail');
-											}}
-											value={this.state.firebaseUser.firebaseEmail}
-											/>
-									</Item>
-									<Item floatingLabel last>
-										<Label>Password</Label>
-											<Input
-												secureTextEntry
-												onChangeText={(text) => {
-													this.onChangeText(text, 'firebasePassword');
-												}}
-												value={this.state.firebaseUser.firebasePassword}
-											/>
-									</Item>
-								</Form>
-							</Col>
-						</Row>
-						{this.renderLoginButton()}
-						{this.renderRegisterButton()}
-					</Grid>
-				</Content>
+// 				<Content style={{ padding: 22 }}>
+// 				<Image
+//      style={{ width: fullWidth, height: fullHeight }}
+//      source={require('../img/loginbackground.png')}
+// />
+// 					<Grid>
+// 						<Row>
+// 							<Image
+// 							style={{ width: 250, height: 75 }}
+//
+// 							/>
+// 						</Row>
+// 						<Row>
+// 							<Col>
+// 								<Form>
+// 									<Item stackedLabel>
+// 										<Label>Username</Label>
+// 											<Input
+// 											onChangeText={(text) => {
+// 												this.onChangeText(text, 'firebaseEmail');
+// 											}}
+// 											value={this.state.firebaseUser.firebaseEmail}
+// 											/>
+// 									</Item>
+// 									<Item stackedLabel>
+// 										<Label>Password</Label>
+// 											<Input
+// 												secureTextEntry
+// 												onChangeText={(text) => {
+// 													this.onChangeText(text, 'firebasePassword');
+// 												}}
+// 												value={this.state.firebaseUser.firebasePassword}
+// 											/>
+// 									</Item>
+// 								</Form>
+// 							</Col>
+// 						</Row>
+// 						{this.renderLoginButton()}
+// 						{this.renderRegisterButton()}
+// 					</Grid>
+// 				</Content>
 			// </BaseViewScreen>
 		);
 	}

@@ -4,12 +4,12 @@ import _ from 'lodash';
 import PouchDB from 'pouchdb-react-native';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { ListView, Alert, AsyncStorage, Keyboard, View } from 'react-native';
+import { ListView, Alert, AsyncStorage, Keyboard, View, Platform, ScrollView } from 'react-native';
 import { Col, Row, Grid } from 'react-native-easy-grid';
 import ActionButton from 'react-native-action-button';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StyleProvider, Body, Container, Content, Header, Item, Input, Label, Title, Button, Text } from 'native-base';
-
+import TextField from '../containers/common/TextField';
 // import Style from '../styles/styles';
 
 PouchDB.plugin(require('pouchdb-find'));
@@ -41,11 +41,15 @@ class CreateCompany extends Component {
 			company: {
 				doctype: 'company',
 				name: '',
-				companyRegNo: '',
-				vatNo: '',
+				companyregno: '',
+				vatnumber: '',
+				contactname: '',
 				phone: '',
 				email: '',
-				address: '',
+				street: '',
+				postcode: '',
+				region: '',
+				city: '',
 				country: '',
 				userEmail: '',
 				databaseId: '',
@@ -268,92 +272,22 @@ class CreateCompany extends Component {
 
 	render() {
 		return (
-			<Container>
-				<Header style={{ backgroundColor: '#9DBDF2' }}>
-					<Body>
-					<Title style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }}>
-					Create Company
-					</Title>
-					</Body>
-				</Header>
+			<Container style={{ paddingTop: (Platform.OS === 'ios') ? 64 : 54 }}>
 				<Content>
-					<Item stackedLabel>
-						<Label style={{ marginLeft: 12 }}>Company name</Label>
-							<Input
-							style={{ marginLeft: 7 }}
-							onChangeText={(text) => {
-								this.onChangeText(text, 'name');
-							}}
-							value={this.state.company.name}
-							/>
-					</Item>
-					<Item stackedLabel>
-						<Label style={{ marginLeft: 12 }}>Company Reg No</Label>
-							<Input
-							style={{ marginLeft: 7 }}
-							onChangeText={(text) => {
-								this.onChangeText(text, 'companyRegNo');
-							}}
-							value={this.state.company.companyRegNo}
-							/>
-					</Item>
-					<Item stackedLabel>
-						<Label style={{ marginLeft: 12 }}>VAT No</Label>
-							<Input
-							style={{ marginLeft: 7 }}
-							onChangeText={(text) => {
-								this.onChangeText(text, 'vatNo');
-							}}
-							value={this.state.company.vatNo}
-							/>
-					</Item>
-					<Item stackedLabel>
-						<Label style={{ marginLeft: 12 }}>Contact Phone</Label>
-							<Input
-							style={{ marginLeft: 7 }}
-							onChangeText={(text) => {
-								this.onChangeText(text, 'phone');
-							}}
-							value={this.state.company.phone}
-							/>
-					</Item>
-					<Item stackedLabel>
-						<Label style={{ marginLeft: 12 }}>Contact Email</Label>
-							<Input
-							style={{ marginLeft: 7 }}
-							onChangeText={(text) => {
-								this.onChangeText(text, 'email');
-							}}
-							value={this.state.company.email}
-							/>
-					</Item>
-					<Item stackedLabel>
-						<Label style={{ marginLeft: 12 }}>Address</Label>
-						<Input
-							multiline
-							numberOfLines={5}
-							style={{
-								height: 80,
-								paddingVertical: 0,
-								marginLeft: 7
-							}}
-							value={this.state.company.address}
-							onChangeText={(text) => {
-								this.onChangeText(text, 'address');
-							}}
-						/>
-					</Item>
-					<Item stackedLabel>
-						<Label style={{ marginLeft: 12 }}>Country</Label>
-							<Input
-							style={{ marginLeft: 7 }}
-							onChangeText={(text) => {
-								this.onChangeText(text, 'country');
-							}}
-							value={this.state.company.country}
-							/>
-					</Item>
-					<View style={{ height: 60 }} />
+					<View style={{ padding: 20 }}>
+						<TextField label="Company name" value={this.state.company.name} onChangeText={value => this.onChangeText(value, 'name')} validate />
+						<TextField label="Company registration number" value={this.state.company.companyregno} onChangeText={value => this.onChangeText(value, 'companyregno')} validate />
+						<TextField label="VAT number" value={this.state.company.vatnumber} onChangeText={value => this.onChangeText(value, 'vatnumber')} validate />
+						<TextField label="Contact name" value={this.state.company.contactname} onChangeText={value => this.onChangeText(value, 'contactname')} validate />
+						<TextField label="Phone" value={this.state.company.phone} onChangeText={value => this.onChangeText(value, 'phone')} validate />
+						<TextField label="Email" value={this.state.company.email} onChangeText={value => this.onChangeText(value, 'email')} validate />
+						<TextField label="Street" value={this.state.company.street} onChangeText={value => this.onChangeText(value, 'street')} validate />
+						<TextField label="Postcode" value={this.state.company.postcode} onChangeText={value => this.onChangeText(value, 'postcode')} validate />
+						<TextField label="Region" value={this.state.company.region} onChangeText={value => this.onChangeText(value, 'region')} validate />
+						<TextField label="City" value={this.state.company.city} onChangeText={value => this.onChangeText(value, 'city')} validate />
+						<TextField label="Country" value={this.state.company.country} onChangeText={value => this.onChangeText(value, 'country')} validate />
+					</View>
+					<View style={{ height: 40 }} />
 				</Content>
 				{this.renderButtons()}
 			</Container>
