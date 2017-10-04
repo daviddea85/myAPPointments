@@ -19,6 +19,7 @@ import Dashboard from './containers/Dashboard';
 import Appointments from './containers/Appointments';
 import AppointmentsInfo from './containers/AppointmentsInfo';
 import Contacts from './containers/Contacts';
+import ContactInfo from './containers/ContactInfo';
 import Alerts from './containers/Alerts';
 import More from './containers/More';
 
@@ -83,6 +84,7 @@ class AppContainer extends Component {
 					<Scene key="AppointmentsInfo" component={AppointmentsInfo} hideNavBar={false} title="Appointment Info" />
 					<Scene key="AppointmentTreatmentsList" component={AppointmentTreatmentsList} hideNavBar title="Treatment list" />
 					<Scene key="Contacts" component={Contacts} hideNavBar={false} title="Contacts" type={ActionConst.REPLACE} renderBackButton={null} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
+					<Scene key="ContactInfo" component={ContactInfo} hideNavBar={false} title="Contact info" />
 					<Scene key="Alerts" component={Alerts} hideNavBar={false} title="Alerts" type={ActionConst.REPLACE} renderBackButton={null} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
 					<Scene key="More" component={More} hideNavBar={false} title="More" type={ActionConst.REPLACE} renderBackButton={null} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
 				</Scene>
