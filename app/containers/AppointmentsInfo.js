@@ -31,7 +31,8 @@ import ActionButton from 'react-native-action-button';
 import { Actions } from 'react-native-router-flux';
 import { FooterMain } from '../containers/common/Footer';
 import DatePicker from 'react-native-datepicker';
-import ModalPicker from 'react-native-modal-picker';
+import TextField from '../containers/common/TextField';
+import ModalPicker from './common/ModalPicker';
 import moment from 'moment';
 
 const fullWidth = Dimensions.get('window').width; // full width
@@ -137,7 +138,7 @@ class AppointmentsInfo extends Component {
 		});
 	}
 
-	onChangeText(newValue, prop) {
+	async onChangeText(newValue, prop) {
 		switch(prop){
 		case 'employee_id':
 			let employeeappointment = this.state.appointment;
@@ -160,7 +161,6 @@ class AppointmentsInfo extends Component {
 			contactappointment = this.state.appointment;
 			_.set(contactappointment, 'contact_name', newValue.label);
 			this.setState({ appointment: contactappointment });
-			this.getAppointmentInfo();
 			break;
 		case 'hour':
 			const hourappointment = this.state.appointment;
@@ -209,8 +209,6 @@ class AppointmentsInfo extends Component {
 			}
 			this.contactsList = _.sortBy(this.contactsList, ['label']);
 		}
-		console.log('this.contactsList');
-		console.log(this.contactsList);
 		const queryEmployee = { selector: { doctype: 'user' }, };
 		const employeeInfo = await DBCompanyConnection.find(queryEmployee);
 		this.employeesList = [];
@@ -324,8 +322,6 @@ class AppointmentsInfo extends Component {
 			{ key: indexMinute++, label: '58', value: '58' },
 			{ key: indexMinute++, label: '59', value: '59' },
 		];
-		console.log('this.state.appointmentid');
-		console.log(this.state.appointmentid);
 		if (this.state.appointmentid === '') {
 			this.setState({
 				appointment: this.state.appointment,
@@ -407,24 +403,17 @@ class AppointmentsInfo extends Component {
 			const savedappointment = await DBCompanyConnection.post(newappointment);
 			const newrev = savedappointment.rev;
 			this.onChangeText(newrev, '_rev');
-			this.saveAppointmentAlert('created', savedappointment._id);
+			this.saveAppointmentAlert('created', savedappointment.id);
 		} else {
 			const updatedappointment = await DBCompanyConnection.put(this.state.appointment);
 			const newrev = updatedappointment.rev;
 			this.onChangeText(newrev, '_rev');
-			this.saveAppointmentAlert('updated', updatedappointment._id);
+			this.saveAppointmentAlert('updated', updatedappointment.id);
 		}
 	}
 
 	async saveAppointmentAlert(saveText, appointmentid) {
-		console.log('appointmentid');
-		console.log(appointmentid);
-		// const query = { selector: { doctype: 'contact', _id: this.state.appointment.contact_id }, };
-		// const contactinfo = await DBCompanyConnection.find(query);
-		// if (contactinfo.docs.length > 0) {
-			// this.setState({ contact: contactinfo.docs[0] });
 		this.setState({ appointmentid: appointmentid });
-		// }
 		Alert.alert(
 			`Appointment ${saveText}`,
 			`The appointment for ${this.state.appointment.contact_name} on ${this.state.appointment.date} at ${this.state.appointment.hour}:${this.state.appointment.minute} has been ${saveText}`,
@@ -621,8 +610,7 @@ class AppointmentsInfo extends Component {
 	}
 
 	renderRowAddresses(address) {
-		console.log('address');
-		console.log(address);
+		address.label = address.label.charAt(0).toUpperCase() + address.label.slice(1);
 		if (_.isEmpty(address) !== true) {
 			return (
 				<ListItem>
@@ -666,9 +654,8 @@ class AppointmentsInfo extends Component {
 	}
 
 	renderRowTelephones(telephone) {
-		console.log('telephone');
-		console.log(telephone);
 		if (_.isEmpty(telephone) !== true) {
+			telephone.label = telephone.label.charAt(0).toUpperCase() + telephone.label.slice(1);
 			return (
 				<ListItem>
 					<View
@@ -711,9 +698,8 @@ class AppointmentsInfo extends Component {
 	}
 
 	renderRowEmails(email) {
-		console.log('email');
-		console.log(email);
 		if (_.isEmpty(email) !== true) {
+			email.label = email.label.charAt(0).toUpperCase() + email.label.slice(1);
 			return (
 				<ListItem>
 					<View
@@ -797,16 +783,15 @@ class AppointmentsInfo extends Component {
 									flex: 1,
 									flexDirection: 'row',
 									justifyContent: 'center',
-									paddingLeft: 12,
-									paddingRight: 12,
-									paddingTop: 5,
+									paddingLeft: 40,
+									paddingRight: 40,
 								}}
 							>
 								<IconMaterial
 									name="access-time"
 									size={20}
 									style={{
-										paddingTop: 10
+										paddingTop: 25
 									}}
 								/>
 								<Label
@@ -820,30 +805,7 @@ class AppointmentsInfo extends Component {
 								>
 									Hour
 								</Label>
-								<ModalPicker
-									data={this.hoursList}
-									initValue="H"
-									onChange={(option)=>{ this.onChangeText(option, 'hour'); }}>
-									<Text
-										style={{
-											textAlign: 'center',
-											paddingTop: 8,
-											paddingLeft: 5,
-											borderColor: '#C0C0C0',
-											borderWidth: 1,
-											borderRadius: 6,
-											height: 40,
-										}}
-									>
-									{this.state.appointment.hour}
-									<MaterialCommunityIcons
-										name="chevron-down"
-										style={{
-											fontSize: 20,
-										}}
-									/>
-									</Text>
-								</ModalPicker>
+								<ModalPicker data={this.hoursList} label="" initValue={this.state.appointment.hour} onChange={(option)=>{ this.onChangeText(option, 'hour'); }} />
 								<Label
 									style={{
 										paddingLeft: 12,
@@ -855,31 +817,7 @@ class AppointmentsInfo extends Component {
 								>
 									Minute
 								</Label>
-								<ModalPicker
-
-									data={this.minutesList}
-									initValue="M"
-									onChange={(option)=>{ this.onChangeText(option, 'minute'); }}>
-									<Text
-										style={{
-											textAlign: 'center',
-											paddingTop: 8,
-											paddingLeft: 5,
-											borderColor: '#C0C0C0',
-											borderWidth: 1,
-											borderRadius: 6,
-											height: 40,
-										}}
-									>
-									{this.state.appointment.minute}
-									<MaterialCommunityIcons
-										name="chevron-down"
-										style={{
-											fontSize: 20,
-										}}
-									/>
-									</Text>
-								</ModalPicker>
+								<ModalPicker data={this.minutesList} label="" initValue={this.state.appointment.minute} onChange={(option)=>{ this.onChangeText(option, 'minute'); }} />
 							</View>
 							<View
 								style={{
@@ -887,7 +825,6 @@ class AppointmentsInfo extends Component {
 									flexDirection: 'row',
 									paddingLeft: 12,
 									paddingRight: 12,
-									paddingTop: 12,
 									width: fullWidth
 								}}
 							>
@@ -895,43 +832,19 @@ class AppointmentsInfo extends Component {
 									name="perm-identity"
 									size={20}
 									style={{
-										paddingTop: 12,
+										paddingTop: 25,
 										width: 20
 									}}
 								/>
 								<Label
 									style={{
-										paddingTop: 12,
+										paddingTop: 25,
 										paddingLeft: 12,
 										fontWeight: 'bold',
 										width: 110
 									}}
 								>Contact</Label>
-								<ModalPicker
-									data={this.contactsList}
-									initValue="Select contact"
-									onChange={(option)=>{ this.onChangeText(option, 'contact_id'); }}>
-									<Text
-										style={{
-											textAlign: 'center',
-											paddingTop: 8,
-											marginRight: 7,
-											paddingLeft: 12,
-											borderColor: '#C0C0C0',
-											borderWidth: 1,
-											borderRadius: 6,
-											height: 40,
-										}}
-									>
-									{this.state.appointment.contact_name}
-									<MaterialCommunityIcons
-										name="chevron-down"
-										style={{
-											fontSize: 20,
-										}}
-									/>
-									</Text>
-								</ModalPicker>
+								<ModalPicker data={this.contactsList} label="" initValue={this.state.appointment.contact_name} onChange={(option)=>{ this.onChangeText(option, 'contact_id'); }} />
 							</View>
 							<View
 								style={{
@@ -939,7 +852,6 @@ class AppointmentsInfo extends Component {
 									flexDirection: 'row',
 									paddingLeft: 12,
 									paddingRight: 12,
-									paddingTop: 12,
 									width: fullWidth
 								}}
 							>
@@ -947,43 +859,19 @@ class AppointmentsInfo extends Component {
 									name="supervisor-account"
 									size={20}
 									style={{
-										paddingTop: 12,
+										paddingTop: 25,
 										width: 20
 									}}
 								/>
 								<Label
 									style={{
-										paddingTop: 12,
+										paddingTop: 25,
 										paddingLeft: 12,
 										fontWeight: 'bold',
 										width: 110
 									}}
 								>Employee</Label>
-								<ModalPicker
-									data={this.employeesList}
-									initValue="Select employee"
-									onChange={(option)=>{ this.onChangeText(option, 'employee_id'); }}>
-									<Text
-										style={{
-											textAlign: 'center',
-											paddingTop: 8,
-											marginRight: 7,
-											paddingLeft: 12,
-											borderColor: '#C0C0C0',
-											borderWidth: 1,
-											borderRadius: 6,
-											height: 40,
-										}}
-									>
-									{this.state.appointment.employee_alias}
-									<MaterialCommunityIcons
-										name="chevron-down"
-										style={{
-											fontSize: 20,
-										}}
-									/>
-									</Text>
-								</ModalPicker>
+								<ModalPicker data={this.employeesList} label="" initValue={this.state.appointment.employee_alias} onChange={(option)=>{ this.onChangeText(option, 'employee_id'); }} />
 							</View>
 							<View
 								style={{
