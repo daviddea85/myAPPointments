@@ -124,110 +124,6 @@ class pageTwo extends Component {
 		}
 	}
 
-	// <Container>
-	// 		<Header>
-	// 				<Body>
-	// 						<Title>Pag </Title>
-	// 				</Body>
-	// 		</Header>
-	// 		<Content padder>
-	// 			<Card>
-	// 				<CardItem>
-	// 					<Body>
-	// 						<Text>
-	// 								This is Page One, Press button to goto page two
-	// 						</Text>
-	// 					</Body>
-	// 				</CardItem>
-	// 				<CardItem header>
-	// 					<Text>GeekyAnts</Text>
-	// 				</CardItem>
-	// 			</Card>
-	// 			<Card>
-	// 				<CardItem>
-	// 					<Body>
-	// 						<Text>
-	// 								This is Page One, Press button to goto page two
-	// 						</Text>
-	// 					</Body>
-	// 				</CardItem>
-	// 				<CardItem header>
-	// 					<Text>GeekyAnts</Text>
-	// 				</CardItem>
-	// 			</Card>
-	// 			<Card>
-	// 				<CardItem>
-	// 					<Body>
-	// 						<Text>
-	// 								This is Page One, Press button to goto page two
-	// 						</Text>
-	// 					</Body>
-	// 				</CardItem>
-	// 				<CardItem header>
-	// 					<Text>GeekyAnts</Text>
-	// 				</CardItem>
-	// 			</Card>
-	// 			<Button><Text>Modal</Text></Button>
-	// 		</Content>
-	// 		<ModalSide />
-	// 		<View>
-	// 			<Fab
-	// 					active={this.state.active}
-	// 					direction="up"
-	// 					containerStyle={{ marginBottom: 200 }}
-	// 					style={{ backgroundColor: '#5067FF' }}
-	// 					position="bottomRight"
-	// 					onPress={() => this.setState({ active: !this.state.active })}>
-	// 					<Icon name="ios-settings-outline" />
-	// 					<Button style={{ backgroundColor: '#34A34F' }}>
-	// 							<Icon name="ios-cloud-upload-outline" />
-	// 					</Button>
-	// 					<Button style={{ backgroundColor: '#3B5998' }}>
-	// 							<Icon name="ios-add-outline" />
-	// 					</Button>
-	// 					<Button style={{ backgroundColor: '#DD5144' }}>
-	// 							<Icon name="ios-trash-outline" />
-	// 					</Button>
-	// 					<Button style={{ backgroundColor: '#FF8C00' }}>
-	// 							<Icon name="ios-pulse" />
-	// 					</Button>
-	// 					<Button style={{ backgroundColor: '#FFD700' }}>
-	// 							<Icon name="ios-send-outline" />
-	// 					</Button>
-	// 			</Fab>
-	// 		</View>
-
-	// <ListItem style={{ height: 100, backgroundColor: 'white' }} button onPress={() => { Actions.orderInfo({ orderInfo: order, title: `Order No: ${order.ordernumber}` }); }}>
-	// 	<Body>
-	// 		<Text>
-	// 			Order No: {order.ordernumber}
-	// 		</Text>
-	// 		<Text note>
-	// 			Business: {order.businessname}
-	// 		</Text>
-	// 		<Text note>
-	// 			Department: {order.departmentname}
-	// 		</Text>
-	// 		<Text note>
-	// 			Status: {order.status} Type: {order.order_type}
-	// 		</Text>
-	// 		<Text note>
-	// 			Amount: {order.totalamount} Total cost: {order.totalcost}
-	// 		</Text>
-	// 		<MaterialCommunityIcons
-	// 			name="chevron-right"
-	// 			style={{
-	// 				fontSize: 30,
-	// 				height: 40,
-	// 				top: 20,
-	// 				color: '#9b9cb1',
-	// 				position: 'absolute',
-	// 				right: 10,
-	// 			}}
-	// 		/>
-	// 	</Body>
-	// </ListItem>
-
 	renderRowUserAlerts(useralert) {
 		if (useralert !== null) {
 			return (
@@ -251,14 +147,14 @@ class pageTwo extends Component {
 			<Container style={{ paddingTop: (Platform.OS === 'ios') ? 64 : 54 }}>
 				<Tabs initialPage={this.currentTab} ref={(c) => { this._tabs = c; }}>
 					<Tab heading={<TabHeading><Text style={{ fontSize: 12 }}>User</Text></TabHeading>}>
-						<Content>
+						<Content style={{ padding: 20 }}>
 						{this.state.showspinner && <Spinner /> }
 						{this.state.alertsUserCount === 0 && this.state.showspinner === false && <Text>User alerts not found</Text>}
 							<View
 								style={{
 									flex: 1,
 									flexDirection: 'row',
-									justifyContent: 'center',
+									justifyContent: 'center'
 								}}
 							>
 								<ListView
@@ -271,14 +167,14 @@ class pageTwo extends Component {
 						</Content>
 					</Tab>
 					<Tab heading={<TabHeading><Text style={{ fontSize: 12 }}>System</Text></TabHeading>}>
-						<Content>
+					<Content style={{ padding: 20 }}>
 						{this.state.showspinner && <Spinner /> }
 						{this.state.alertsSystemCount === 0 && this.state.showspinner === false && <Text>System alerts not found</Text>}
 							<View
 								style={{
 									flex: 1,
 									flexDirection: 'row',
-									justifyContent: 'center',
+									justifyContent: 'center'
 								}}
 							>
 								<ListView

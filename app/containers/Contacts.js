@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { AsyncStorage, ListView, View } from 'react-native';
-import { Container, Content, Text, Card, Header, Body, Button, Title, CardItem, Icon, Fab } from 'native-base';
+import { Platform, Container, Content, Text, Card, Header, Body, Button, Title, CardItem, Icon, Fab } from 'native-base';
 import { Actions } from 'react-native-router-flux';
 import { styles } from '../Styles/general';
 import { FooterMain } from '../containers/common';
 import ModalSide from './common/ModalSide';
-// const ContactsDevice = require('react-native-contacts');
 import PouchDB from 'pouchdb-react-native';
 
 let DBCompanyConnection = null;
@@ -48,28 +47,6 @@ class Contacts extends Component {
 	componentWillUnmount() {}
 
 	async getContactsFromDevice() {
-
-		console.log('ContactsDevice');
-		console.log(ContactsDevice);
-
-		// ContactsDevice.getAll((err, contacts) => {
-		//   if(err === 'denied'){
-		//     // error
-		// 		console.log('error');
-		//   } else {
-		// 		console.log('contacts');
-		// 		console.log(contacts);
-		//     // contacts returned in []
-		//   }
-		// })
-
-		// Contacts.getAll((err, contacts) => {
-		//   if(err === 'denied'){
-		//     // error
-		//   } else {
-		//     // contacts returned in []
-		//   }
-		// })
 	}
 
 	async checkSettings() {
@@ -100,20 +77,14 @@ class Contacts extends Component {
 
 	render() {
 		return (
-			<Container>
-					<Header>
-							<Body>
-									<Title>Pag </Title>
-							</Body>
-					</Header>
-					<Content padder>
-					</Content>
-					<ModalSide />
-					<View>
-						<Text>Action button</Text>
+			<Container style={{ paddingTop: 64 }}>
+				<Content>
+					<View style={{ padding: 20 }}>
+						<Text>Contacts screen</Text>
 					</View>
-
-					<FooterMain activeArea="Contacts" />
+				</Content>
+				<ModalSide />
+				<FooterMain activeArea="Contacts" />
 			</Container>
 		);
 	}

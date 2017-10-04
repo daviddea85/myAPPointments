@@ -104,14 +104,14 @@ class LoginForm extends Component {
 					<View style={{ backgroundColor: 'transparent', alignItems: 'center', }}>
 						<TextFieldLogin
 							placeholder="Email"
-							style={{ marginTop: 50, paddingLeft: 10, paddingRight: 10, backgroundColor: 'white', textAlign: 'center', width: fullWidth - 100, alignSelf: 'center', borderWidth: 2, borderColor: 'steelblue' }}
+							style={{ marginTop: 40, paddingLeft: 10, paddingRight: 10, backgroundColor: 'white', textAlign: 'center', width: fullWidth - 100, alignSelf: 'center', borderWidth: 2, borderColor: 'steelblue' }}
 							label=""
 							value={this.state.firebaseUser.firebaseEmail}
 							onChangeText={value => this.onChangeText(value, 'firebaseEmail')} />
 						<TextFieldLogin
 							secureTextEntry
 							placeholder="Password"
-							style={{ marginTop: 90, paddingLeft: 10, paddingRight: 10, backgroundColor: 'white', textAlign: 'center', width: fullWidth - 100, alignSelf: 'center', borderWidth: 2, borderColor: 'steelblue' }}
+							style={{ marginTop: 120, paddingLeft: 10, paddingRight: 10, backgroundColor: 'white', textAlign: 'center', width: fullWidth - 100, alignSelf: 'center', borderWidth: 2, borderColor: 'steelblue' }}
 							label=""
 							value={this.state.firebaseUser.firebasePassword}
 							onChangeText={value => this.onChangeText(value, 'firebasePassword')} />
@@ -123,11 +123,13 @@ class LoginForm extends Component {
 								borderWidth: 2,
 								borderColor: 'steelblue',
 								alignSelf: 'center',
-								marginTop: 150
+								marginTop: 100,
+								width: fullWidth - 250,
+								justifyContent: 'center',
 							}}
 							onPress={this.login.bind(this)}
 						>
-							<Text>&nbsp;&nbsp;&nbsp;&nbsp;Login&nbsp;&nbsp;&nbsp;&nbsp;</Text>
+							<Text>Login</Text>
 						</Button>
 						<Button
 							small
@@ -137,11 +139,13 @@ class LoginForm extends Component {
 								borderWidth: 1,
 								borderColor: 'steelblue',
 								alignSelf: 'center',
-								marginTop: 20
+								marginTop: 10,
+								width: fullWidth - 250,
+								justifyContent: 'center',
 							}}
 							onPress={this.register.bind(this)}
 						>
-							<Text>&nbsp;&nbsp;&nbsp;Register&nbsp;&nbsp;&nbsp;</Text>
+							<Text>Register</Text>
 						</Button>
 					</View>
         		</Image>
