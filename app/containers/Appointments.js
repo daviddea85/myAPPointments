@@ -57,7 +57,7 @@ class Appointments extends Component {
 					}
 				});
 			} else {
-				Actions.login();
+				Actions.Login();
 			}
 		});
 	}
@@ -90,7 +90,7 @@ class Appointments extends Component {
 					}
 				});
 			} else {
-				Actions.login();
+				Actions.Login();
 			}
 		});
 	}
@@ -301,9 +301,9 @@ class Appointments extends Component {
 
 	render() {
 		return (
-			<Container style={{ paddingTop: (Platform.OS === 'ios') ? 58 : 54 }}>
+			<Container style={{ paddingTop: (Platform.OS === 'ios') ? 56 : 54 }}>
 				<Content>
-					<View style={{ flexDirection: 'row', flex: 1, borderColor: 'steelblue', borderBottomWidth: 3 }}>
+					<View style={{ flexDirection: 'row', flex: 1, borderColor: 'steelblue', borderBottomWidth: 2 }}>
 						<View
 							style={{
 								paddingTop: 16,
@@ -341,6 +341,7 @@ class Appointments extends Component {
 							data={this.employeesList} label="" initValue={this.userSelected.label} onChange={(option)=>{ this.onChangeEmployee(option, 'userSelected'); }} />
 					</View>
 					<View>
+						{this.state.showspinner && <Spinner /> }
 						<ListView
 							enableEmptySections
 							dataSource={this.state.appointmentsList}

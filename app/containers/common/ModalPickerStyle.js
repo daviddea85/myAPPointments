@@ -1,6 +1,6 @@
 import { StyleSheet, Dimensions } from 'react-native';
 
-const {height, width} = Dimensions.get('window');
+const { height, width} = Dimensions.get('window');
 
 const PADDING = 8;
 const BORDER_RADIUS = 3;

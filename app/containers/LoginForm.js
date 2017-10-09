@@ -84,7 +84,7 @@ class LoginForm extends Component {
 			await firebase.auth().signInWithEmailAndPassword(this.state.firebaseUser.firebaseEmail, this.state.firebaseUser.firebasePassword);
 			const userSignedIn = await firebase.auth().currentUser;
 			AsyncStorage.setItem('userLoggedEmail', userSignedIn.email);
-			Actions.company({ title: 'Company list', userLogged: userSignedIn });
+			Actions.CompanyList({ title: 'Company list', userLogged: userSignedIn });
 		} catch (error) {
 			Alert.alert(
 				error.code,

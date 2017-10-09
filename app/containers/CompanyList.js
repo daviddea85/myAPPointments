@@ -3,19 +3,21 @@ import React, { Component } from 'react';
 import PouchDB from 'pouchdb-react-native';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { ListView, Alert, AsyncStorage, Platform } from 'react-native';
+import { ListView, Alert, AsyncStorage, Platform, Dimensions, Text } from 'react-native';
 import ActionButton from 'react-native-action-button';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
-import { Body, Container, Content, ListItem, Header, Text, Button, Title, View } from 'native-base';
+import { Body, Container, Content, ListItem, Header, Button, Title, View } from 'native-base';
 
 let DBCompanyConnection = null;
 let DBAppConnection = null;
+
+const fullWidth = Dimensions.get('window').width; // full width
+const fullHeight = Dimensions.get('window').height; // full height
 
 class GetCompanyList extends Component {
 
 	constructor(props) {
 		super(props);
-
 		const dsMembers = new ListView.DataSource({
 			rowHasChanged: (r1, r2) => r1 !== r2
 		});
@@ -120,7 +122,7 @@ class GetCompanyList extends Component {
 	}
 
 	createCompanyForm() {
-		Actions.createCompany({ companyid: '', title: 'Create company', firebaseUser: this.userLogged });
+		Actions.CreateCompany({ companyid: '', title: 'Create company', firebaseUser: this.userLogged });
 	}
 
 	joinPendingConfirmation(pending) {
@@ -251,7 +253,7 @@ class GetCompanyList extends Component {
 	checkCompanyEditAccess(member) {
 		if (member.userCreated === this.userLoggedEmail) {
 			AsyncStorage.setItem('companyDatabase', '');
-			Actions.createCompany({ title: member.memberCompanyName, companyid: member.companyId });
+			Actions.CreateCompany({ title: member.memberCompanyName, companyid: member.companyId });
 		} else {
 			Alert.alert(
 				'User access',
@@ -270,7 +272,7 @@ class GetCompanyList extends Component {
 				<ListItem
 					style={{ height: 70, backgroundColor: 'white' }}
 					button
-					onPress={() => { this.checkCompanyEditAccess(member); }}
+					onLongPress={() => { this.checkCompanyEditAccess(member); }}
 					iconRight
 				>
 					<Text
@@ -282,7 +284,7 @@ class GetCompanyList extends Component {
 					<View
 						style={{
 							position: 'absolute',
-							right: 60
+							right: 80
 						}}
 					>
 						<SimpleLineIcons
@@ -300,7 +302,7 @@ class GetCompanyList extends Component {
 					<View
 						style={{
 							position: 'absolute',
-							right: 10
+							right: 20
 						}}
 					>
 						<SimpleLineIcons
@@ -312,7 +314,7 @@ class GetCompanyList extends Component {
 						<Text
 							style={{
 								fontSize: 12,
-								right: 10
+								right: 6
 							}}
 						>Leave</Text>
 					</View>
@@ -332,12 +334,12 @@ class GetCompanyList extends Component {
 						style={{ color: 'black',
 							fontFamily: 'Arial', }}
 					>
-					{pending.pendingCompanyName}
+						{pending.pendingCompanyName}
 					</Text>
 					<View
 						style={{
 							position: 'absolute',
-							right: 60
+							right: 80
 						}}
 					>
 						<SimpleLineIcons
@@ -355,7 +357,7 @@ class GetCompanyList extends Component {
 					<View
 						style={{
 							position: 'absolute',
-							right: 10
+							right: 20
 						}}
 					>
 						<SimpleLineIcons
@@ -367,7 +369,7 @@ class GetCompanyList extends Component {
 						<Text
 							style={{
 								fontSize: 12,
-								right: 10
+								right: 6
 							}}
 						>Reject</Text>
 					</View>
@@ -380,26 +382,42 @@ class GetCompanyList extends Component {
 	render() {
 		return (
 			<Container style={{ paddingTop: (Platform.OS === 'ios') ? 64 : 54 }}>
-				<Content style={{ borderColor: 'steelblue', borderBottomWidth: 0.25, borderWidth: 0.5, paddingTop: 10, borderRadius: 12 }}>
-				{this.state.membersCount === 0 && <Text style={{ fontWeight: 'bold', alignSelf: 'center' }}>Member invites not found</Text>}
-				{this.state.membersCount !== 0 && <Text style={{ fontWeight: 'bold', alignSelf: 'center' }}>Member Of</Text>}
+				<View style={{ borderColor: 'steelblue', borderBottomWidth: 2, borderTopWidth: 2, height: 40 }}>
+					{this.state.membersCount === 0 && <Text style={{ fontWeight: 'bold', alignSelf: 'center', alignItems: 'center', paddingTop: 8 }}>Member invites not found</Text>}
+					{this.state.membersCount !== 0 && <Text style={{ fontWeight: 'bold', alignSelf: 'center', alignItems: 'center', paddingTop: 8 }}>Member of</Text>}
+				</View>
+				<Content style={{ borderColor: 'steelblue', borderBottomWidth: 0.25, borderWidth: 0.5 }}>
 					<ListView
 						enableEmptySections
 						dataSource={this.state.members}
 						renderRow={this.renderRow}
 					/>
 				</Content>
-				<Content style={{ borderColor: 'steelblue', borderTopWidth: 0.25, borderWidth: 0.5, paddingTop: 10, borderRadius: 12 }}>
-				{this.state.pendingsCount === 0 && <Text style={{ fontWeight: 'bold', alignSelf: 'center' }}>Pending invites not found</Text>}
-				{this.state.pendingsCount !== 0 && <Text style={{ fontWeight: 'bold', alignSelf: 'center' }}>Pending invites</Text>}
+				<View style={{ borderColor: 'steelblue', borderBottomWidth: 2, borderTopWidth: 2, height: 40 }}>
+					{this.state.pendingsCount === 0 && <Text style={{ fontWeight: 'bold', alignSelf: 'center', alignItems: 'center', paddingTop: 8 }}>Pending invites not found</Text>}
+					{this.state.pendingsCount !== 0 && <Text style={{ fontWeight: 'bold', alignSelf: 'center', alignItems: 'center', paddingTop: 8 }}>Pending invites</Text>}
+				</View>
+				<Content style={{ borderColor: 'steelblue', borderBottomWidth: 0.25, borderWidth: 0.5 }}>
 					<ListView
 						enableEmptySections
 						dataSource={this.state.pendings}
 						renderRow={this.renderRowPendings}
 					/>
 				</Content>
-				<View style={{ padding: 15 }}>
-					<Button backgroundColor='#9DBDF2' onPress={this.createCompanyForm.bind(this)} block info>
+				<View style={{ padding: 10, borderColor: 'steelblue', borderTopWidth: 2 }}>
+					<Button
+						small
+						rounded
+						style={{
+							backgroundColor: '#9DBDF2',
+							borderWidth: 1,
+							borderColor: 'steelblue',
+							alignSelf: 'center',
+							width: fullWidth - 200,
+							justifyContent: 'center',
+						}}
+						onPress={this.createCompanyForm.bind(this)}
+					>
 						<Text>Create company</Text>
 					</Button>
 				</View>

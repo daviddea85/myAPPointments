@@ -230,19 +230,20 @@ class Contacts extends Component {
 	render() {
 		return (
 			<Container style={{ paddingTop: (Platform.OS === 'ios') ? 64 : 54 }}>
-				<View style={{ flexDirection: 'row', backgroundColor: '#EFEFEF', paddingLeft: 5, paddingTop: 5, paddingBottom: 5, alignItems: 'center' }}>
+				<View style={{ flexDirection: 'row', paddingLeft: 10, paddingTop: 7.5, paddingBottom: 7.5, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'steelblue' }}>
 					<TextInput
 						underlineColorAndroid={'transparent'}
 						placeholder="Search contact by name"
 						style={{
 							flex: 1,
-							height: 35,
+							height: 40,
 							borderColor: '#C0C0C0',
 							borderWidth: 1,
 							borderRadius: 6,
 							backgroundColor: '#fff',
 							color: '#424B4F',
-							paddingLeft: 5
+							paddingLeft: 10,
+							paddingRight: 10
 						}}
 						value={this.state.filtervalue}
 						onChangeText={value => this.setState({ filtervalue: value })}
@@ -257,7 +258,7 @@ class Contacts extends Component {
 						}}
 						onPress={() => { this.clearFilter(); }}
 					/>
-					<TouchableOpacity style={{ marginLeft: 15, marginRight: 15 }} onPress={() => { this.getContacts('search'); }}>
+					<TouchableOpacity style={{ marginLeft: 15, marginRight: 10 }} onPress={() => { this.getContacts('search'); }}>
 						<MaterialCommunityIcons name="magnify" size={28} style={{ color: '#808080' }} />
 					</TouchableOpacity>
 				</View>

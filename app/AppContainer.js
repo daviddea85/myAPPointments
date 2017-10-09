@@ -67,7 +67,6 @@ class AppContainer extends Component {
 			// />
 		// );
 	// }
-
 	// renderRightButton={this.navBarRightButton}
 
 	render() {
@@ -76,9 +75,9 @@ class AppContainer extends Component {
 				renderBackButton={this.navBarLeftButton}
 			>
 				<Scene key="root">
-					<Scene key="login" component={LoginForm} hideNavBar type={ActionConst.REPLACE} />
-					<Scene key="company" component={CompanyList} hideNavBar={false} type={ActionConst.REPLACE} renderBackButton={null} />
-					<Scene key="createCompany" component={CreateCompany} hideNavBar={false} />
+					<Scene key="Login" component={LoginForm} hideNavBar type={ActionConst.REPLACE} />
+					<Scene key="CompanyList" component={CompanyList} hideNavBar={false} title="Company list" />
+					<Scene key="CreateCompany" component={CreateCompany} hideNavBar={false} />
 					<Scene key="Dashboard" component={Dashboard} hideNavBar={false} title="Dashboard" type={ActionConst.REPLACE} renderBackButton={null} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
 					<Scene initial key="Appointments" component={Appointments} hideNavBar={false} title="Appointments" type={ActionConst.REPLACE} renderBackButton={null} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
 					<Scene key="AppointmentsInfo" component={AppointmentsInfo} hideNavBar={false} title="Appointment Info" />
@@ -88,7 +87,6 @@ class AppContainer extends Component {
 					<Scene key="Alerts" component={Alerts} hideNavBar={false} title="Alerts" type={ActionConst.REPLACE} renderBackButton={null} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
 					<Scene key="More" component={More} hideNavBar={false} title="More" type={ActionConst.REPLACE} renderBackButton={null} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
 				</Scene>
-
 			</Router>
 		);
 	}

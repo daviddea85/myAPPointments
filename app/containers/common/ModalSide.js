@@ -215,7 +215,7 @@ class ModalSide extends Component {
 			AsyncStorage.setItem('userLoggedEmail', '');
 			firebase.auth().signOut();
 			this.props.setModalState({ prop: 'modalConfigShow', value: false });
-			Actions.login();
+			Actions.Login();
 		} catch (error) {
 			Alert.alert(
 				error.code,

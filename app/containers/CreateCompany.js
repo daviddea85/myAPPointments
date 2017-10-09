@@ -156,7 +156,7 @@ class CreateCompany extends Component {
 				`The company ${this.state.company.name} already exists`,
 				[
 					{ text: 'Change name', onPress: () => console.log('change name pressed'), style: 'cancel' },
-					{ text: 'OK', onPress: () => Actions.company({ title: 'Company list' }), style: 'cancel' },
+					{ text: 'OK', onPress: () => Actions.CompanyList({ title: 'Company list' }), style: 'cancel' },
 				],
 				{ cancelable: true }
 			);
@@ -209,7 +209,7 @@ class CreateCompany extends Component {
 				'Company created',
 				`The company ${this.state.company.name} has been created`,
 				[
-					{ text: 'OK', onPress: () => Actions.company({ title: 'Company list' }), style: 'cancel' }
+					{ text: 'OK', onPress: () => Actions.CompanyList({ title: 'Company list' }), style: 'cancel' }
 				],
 				{ cancelable: true }
 			);
@@ -221,7 +221,7 @@ class CreateCompany extends Component {
 				'Company saved',
 				`The company ${this.state.company.name} has been saved`,
 				[
-					{ text: 'OK', onPress: () => Actions.company({ title: 'Company list' }), style: 'cancel' }
+					{ text: 'OK', onPress: () => Actions.CompanyList({ title: 'Company list' }), style: 'cancel' }
 				],
 				{ cancelable: true }
 			);
