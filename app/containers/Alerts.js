@@ -38,6 +38,7 @@ import { FooterMain } from '../containers/common/Footer';
 import DatePicker from 'react-native-datepicker';
 import ModalPicker from 'react-native-modal-picker';
 import moment from 'moment';
+import ModalSide from './common/ModalSide';
 
 const fullWidth = Dimensions.get('window').width; // full width
 
@@ -68,7 +69,7 @@ class pageTwo extends Component {
 		AsyncStorage.getItem('companyDatabase').then((companyDatabaseValue) => {
 			if (companyDatabaseValue !== null) {
 				this.companyDatabase = companyDatabaseValue;
-				this.connectCompanyDb(true);
+				// this.connectCompanyDb(true);
 			}
 		});
 	}
@@ -80,7 +81,7 @@ class pageTwo extends Component {
 			Actions.pop({ refresh: { goMenu: true } });
 		}
 		if (nextProps.goBack) {
-			this.connectCompanyDb(true);
+			// this.connectCompanyDb(true);
 		}
 	}
 
@@ -187,6 +188,7 @@ class pageTwo extends Component {
 						</Content>
 					</Tab>
 				</Tabs>
+				<ModalSide />
 				<FooterMain activeArea="Alerts" />
 			</Container>
 		);
