@@ -122,13 +122,15 @@ class AppointmentTreatmentsList extends Component {
 
 	closeTreatmentListModal() {
 		this.treatmentTitleSelected = '';
+		this.treatmentid = '';
 		for (let i = 0; i < this.treatments.length; i += 1) {
 			if (this.treatments[i].selected === true) {
 				this.treatmentTitleSelected = this.treatments[i].title;
+				this.treatmentid = this.treatments[i]._id;
 			}
 		}
 		if (this.treatmentTitleSelected !== '') {
-			Actions.AppointmentsInfo({ appointmentid: this.props.appointment_id, title: 'Appointment', appointmentdate: this.props.appointment_date, currentTab: 1, treatmentTitle: this.treatmentTitleSelected });
+			Actions.AppointmentsInfo({ appointmentid: this.props.appointment_id, title: 'Appointment', appointmentdate: this.props.appointment_date, currentTab: 1, treatmentTitle: this.treatmentTitleSelected, treatmentid: this.treatmentid });
 		} else {
 			Actions.AppointmentsInfo({ appointmentid: this.props.appointment_id, title: 'Appointment', appointmentdate: this.props.appointment_date, currentTab: 1 });
 		}

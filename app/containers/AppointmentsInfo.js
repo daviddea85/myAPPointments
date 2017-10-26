@@ -36,6 +36,7 @@ import ModalPicker from './common/ModalPicker';
 import moment from 'moment';
 
 const fullWidth = Dimensions.get('window').width; // full width
+const hat = require('hat');
 
 PouchDB.plugin(require('pouchdb-find'));
 
@@ -72,6 +73,7 @@ class AppointmentsInfo extends Component {
 				employee_id: '',
 				notes: ''
 			},
+			treatmentid: this.props.treatmentid || '',
 			treatment: {
 				_id: '',
 				doctype: 'treatment',
@@ -96,9 +98,9 @@ class AppointmentsInfo extends Component {
 				phoneNumbers: [],
 				userid: '',
 			},
-			treatmentimages: {},
 			imageslist: dsImages.cloneWithRows([]),
 			addresseslist: dsAdresses.cloneWithRows([]),
+			images: [],
 			telephoneslist: dsTelephones.cloneWithRows([]),
 			emailslist: dsEmails.cloneWithRows([]),
 		};
@@ -184,6 +186,27 @@ class AppointmentsInfo extends Component {
 		const intreatment = this.state.treatment;
 		_.set(intreatment, prop, newValue);
 		this.setState({ treatment: intreatment });
+	}
+
+	onChangeTreatmentImagesInfo(newValue, prop, imageInfo) {
+		const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+		const newimages = this.state.images;
+		for (let i = 0; i < newimages.length; i += 1) {
+			if (imageInfo.imageid === newimages[i].imageid) {
+				if (prop === 'notes') {
+					newimages[i].notes = newValue;
+				}
+				if (prop === '_rev') {
+					newimages[i]._rev = newValue;
+				}
+				if (prop === '_id') {
+					newimages[i]._id = newValue;
+				}
+			}
+		}
+		console.log('newimages');
+		console.log(newimages);
+		this.setState({ imageslist: ds.cloneWithRows(newimages), images: newimages });
 	}
 
 	async getAppointmentInfo() {
@@ -361,23 +384,24 @@ class AppointmentsInfo extends Component {
 					this.state.treatment.appointment_id = this.state.appointmentid;
 					treatmentInfo.docs[0] = this.state.treatment;
 				} else {
-					if (this.props.treatmentTitle !== undefined) {
+					if (!_.isEmpty(this.props.treatmentTitle)) {
 						treatmentInfo.docs[0].title = this.props.treatmentTitle;
 					}
 				}
-				this.treatmentimages = [];
-				if (treatmentInfo.docs[0]._id !== '') {
-					const queryTreatmentImages = { selector: { doctype: 'images', area: 'treatments', owner: treatmentInfo.docs[0]._id }, };
-					const treatmentImages = await DBCompanyConnection.find(queryTreatment);
-					if (treatmentImages.docs.length > 0) {
-						this.treatmentimages.push(treatmentImages.docs);
+				// this.appointmentimages = [];
+				if (this.state.appointmentid !== '') {
+					const queryAppointmentImages = { selector: { doctype: 'images', area: 'appointment', owner: this.state.appointmentid }, };
+					const appointmentimages = await DBCompanyConnection.find(queryAppointmentImages);
+					if (appointmentimages.docs.length > 0) {
+						this.setState({ imageslist: dsImages.cloneWithRows(appointmentimages.docs), images: appointmentimages.docs });
+					} else {
+						this.setState({ imageslist: dsImages.cloneWithRows([]), images: [] });
 					}
 				}
 				this.setState({
 					appointment: appointmentInfo.docs[0],
 					treatment: treatmentInfo.docs[0],
 					contact: contactInfo.docs[0],
-					imageslist: dsImages.cloneWithRows(this.treatmentimages),
 					addresseslist: dsAdresses.cloneWithRows(contactInfo.docs[0].postalAddresses),
 					telephoneslist: dsTelephones.cloneWithRows(contactInfo.docs[0].phoneNumbers),
 					emailslist: dsEmails.cloneWithRows(contactInfo.docs[0].emailAddresses),
@@ -424,23 +448,24 @@ class AppointmentsInfo extends Component {
 		);
 	}
 
-	async deleteAppointment() {
-		const appointmentDeleted = await DBCompanyConnection.remove(this.state.appointment);
-		if (this.state.treatment._id !== '') {
-			const treatmentDeleted = await DBCompanyConnection.remove(this.state.treatment);
-		}
-		this.deleteAppointmentAlert();
-	}
-
 	deleteAppointmentConfirmationAlert() {
 		Alert.alert(
 			'Appointment delete',
 			`Are you sure you want to delete the appointment for ${this.state.appointment.contact_name} on ${this.state.appointment.date} at ${this.state.appointment.hour}:${this.state.appointment.minute}?`,
 			[
-				{ text: 'OK', onPress: () => this.deleteAppointment(), style: 'cancel' }
+				{ text: 'Yes', onPress: () => this.deleteAppointment(), style: 'cancel' },
+				{ text: 'No', onPress: () => console.log('cancel appointment delete'), style: 'cancel' }
 			],
 			{ cancelable: true }
 		);
+	}
+
+	async deleteAppointment() {
+		const appointmentDeleted = await DBCompanyConnection.remove(this.state.appointment);
+		if (this.state.treatmentid !== '') {
+			const treatmentDeleted = await DBCompanyConnection.remove(this.state.treatment);
+		}
+		this.deleteAppointmentAlert();
 	}
 
 	deleteAppointmentAlert() {
@@ -449,6 +474,35 @@ class AppointmentsInfo extends Component {
 			`The appointment for ${this.state.appointment.contact_name} on ${this.state.appointment.date} at ${this.state.appointment.hour}:${this.state.appointment.minute} has been deleted`,
 			[
 				{ text: 'OK', onPress: () => console.log('appointment deleted'), style: 'cancel' }
+			],
+			{ cancelable: true }
+		);
+	}
+
+	deleteTreatmentConfirmationAlert() {
+		Alert.alert(
+			'Treatment delete',
+			`Are you sure you want to delete the treatment ${this.state.treatment.title.toLowerCase()} for the appointment on ${this.state.appointment.date} at ${this.state.appointment.hour}:${this.state.appointment.minute}?`,
+			[
+				{ text: 'Yes', onPress: () => this.deleteTreatment(), style: 'cancel' },
+				{ text: 'No', onPress: () => console.log('cancel appointment delete'), style: 'cancel' }
+			],
+			{ cancelable: true }
+		);
+	}
+
+	async deleteTreatment() {
+		const treatmentDeleted = await DBCompanyConnection.remove(this.state.treatment);
+		this.setState({ treatment: '' });
+		this.deleteTreatmentAlert();
+	}
+
+	deleteTreatmentAlert() {
+		Alert.alert(
+			'Treatment deleted',
+			'The treatment has been deleted',
+			[
+				{ text: 'OK', onPress: () => console.log('treatment deleted'), style: 'cancel' }
 			],
 			{ cancelable: true }
 		);
@@ -470,12 +524,13 @@ class AppointmentsInfo extends Component {
 				newtreatment.doctype = 'treatment';
 				newtreatment.appointment_id = this.state.appointmentid;
 				newtreatment.contact_id = this.state.appointment.contact_id;
-				newtreatment.title = this.state.appointment.contact_id;
+				newtreatment.title = this.state.treatment.title;
 				const title = this.state.treatment.title.toLowerCase();
 				newtreatment.title = title.charAt(0).toUpperCase() + title.slice(1);
 				newtreatment.notes = this.state.treatment.notes;
 				const savedtreatment = await DBCompanyConnection.post(newtreatment);
 				const newrev = savedtreatment.rev;
+				this.setState({ treatmentid: savedtreatment.id });
 				this.onChangeTextTreatment(newrev, '_rev');
 				this.saveTreatmentAlert('created');
 			} else {
@@ -484,6 +539,7 @@ class AppointmentsInfo extends Component {
 				this.state.treatment.title = this.state.treatment.title.charAt(0).toUpperCase() + this.state.treatment.title.slice(1);
 				const saveTreatment = await DBCompanyConnection.put(this.state.treatment);
 				const newrev = saveTreatment.rev;
+				this.setState({ treatmentid: savedtreatment.id });
 				this.onChangeTextTreatment(newrev, '_rev');
 				this.saveTreatmentAlert('updated');
 			}
@@ -493,9 +549,110 @@ class AppointmentsInfo extends Component {
 	saveTreatmentAlert(saveText) {
 		Alert.alert(
 			`Treatment ${saveText}`,
-			`The treatment ${this.state.treatment.title} for ${this.state.appointment.contact_name} on ${this.state.appointment.date} has been ${saveText}`,
+			`The treatment ${this.state.treatment.title.toLowerCase()} for ${this.state.appointment.contact_name} on ${this.state.appointment.date} has been ${saveText}`,
 			[
-				{ text: 'OK', onPress: () => console.log('appointment created/updated'), style: 'cancel' }
+				{ text: 'OK', onPress: () => console.log('treatment created/updated'), style: 'cancel' }
+			],
+			{ cancelable: true }
+		);
+	}
+
+	async saveImageAppointment(image) {
+		if (this.state.appointmentid === '') {
+			Alert.alert(
+				'Appointment info',
+				'The appointment needs to be created first',
+				[
+					{ text: 'OK', onPress: () => this._tabs.goToPage(0), style: 'cancel' }
+				],
+				{ cancelable: true }
+			);
+		} else {
+			if (_.isEmpty(image._id)) {
+				console.log('crear');
+				const newimage = {};
+				newimage.doctype = 'images';
+				newimage.area = 'appointment';
+				newimage.owner = this.state.appointmentid;
+				newimage.notes = image.notes;
+				newimage.uri = image.uri;
+				newimage.imageid = image.imageid;
+				const savedimage = await DBCompanyConnection.post(newimage);
+				const newrev = savedimage.rev;
+				const newid = savedimage.id;
+				console.log('newimage');
+				console.log(newimage);
+				this.onChangeTreatmentImagesInfo(newrev, '_rev', newimage);
+				this.onChangeTreatmentImagesInfo(newid, '_id', newimage);
+				this.saveImageAppointmentAlert('created');
+				// this.state.imageslist.push(newimage);
+				// this.setState({ imageslist: ds.cloneWithRows(this.state.imageslist), images: this.state.imageslist });
+			} else {
+				console.log('actualizar');
+				console.log('imageimageimageimageimage');
+				console.log(image);
+				// const queryAppointmentImage = { selector: { _id: image._id }, };
+				const updatedimage = await DBCompanyConnection.put(image);
+				// updatedimage.notes = image.notes;
+				console.log('updatedimage');
+				console.log(updatedimage);
+				// this.state.treatment.contact_id = this.state.appointment.contact_id;
+				// this.state.treatment.title = this.state.treatment.title.toLowerCase();
+				// this.state.treatment.title = this.state.treatment.title.charAt(0).toUpperCase() + this.state.treatment.title.slice(1);
+				// const savedimage = await DBCompanyConnection.put(appointmentimage);
+				const newrev = updatedimage.rev;
+				this.onChangeTreatmentImagesInfo(newrev, '_rev', image);
+				this.saveImageAppointmentAlert('updated');
+				// this.state.imageslist.push(newimage);
+				// this.setState({ imageslist: ds.cloneWithRows(this.state.imageslist), images: this.state.imageslist });
+			}
+		}
+	}
+
+	saveImageAppointmentAlert(saveText) {
+		Alert.alert(
+			`Treatment image ${saveText}`,
+			`The image in the appointment for ${this.state.appointment.contact_name} on ${this.state.appointment.date} has been ${saveText}`,
+			[
+				{ text: 'OK', onPress: () => console.log('image treatment created/updated'), style: 'cancel' }
+			],
+			{ cancelable: true }
+		);
+	}
+
+	deleteImageTreatmentConfirmation(image) {
+		Alert.alert(
+			'Image treatment',
+			`Are you sure you want to delete the image on the treatment ${this.state.treatment.title.toLowerCase()} for ${this.state.appointment.contact_name} on ${this.state.appointment.date}?`,
+			[
+				{ text: 'Yes', onPress: () => this.deleteImageTreatment(image), style: 'cancel' },
+				{ text: 'No', onPress: () => console.log('cancel delete appointment'), style: 'cancel' }
+			],
+			{ cancelable: true }
+		);
+	}
+
+	async deleteImageTreatment(image) {
+		const dsImages = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+		for (let i = 0; i < this.state.images.length; i += 1) {
+			if (this.state.images[i].imageid === image.imageid) {
+				const index = this.state.images.indexOf(image);
+				this.state.images.splice(index, 1);
+			}
+		}
+		console.log('this.state.images');
+		console.log(this.state.images);
+		this.setState({ images: this.state.images, imageslist: dsImages.cloneWithRows(this.state.images) });
+		const imageTreatmentDeleted = await DBCompanyConnection.remove(image);
+		this.deleteImageTreatmentConfirmationAlert();
+	}
+
+	deleteImageTreatmentConfirmationAlert() {
+		Alert.alert(
+			'Image treatment',
+			`The image ${this.state.treatment.title.toLowerCase()} for ${this.state.appointment.contact_name} on ${this.state.appointment.date} has been deleted`,
+			[
+				{ text: 'Ok', onPress: () => console.log('cancel delete appointment'), style: 'cancel' }
 			],
 			{ cancelable: true }
 		);
@@ -552,7 +709,7 @@ class AppointmentsInfo extends Component {
 				<ActionButton.Item buttonColor="#00b359" title="Update appointment" onPress={() => { this.saveAppointment(); }}>
 					<IconMaterial name="save" size={28} color="white" />
 				</ActionButton.Item>
-				<ActionButton.Item buttonColor="#ff4c4c" title="Delete appointment" onPress={() => { this.deleteAppointment(); }}>
+				<ActionButton.Item buttonColor="#ff4c4c" title="Delete appointment" onPress={() => { this.deleteAppointmentConfirmationAlert(); }}>
 					<IconMaterial name="delete" size={28} color="white" />
 				</ActionButton.Item>
 			</ActionButton>
@@ -594,18 +751,169 @@ class AppointmentsInfo extends Component {
 				<ActionButton.Item buttonColor="#00b359" title="Update treatment" onPress={() => { this.saveTreatment(); }}>
 					<IconMaterial name="save" size={28} color="white" />
 				</ActionButton.Item>
-				<ActionButton.Item buttonColor="#ff4c4c" title="Delete treatment" onPress={() => { this.deleteTreatment(); }}>
+				<ActionButton.Item buttonColor="#ff4c4c" title="Delete treatment" onPress={() => { this.deleteTreatmentConfirmationAlert(); }}>
 					<IconMaterial name="delete" size={28} color="white" />
 				</ActionButton.Item>
 			</ActionButton>
 		);
 	}
 
+	choosePhoto(cropit) {
+		ImagePicker.openPicker({
+			cropping: cropit,
+			width: 400,
+			height: 400,
+			includeBase64: true
+		}).then((imageInfo) => {
+			const image = {};
+			image.uri = `data:${imageInfo.mime};base64,${imageInfo.data}`;
+			image.notes = '';
+			const newHatId = hat();
+			image.imageid = newHatId;
+			const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+			const newimage = this.state.images;
+			newimage.push(image);
+			this.setState({ imageslist: ds.cloneWithRows(newimage), images: newimage });
+		}).catch('error', (error) => {
+			Alert.alert(
+				'Image Upload Error',
+				error.message,
+				[
+					{ text: 'Ok', onPress: () => console.log('error upload image'), style: 'cancel' },
+				],
+				{ cancelable: false }
+			);
+		});
+	}
+
+	addPhoto(cropit) {
+		ImagePicker.openCamera({
+			cropping: cropit,
+			width: 400,
+			height: 400,
+			includeBase64: true
+		}).then((imageInfo) => {
+			const image = {};
+			image.uri = `data:${imageInfo.mime};base64,${imageInfo.data}`;
+			image.notes = '';
+			const newHatId = hat();
+			image.imageid = newHatId;
+			const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+			const newimage = this.state.images;
+			newimage.push(image);
+			this.setState({ imageslist: ds.cloneWithRows(newimage), images: newimage });
+		}).catch('error', (error) => {
+			Alert.alert(
+				'Image Upload Error',
+				error.message,
+				[
+					{ text: 'Ok', onPress: () => console.log('error upload image'), style: 'cancel' },
+				],
+				{ cancelable: false }
+			);
+		});
+	}
+
 	renderRowImages(image) {
-		console.log('image');
-		console.log(image);
 		return (
-			null
+			<View
+				style={{ paddingTop: 10, paddingBottom: 10, borderColor: 'steelblue', borderBottomWidth: 0.5 }}
+			>
+				<View
+					style={{
+						flex: 1,
+						flexDirection: 'row',
+					}}
+				>
+					<Body style={{ flex: 0.3 }}>
+						<View
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								paddingTop: 3
+							}}
+						>
+						<Image style={{ width: 100, height: 120 }} source={{ uri: image.uri }} />
+						</View>
+					</Body>			
+					<Body style={{ flex: 0.7 }}>
+						<View
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								paddingRight: 12,
+								paddingTop: 3,
+							}}
+						>
+							<Input
+								placeholder="Notes"
+								underlineColorAndroid={'transparent'}
+								autoCorrect={false}
+								multiline
+								numberOfLines={5}
+								returnKeyType="done"
+								style={{
+									backgroundColor: '#fff',
+									height: 80,
+									borderColor: '#C0C0C0',
+									borderWidth: 1,
+									borderRadius: 6,
+									color: '#424B4F',
+									width: fullWidth,
+									paddingVertical: 0
+								}}
+								onChangeText={(text) => {
+									this.onChangeTreatmentImagesInfo(text, 'notes', image);
+								}}
+								value={image.notes}
+							/>
+						</View>
+						<View
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								paddingRight: 12,
+								paddingTop: 3,
+							}}
+						>
+							<Button
+								success
+								small
+								rounded
+								onPress={() =>
+									{
+									this.saveImageAppointment(image);
+								}}
+								style={{
+									marginLeft: 12,
+									width: 80,
+									justifyContent: 'center',
+								}}
+							>
+								<Text>Save</Text>
+							</Button>
+							{image._id &&
+							<Button
+								danger
+								small
+								rounded
+								onPress={() =>
+									{
+									this.deleteImageTreatmentConfirmation(image);
+								}}
+								style={{
+									marginLeft: 12,
+									width: 80,
+									justifyContent: 'center',
+								}}
+							>
+								<Text>Delete</Text>
+							</Button>
+							}
+						</View>
+					</Body>
+				</View>
+			</View>
 		);
 	}
 
@@ -906,7 +1214,7 @@ class AppointmentsInfo extends Component {
 									returnKeyType="done"
 									style={{
 										backgroundColor: '#fff',
-										height: 180,
+										height: 150,
 										borderColor: '#C0C0C0',
 										borderWidth: 1,
 										borderRadius: 6,
@@ -1044,7 +1352,7 @@ class AppointmentsInfo extends Component {
 									returnKeyType="done"
 									style={{
 										backgroundColor: '#fff',
-										height: 200,
+										height: 215,
 										borderColor: '#C0C0C0',
 										borderWidth: 1,
 										borderRadius: 6,
@@ -1083,6 +1391,9 @@ class AppointmentsInfo extends Component {
 							onPress={() => { this.hideKeyboard(); }}
 							icon={<IconMaterial name="settings" size={28} color="white" />}
 						>
+							<ActionButton.Item buttonColor="#293E6A" title="Choose image from library" onPress={() => { this.choosePhoto(true); }}>
+								<IconMaterial name="photo-library" size={28} color="white" />
+							</ActionButton.Item>
 							<ActionButton.Item buttonColor="steelblue" title="Add image" onPress={() => { this.addPhoto(true); }}>
 								<IconMaterial name="add-a-photo" size={28} color="white" />
 							</ActionButton.Item>
