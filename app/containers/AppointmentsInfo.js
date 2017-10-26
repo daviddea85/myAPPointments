@@ -473,7 +473,7 @@ class AppointmentsInfo extends Component {
 			'Appointment deleted',
 			`The appointment for ${this.state.appointment.contact_name} on ${this.state.appointment.date} at ${this.state.appointment.hour}:${this.state.appointment.minute} has been deleted`,
 			[
-				{ text: 'OK', onPress: () => console.log('appointment deleted'), style: 'cancel' }
+				{ text: 'OK', onPress: () => Actions.Appointments({ title: 'Appointments' }), style: 'cancel' }
 			],
 			{ cancelable: true }
 		);
@@ -537,9 +537,9 @@ class AppointmentsInfo extends Component {
 				this.state.treatment.contact_id = this.state.appointment.contact_id;
 				this.state.treatment.title = this.state.treatment.title.toLowerCase();
 				this.state.treatment.title = this.state.treatment.title.charAt(0).toUpperCase() + this.state.treatment.title.slice(1);
-				const saveTreatment = await DBCompanyConnection.put(this.state.treatment);
-				const newrev = saveTreatment.rev;
-				this.setState({ treatmentid: savedtreatment.id });
+				const updatedtreatment = await DBCompanyConnection.put(this.state.treatment);
+				const newrev = updatedtreatment.rev;
+				this.setState({ treatmentid: updatedtreatment.id });
 				this.onChangeTextTreatment(newrev, '_rev');
 				this.saveTreatmentAlert('updated');
 			}
@@ -626,7 +626,7 @@ class AppointmentsInfo extends Component {
 			`Are you sure you want to delete the image on the treatment ${this.state.treatment.title.toLowerCase()} for ${this.state.appointment.contact_name} on ${this.state.appointment.date}?`,
 			[
 				{ text: 'Yes', onPress: () => this.deleteImageTreatment(image), style: 'cancel' },
-				{ text: 'No', onPress: () => console.log('cancel delete appointment'), style: 'cancel' }
+				{ text: 'No', onPress: () => console.log('cancel delete appointment image'), style: 'cancel' }
 			],
 			{ cancelable: true }
 		);
@@ -717,7 +717,7 @@ class AppointmentsInfo extends Component {
 	}
 
 	treatmentButtons() {
-		if (this.state.treatment._id === '') {
+		if (this.state.treatmentid === '') {
 			return (
 				<ActionButton
 					size={40}
