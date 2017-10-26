@@ -78,14 +78,14 @@ class AppContainer extends Component {
 					<Scene key="Login" component={LoginForm} hideNavBar />
 					<Scene key="CompanyList" component={CompanyList} hideNavBar={false} title="Company list" />
 					<Scene key="CreateCompany" component={CreateCompany} hideNavBar={false} />
-					<Scene key="Dashboard" component={Dashboard} hideNavBar={false} title="Dashboard" type={ActionConst.REPLACE} renderBackButton={null} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
-					<Scene initial key="Appointments" component={Appointments} hideNavBar={false} title="Appointments" type={ActionConst.REPLACE} renderBackButton={null} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
+					<Scene key="Dashboard" component={Dashboard} hideNavBar={false} title="Dashboard" type={ActionConst.REPLACE} renderBackButton={false} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
+					<Scene initial key="Appointments" component={Appointments} hideNavBar={false} title="Appointments" type={ActionConst.REPLACE} renderBackButton={false} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
 					<Scene key="AppointmentsInfo" component={AppointmentsInfo} hideNavBar={false} title="Appointment Info" />
 					<Scene key="AppointmentTreatmentsList" component={AppointmentTreatmentsList} hideNavBar title="Treatment list" />
-					<Scene key="Contacts" component={Contacts} hideNavBar={false} title="Contacts" type={ActionConst.REPLACE} renderBackButton={null} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
+					<Scene key="Contacts" component={Contacts} hideNavBar={false} title="Contacts" type={ActionConst.REPLACE} renderBackButton={false} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
 					<Scene key="ContactInfo" component={ContactInfo} hideNavBar={false} title="Contact info" />
-					<Scene key="Alerts" component={Alerts} hideNavBar={false} title="Alerts" type={ActionConst.REPLACE} renderBackButton={null} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
-					<Scene key="More" component={More} hideNavBar={false} title="More" type={ActionConst.REPLACE} renderBackButton={null} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
+					<Scene key="Alerts" component={Alerts} hideNavBar={false} title="Alerts" type={ActionConst.REPLACE} renderBackButton={false} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
+					<Scene key="More" component={More} hideNavBar={false} title="More" type={ActionConst.REPLACE} renderBackButton={false} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
 				</Scene>
 			</Router>
 		);

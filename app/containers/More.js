@@ -46,6 +46,22 @@ class More extends Component {
 
 	}
 
+	useProfile() {
+
+	}
+
+	companyInformation() {
+
+	}
+
+	treatmentsManagement() {
+
+	}
+
+	reportsList() {
+
+	}
+
 	render() {
 		return (
 			<Container style={{ paddingTop: 64 }}>
@@ -77,7 +93,7 @@ class More extends Component {
 							/>
 						</View>
 					</TouchableOpacity>
-					<TouchableOpacity style={{ marginLeft: 5, marginRight: 5 }} onPress={() => { this.usersManagement(); }}>
+					<TouchableOpacity style={{ marginLeft: 5, marginRight: 5 }} onPress={() => { this.useProfile(); }}>
 						<View
 							style={{
 								flex: 1,
@@ -104,7 +120,7 @@ class More extends Component {
 							/>
 						</View>
 					</TouchableOpacity>
-					<TouchableOpacity style={{ marginLeft: 5, marginRight: 5, marginBottom: 5 }} onPress={() => { Actions.CompanyList({ title: 'Company list', userLogged: this.userLoggedEmail });; }}>
+					<TouchableOpacity style={{ marginLeft: 5, marginRight: 5 }} onPress={() => { Actions.CompanyList({ title: 'Company list', userLogged: this.userLoggedEmail }); }}>
 						<View
 							style={{
 								flex: 1,
@@ -117,6 +133,87 @@ class More extends Component {
 							}}
 						>
 							<Text style={{ marginTop: 12.5, marginLeft: 12, flex: 0.8 }}>Switch company</Text>
+							<MaterialCommunityIcons
+								name="chevron-right"
+								style={{
+									fontSize: 30,
+									height: 40,
+									color: '#9b9cb1',
+									position: 'absolute',
+									top: 7.5,
+									right: 10,
+									backgroundColor: 'transparent'
+								}}
+							/>
+						</View>
+					</TouchableOpacity>
+					<TouchableOpacity style={{ marginLeft: 5, marginRight: 5 }} onPress={() => { this.companyInformation(); }}>
+						<View
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								height: 50,
+								borderColor: '#E8E8E8',
+								borderRadius: 5,
+								borderWidth: 2,
+								backgroundColor: 'white'
+							}}
+						>
+							<Text style={{ marginTop: 12.5, marginLeft: 12, flex: 0.8 }}>Company information</Text>
+							<MaterialCommunityIcons
+								name="chevron-right"
+								style={{
+									fontSize: 30,
+									height: 40,
+									color: '#9b9cb1',
+									position: 'absolute',
+									top: 7.5,
+									right: 10,
+									backgroundColor: 'transparent'
+								}}
+							/>
+						</View>
+					</TouchableOpacity>
+					<TouchableOpacity style={{ marginLeft: 5, marginRight: 5 }} onPress={() => { this.treatmentsManagement(); }}>
+						<View
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								height: 50,
+								borderColor: '#E8E8E8',
+								borderRadius: 5,
+								borderWidth: 2,
+								backgroundColor: 'white'
+							}}
+						>
+							<Text style={{ marginTop: 12.5, marginLeft: 12, flex: 0.8 }}>Treatments management</Text>
+							<MaterialCommunityIcons
+								name="chevron-right"
+								style={{
+									fontSize: 30,
+									height: 40,
+									color: '#9b9cb1',
+									position: 'absolute',
+									top: 7.5,
+									right: 10,
+									backgroundColor: 'transparent'
+								}}
+							/>
+						</View>
+					</TouchableOpacity>
+					<TouchableOpacity style={{ marginLeft: 5, marginRight: 5, marginBottom: 5 }} onPress={() => { this.reportsList(); }}>
+						<View
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								height: 50,
+								borderColor: '#E8E8E8',
+								borderRadius: 5,
+								borderWidth: 2,
+								backgroundColor: 'white'
+							}}
+						>
+							<Text style={{ marginTop: 12.5, marginLeft: 12, flex: 0.8 }}>Reports</Text>
 							<MaterialCommunityIcons
 								name="chevron-right"
 								style={{
