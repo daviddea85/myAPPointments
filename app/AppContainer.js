@@ -75,7 +75,7 @@ class AppContainer extends Component {
 				renderBackButton={this.navBarLeftButton}
 			>
 				<Scene key="root">
-					<Scene key="Login" component={LoginForm} hideNavBar type={ActionConst.REPLACE} />
+					<Scene key="Login" component={LoginForm} hideNavBar />
 					<Scene key="CompanyList" component={CompanyList} hideNavBar={false} title="Company list" />
 					<Scene key="CreateCompany" component={CreateCompany} hideNavBar={false} />
 					<Scene key="Dashboard" component={Dashboard} hideNavBar={false} title="Dashboard" type={ActionConst.REPLACE} renderBackButton={null} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />

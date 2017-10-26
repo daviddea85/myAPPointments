@@ -252,7 +252,6 @@ class GetCompanyList extends Component {
 
 	checkCompanyEditAccess(member) {
 		if (member.userCreated === this.userLoggedEmail) {
-			AsyncStorage.setItem('companyDatabase', '');
 			Actions.CreateCompany({ title: member.memberCompanyName, companyid: member.companyId });
 		} else {
 			Alert.alert(
