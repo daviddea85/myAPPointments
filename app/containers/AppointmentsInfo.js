@@ -35,7 +35,7 @@ import TextField from '../containers/common/TextField';
 import ModalPicker from './common/ModalPicker';
 import moment from 'moment';
 
-const fullWidth = Dimensions.get('window').width; // full width
+const fullWidth = Dimensions.get('window').width;
 const hat = require('hat');
 
 PouchDB.plugin(require('pouchdb-find'));
@@ -60,6 +60,9 @@ class AppointmentsInfo extends Component {
 		const dsEmails = new ListView.DataSource({
 			rowHasChanged: (r1, r2) => r1 !== r2
 		});
+		const dsTreatments = new ListView.DataSource({
+			rowHasChanged: (r1, r2) => r1 !== r2
+		});
 		this.state = {
 			showspinner: false,
 			appointmentid: this.props.appointmentid || '',
@@ -72,15 +75,6 @@ class AppointmentsInfo extends Component {
 				contact_id: '',
 				employee_id: '',
 				notes: ''
-			},
-			treatmentid: this.props.treatmentid || '',
-			treatment: {
-				_id: '',
-				doctype: 'treatment',
-				appointment_id: this.props.appointmentid || '',
-				contact_id: '',
-				title: this.props.treatmentTitle || '',
-				notes: '',
 			},
 			contact: {
 				_id: '',
@@ -98,9 +92,11 @@ class AppointmentsInfo extends Component {
 				phoneNumbers: [],
 				userid: '',
 			},
+			treatmentslist: dsImages.cloneWithRows([]),
+			treatments: [],
 			imageslist: dsImages.cloneWithRows([]),
-			addresseslist: dsAdresses.cloneWithRows([]),
 			images: [],
+			addresseslist: dsAdresses.cloneWithRows([]),
 			telephoneslist: dsTelephones.cloneWithRows([]),
 			emailslist: dsEmails.cloneWithRows([]),
 		};
@@ -129,15 +125,6 @@ class AppointmentsInfo extends Component {
 		if (nextProps.goBack) {
 			this.connectCompanyDb(true);
 		}
-	}
-
-	treatmentListModalControl() {
-		Actions.AppointmentTreatmentsList({
-			title: 'Treatment list',
-			contact_id: this.state.appointment.contact_id,
-			appointment_id: this.state.appointment._id,
-			appointment_date: this.state.appointment.date,
-		});
 	}
 
 	async onChangeText(newValue, prop) {
@@ -182,17 +169,13 @@ class AppointmentsInfo extends Component {
 		}
 	}
 
-	onChangeTextTreatment(newValue, prop) {
-		const intreatment = this.state.treatment;
-		_.set(intreatment, prop, newValue);
-		this.setState({ treatment: intreatment });
-	}
-
 	onChangeTreatmentImagesInfo(newValue, prop, imageInfo) {
 		const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 		const newimages = this.state.images;
 		for (let i = 0; i < newimages.length; i += 1) {
 			if (imageInfo.imageid === newimages[i].imageid) {
+				imageInfo.doctype = 'images';
+				imageInfo.owner = this.state.appointmentid;
 				if (prop === 'notes') {
 					newimages[i].notes = newValue;
 				}
@@ -204,13 +187,35 @@ class AppointmentsInfo extends Component {
 				}
 			}
 		}
-		console.log('newimages');
-		console.log(newimages);
 		this.setState({ imageslist: ds.cloneWithRows(newimages), images: newimages });
+	}
+
+	onChangeTreatmentInfo(newValue, prop, treatmentInfo) {
+		const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+		const newtreatments = this.state.treatments;
+		for (let i = 0; i < newtreatments.length; i += 1) {
+			if (treatmentInfo.treatment_id === newtreatments[i].treatment_id) {
+				if (prop === 'title') {
+					newtreatments[i].title = newValue.label;
+					newtreatments[i].title_id = newValue.value;
+				}
+				if (prop === 'notes') {
+					newtreatments[i].notes = newValue;
+				}
+				if (prop === '_rev') {
+					newtreatments[i]._rev = newValue;
+				}
+				if (prop === '_id') {
+					newtreatments[i]._id = newValue;
+				}
+			}
+		}
+		this.setState({ treatmentslist: ds.cloneWithRows(newtreatments), treatments: newtreatments });
 	}
 
 	async getAppointmentInfo() {
 		this.setState({ showspinner: true });
+		const dsTreatments = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 		const dsImages = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 		const dsAdresses = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 		const dsTelephones = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
@@ -254,6 +259,25 @@ class AppointmentsInfo extends Component {
 				this.employeesList.push(employeesListObject);
 			}
 			this.employeesList = _.sortBy(this.employeesList, ['label']);
+		}
+		const queryTreatment = { selector: { doctype: 'treatmentlist' }, };
+		const treatmentInfo = await DBCompanyConnection.find(queryTreatment);
+		this.treatmentsList = [];
+		treatmentsListObject = {
+			key: '0',
+			value: '',
+			label: ''
+		};
+		if (treatmentInfo.docs.length > 0) {
+			for (let t = 0; t < treatmentInfo.docs.length; t += 1) {
+				treatmentsListObject = {
+					key: treatmentInfo.docs[t]._rev,
+					value: treatmentInfo.docs[t]._id,
+					label: treatmentInfo.docs[t].title
+				};
+				this.treatmentsList.push(treatmentsListObject);
+			}
+			this.treatmentsList = _.sortBy(this.treatmentsList, ['title']);
 		}
 		let indexHour = 0;
 		this.hoursList = [
@@ -350,6 +374,7 @@ class AppointmentsInfo extends Component {
 				appointment: this.state.appointment,
 				treatment: this.state.treatment,
 				contact: this.state.contact,
+				treatmentslist: dsTreatments.cloneWithRows([]),
 				imageslist: dsImages.cloneWithRows([]),
 				addresseslist: dsAdresses.cloneWithRows([]),
 				telephoneslist: dsTelephones.cloneWithRows([]),
@@ -378,17 +403,15 @@ class AppointmentsInfo extends Component {
 						}
 					}
 				}
-				const queryTreatment = { selector: { doctype: 'treatment', appointment_id: this.state.appointmentid }, };
-				const treatmentInfo = await DBCompanyConnection.find(queryTreatment);
-				if (treatmentInfo.docs.length === 0) {
-					this.state.treatment.appointment_id = this.state.appointmentid;
-					treatmentInfo.docs[0] = this.state.treatment;
-				} else {
-					if (!_.isEmpty(this.props.treatmentTitle)) {
-						treatmentInfo.docs[0].title = this.props.treatmentTitle;
+				if (this.state.appointmentid !== '') {
+					const queryTreatmentsAppointment = { selector: { doctype: 'treatment', appointment_id: this.state.appointmentid }, };
+					const treatmentInfo = await DBCompanyConnection.find(queryTreatmentsAppointment);
+					if (treatmentInfo.docs.length > 0) {
+						this.setState({ treatmentslist: dsTreatments.cloneWithRows(treatmentInfo.docs), treatments: treatmentInfo.docs });
+					} else {
+						this.setState({ treatmentslist: dsTreatments.cloneWithRows([]), treatments: [] });
 					}
 				}
-				// this.appointmentimages = [];
 				if (this.state.appointmentid !== '') {
 					const queryAppointmentImages = { selector: { doctype: 'images', area: 'appointment', owner: this.state.appointmentid }, };
 					const appointmentimages = await DBCompanyConnection.find(queryAppointmentImages);
@@ -400,7 +423,6 @@ class AppointmentsInfo extends Component {
 				}
 				this.setState({
 					appointment: appointmentInfo.docs[0],
-					treatment: treatmentInfo.docs[0],
 					contact: contactInfo.docs[0],
 					addresseslist: dsAdresses.cloneWithRows(contactInfo.docs[0].postalAddresses),
 					telephoneslist: dsTelephones.cloneWithRows(contactInfo.docs[0].phoneNumbers),
@@ -411,8 +433,6 @@ class AppointmentsInfo extends Component {
 			this.setState({ showspinner: false });
 		}
 	}
-
-	// validations for appointment
 
 	async saveAppointment() {
 		if (this.state.appointmentid === '') {
@@ -462,8 +482,15 @@ class AppointmentsInfo extends Component {
 
 	async deleteAppointment() {
 		const appointmentDeleted = await DBCompanyConnection.remove(this.state.appointment);
-		if (this.state.treatmentid !== '') {
-			const treatmentDeleted = await DBCompanyConnection.remove(this.state.treatment);
+		if (this.state.treatments.length > 0) {
+			for (let t = 0; t < this.state.treatments.length; t += 1) {
+				const treatmentDeleted = await DBCompanyConnection.remove(this.state.treatments[t]);
+			}
+		}
+		if (this.state.images.length > 0) {
+			for (let i = 0; i < this.state.images.length; i += 1) {
+				const imageDeleted = await DBCompanyConnection.remove(this.state.images[i]);
+			}
 		}
 		this.deleteAppointmentAlert();
 	}
@@ -479,21 +506,43 @@ class AppointmentsInfo extends Component {
 		);
 	}
 
-	deleteTreatmentConfirmationAlert() {
+	addTreatment() {
+		const treatment = {};
+		treatment.doctype = 'treatment';
+		treatment.title = '';
+		treatment.title_id = '';
+		treatment.notes = '';
+		treatment.appointment_id = this.state.appointmentid;
+		const newHatId = hat();
+		treatment.treatment_id = newHatId;
+		const dsTreatments = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+		const newtreatmentlist = this.state.treatments;
+		newtreatmentlist.push(treatment);
+		this.setState({ treatmentslist: dsTreatments.cloneWithRows(newtreatmentlist), treatments: newtreatmentlist });
+	}
+
+	deleteTreatmentConfirmationAlert(treatment) {
 		Alert.alert(
 			'Treatment delete',
-			`Are you sure you want to delete the treatment ${this.state.treatment.title.toLowerCase()} for the appointment on ${this.state.appointment.date} at ${this.state.appointment.hour}:${this.state.appointment.minute}?`,
+			`Are you sure you want to delete the treatment ${treatment.title.toLowerCase()} for the appointment on ${this.state.appointment.date} at ${this.state.appointment.hour}:${this.state.appointment.minute}?`,
 			[
-				{ text: 'Yes', onPress: () => this.deleteTreatment(), style: 'cancel' },
+				{ text: 'Yes', onPress: () => this.deleteTreatment(treatment), style: 'cancel' },
 				{ text: 'No', onPress: () => console.log('cancel appointment delete'), style: 'cancel' }
 			],
 			{ cancelable: true }
 		);
 	}
 
-	async deleteTreatment() {
-		const treatmentDeleted = await DBCompanyConnection.remove(this.state.treatment);
-		this.setState({ treatment: '' });
+	async deleteTreatment(treatment) {
+		const dsTreatments = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+		for (let i = 0; i < this.state.treatments.length; i += 1) {
+			if (this.state.treatments[i].treatment_id === treatment.treatment_id) {
+				const index = this.state.treatments.indexOf(treatment);
+				this.state.treatments.splice(index, 1);
+			}
+		}
+		this.setState({ treatments: this.state.treatments, treatmentslist: dsTreatments.cloneWithRows(this.state.treatments) });
+		const treatmentDeleted = await DBCompanyConnection.remove(treatment);
 		this.deleteTreatmentAlert();
 	}
 
@@ -508,7 +557,8 @@ class AppointmentsInfo extends Component {
 		);
 	}
 
-	async saveTreatment() {
+	async saveTreatment(treatment) {
+		this.setState({ showspinner: true });
 		if (this.state.appointmentid === '') {
 			Alert.alert(
 				'Appointment info',
@@ -519,37 +569,37 @@ class AppointmentsInfo extends Component {
 				{ cancelable: true }
 			);
 		} else {
-			if (this.state.treatment._id === '') {
+			if (_.isEmpty(treatment._id)) {
 				const newtreatment = {};
 				newtreatment.doctype = 'treatment';
 				newtreatment.appointment_id = this.state.appointmentid;
 				newtreatment.contact_id = this.state.appointment.contact_id;
-				newtreatment.title = this.state.treatment.title;
-				const title = this.state.treatment.title.toLowerCase();
-				newtreatment.title = title.charAt(0).toUpperCase() + title.slice(1);
-				newtreatment.notes = this.state.treatment.notes;
+				newtreatment.employee_id = this.state.appointment.employee_id;
+				newtreatment.treatment_id = treatment.treatment_id;
+				newtreatment.notes = treatment.notes;
+				newtreatment.title = treatment.title;
+				newtreatment.title_id = treatment.title_id;
 				const savedtreatment = await DBCompanyConnection.post(newtreatment);
 				const newrev = savedtreatment.rev;
-				this.setState({ treatmentid: savedtreatment.id });
-				this.onChangeTextTreatment(newrev, '_rev');
-				this.saveTreatmentAlert('created');
+				const newid = savedtreatment.id;
+				this.onChangeTreatmentInfo(newrev, '_rev', newtreatment);
+				this.onChangeTreatmentInfo(newid, '_id', newtreatment);
+				this.saveTreatmentAlert('created', newtreatment);
+				this.setState({ showspinner: false });
 			} else {
-				this.state.treatment.contact_id = this.state.appointment.contact_id;
-				this.state.treatment.title = this.state.treatment.title.toLowerCase();
-				this.state.treatment.title = this.state.treatment.title.charAt(0).toUpperCase() + this.state.treatment.title.slice(1);
-				const updatedtreatment = await DBCompanyConnection.put(this.state.treatment);
+				const updatedtreatment = await DBCompanyConnection.put(treatment);
 				const newrev = updatedtreatment.rev;
-				this.setState({ treatmentid: updatedtreatment.id });
-				this.onChangeTextTreatment(newrev, '_rev');
-				this.saveTreatmentAlert('updated');
+				this.onChangeTreatmentInfo(newrev, '_rev', treatment);
+				this.saveTreatmentAlert('updated', treatment);
+				this.setState({ showspinner: false });
 			}
 		}
 	}
 
-	saveTreatmentAlert(saveText) {
+	saveTreatmentAlert(saveText, treatment) {
 		Alert.alert(
 			`Treatment ${saveText}`,
-			`The treatment ${this.state.treatment.title.toLowerCase()} for ${this.state.appointment.contact_name} on ${this.state.appointment.date} has been ${saveText}`,
+			`The treatment ${treatment.title.toLowerCase()} for ${this.state.appointment.contact_name} on ${this.state.appointment.date} has been ${saveText}`,
 			[
 				{ text: 'OK', onPress: () => console.log('treatment created/updated'), style: 'cancel' }
 			],
@@ -558,6 +608,7 @@ class AppointmentsInfo extends Component {
 	}
 
 	async saveImageAppointment(image) {
+		this.setState({ showspinner: true });
 		if (this.state.appointmentid === '') {
 			Alert.alert(
 				'Appointment info',
@@ -569,7 +620,6 @@ class AppointmentsInfo extends Component {
 			);
 		} else {
 			if (_.isEmpty(image._id)) {
-				console.log('crear');
 				const newimage = {};
 				newimage.doctype = 'images';
 				newimage.area = 'appointment';
@@ -580,31 +630,16 @@ class AppointmentsInfo extends Component {
 				const savedimage = await DBCompanyConnection.post(newimage);
 				const newrev = savedimage.rev;
 				const newid = savedimage.id;
-				console.log('newimage');
-				console.log(newimage);
 				this.onChangeTreatmentImagesInfo(newrev, '_rev', newimage);
 				this.onChangeTreatmentImagesInfo(newid, '_id', newimage);
 				this.saveImageAppointmentAlert('created');
-				// this.state.imageslist.push(newimage);
-				// this.setState({ imageslist: ds.cloneWithRows(this.state.imageslist), images: this.state.imageslist });
+				this.setState({ showspinner: false });
 			} else {
-				console.log('actualizar');
-				console.log('imageimageimageimageimage');
-				console.log(image);
-				// const queryAppointmentImage = { selector: { _id: image._id }, };
 				const updatedimage = await DBCompanyConnection.put(image);
-				// updatedimage.notes = image.notes;
-				console.log('updatedimage');
-				console.log(updatedimage);
-				// this.state.treatment.contact_id = this.state.appointment.contact_id;
-				// this.state.treatment.title = this.state.treatment.title.toLowerCase();
-				// this.state.treatment.title = this.state.treatment.title.charAt(0).toUpperCase() + this.state.treatment.title.slice(1);
-				// const savedimage = await DBCompanyConnection.put(appointmentimage);
 				const newrev = updatedimage.rev;
 				this.onChangeTreatmentImagesInfo(newrev, '_rev', image);
 				this.saveImageAppointmentAlert('updated');
-				// this.state.imageslist.push(newimage);
-				// this.setState({ imageslist: ds.cloneWithRows(this.state.imageslist), images: this.state.imageslist });
+				this.setState({ showspinner: false });
 			}
 		}
 	}
@@ -623,7 +658,7 @@ class AppointmentsInfo extends Component {
 	deleteImageTreatmentConfirmation(image) {
 		Alert.alert(
 			'Image treatment',
-			`Are you sure you want to delete the image on the treatment ${this.state.treatment.title.toLowerCase()} for ${this.state.appointment.contact_name} on ${this.state.appointment.date}?`,
+			`Are you sure you want to delete the image for ${this.state.appointment.contact_name} on ${this.state.appointment.date}?`,
 			[
 				{ text: 'Yes', onPress: () => this.deleteImageTreatment(image), style: 'cancel' },
 				{ text: 'No', onPress: () => console.log('cancel delete appointment image'), style: 'cancel' }
@@ -640,8 +675,6 @@ class AppointmentsInfo extends Component {
 				this.state.images.splice(index, 1);
 			}
 		}
-		console.log('this.state.images');
-		console.log(this.state.images);
 		this.setState({ images: this.state.images, imageslist: dsImages.cloneWithRows(this.state.images) });
 		const imageTreatmentDeleted = await DBCompanyConnection.remove(image);
 		this.deleteImageTreatmentConfirmationAlert();
@@ -688,7 +721,7 @@ class AppointmentsInfo extends Component {
 					onPress={() => { this.hideKeyboard(); }}
 					icon={<IconMaterial name="settings" size={28} color="white" />}
 				>
-					<ActionButton.Item buttonColor="#00b359" title="Save appointment" onPress={() => { this.saveAppointment(); }}>
+					<ActionButton.Item buttonColor="#8fbc8f" title="Save appointment" onPress={() => { this.saveAppointment(); }}>
 						<IconMaterial name="save" size={28} color="white" />
 					</ActionButton.Item>
 				</ActionButton>
@@ -706,10 +739,10 @@ class AppointmentsInfo extends Component {
 				onPress={() => { this.hideKeyboard(); }}
 				icon={<IconMaterial name="settings" size={28} color="white" />}
 			>
-				<ActionButton.Item buttonColor="#00b359" title="Update appointment" onPress={() => { this.saveAppointment(); }}>
+				<ActionButton.Item buttonColor="#8fbc8f" title="Update appointment" onPress={() => { this.saveAppointment(); }}>
 					<IconMaterial name="save" size={28} color="white" />
 				</ActionButton.Item>
-				<ActionButton.Item buttonColor="#ff4c4c" title="Delete appointment" onPress={() => { this.deleteAppointmentConfirmationAlert(); }}>
+				<ActionButton.Item buttonColor="#f08080" title="Delete appointment" onPress={() => { this.deleteAppointmentConfirmationAlert(); }}>
 					<IconMaterial name="delete" size={28} color="white" />
 				</ActionButton.Item>
 			</ActionButton>
@@ -717,25 +750,6 @@ class AppointmentsInfo extends Component {
 	}
 
 	treatmentButtons() {
-		if (this.state.treatmentid === '') {
-			return (
-				<ActionButton
-					size={40}
-					buttonColor="#9DBDF2"
-					offsetX={10}
-					offsetY={10}
-					ref={(btn) => {
-						this.floatingBtn = btn;
-					}}
-					onPress={() => { this.hideKeyboard(); }}
-					icon={<IconMaterial name="settings" size={28} color="white" />}
-				>
-				<ActionButton.Item buttonColor="#00b359" title="Save treatment" onPress={() => { this.saveTreatment(); }}>
-					<IconMaterial name="save" size={28} color="white" />
-				</ActionButton.Item>
-				</ActionButton>
-			);
-		}
 		return (
 			<ActionButton
 				size={40}
@@ -748,11 +762,8 @@ class AppointmentsInfo extends Component {
 				onPress={() => { this.hideKeyboard(); }}
 				icon={<IconMaterial name="settings" size={28} color="white" />}
 			>
-				<ActionButton.Item buttonColor="#00b359" title="Update treatment" onPress={() => { this.saveTreatment(); }}>
-					<IconMaterial name="save" size={28} color="white" />
-				</ActionButton.Item>
-				<ActionButton.Item buttonColor="#ff4c4c" title="Delete treatment" onPress={() => { this.deleteTreatmentConfirmationAlert(); }}>
-					<IconMaterial name="delete" size={28} color="white" />
+				<ActionButton.Item buttonColor="steelblue" title="Add treatment" onPress={() => { this.addTreatment(); }}>
+					<MaterialCommunityIcons name="plus" size={28} color="white" />
 				</ActionButton.Item>
 			</ActionButton>
 		);
@@ -768,6 +779,9 @@ class AppointmentsInfo extends Component {
 			const image = {};
 			image.uri = `data:${imageInfo.mime};base64,${imageInfo.data}`;
 			image.notes = '';
+			image.doctype = 'images';
+			image.area = 'appointment';
+			image.owner = this.state.appointmentid;
 			const newHatId = hat();
 			image.imageid = newHatId;
 			const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
@@ -796,6 +810,9 @@ class AppointmentsInfo extends Component {
 			const image = {};
 			image.uri = `data:${imageInfo.mime};base64,${imageInfo.data}`;
 			image.notes = '';
+			image.doctype = 'images';
+			image.area = 'appointment';
+			image.owner = this.state.appointmentid;
 			const newHatId = hat();
 			image.imageid = newHatId;
 			const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
@@ -812,6 +829,78 @@ class AppointmentsInfo extends Component {
 				{ cancelable: false }
 			);
 		});
+	}
+
+	renderRowTreatments(treatment) {
+		return (
+			<View
+				style={{
+					borderColor: 'steelblue',
+					borderBottomWidth: 0.5,
+					paddingBottom: 15,
+					paddingTop: 15
+				}}
+			>
+				<View
+					style={{
+						flex: 1,
+						flexDirection: 'row',
+						width: fullWidth,
+						paddingHorizontal: 12,
+					}}
+				>
+					<ModalPicker data={this.treatmentsList} label="Treatments" initValue={treatment.title} onChange={(option)=>{ this.onChangeTreatmentInfo(option, 'title', treatment); }} />
+				</View>
+				<View
+					style={{
+						flex: 1,
+						flexDirection: 'row',
+						paddingLeft: 12,
+						paddingRight: 12,
+					}}
+				>
+					<Text note
+						style={{
+							paddingLeft: 7,
+							color: '#666666'
+						}}
+					>Notes</Text>
+				</View>
+				<View
+					style={{
+						flex: 1,
+						flexDirection: 'row',
+						paddingLeft: 12,
+						paddingRight: 60,
+						paddingTop: 12,
+					}}
+				>
+					<Input
+						underlineColorAndroid={'transparent'}
+						autoCorrect={false}
+						multiline
+						numberOfLines={5}
+						returnKeyType="done"
+						style={{
+							backgroundColor: '#fff',
+							height: 80,
+							borderColor: '#C0C0C0',
+							borderWidth: 1,
+							borderRadius: 6,
+							color: '#424B4F',
+							width: fullWidth,
+							paddingVertical: 0,
+						}}
+						onChangeText={(text) => {
+							this.onChangeTreatmentInfo(text, 'notes', treatment);
+						}}
+						value={treatment.notes}
+					/>
+				</View>
+				<ActionButton size={40} icon={<IconMaterial name="save" size={28} color="white" />} buttonColor="#8fbc8f" offsetX={10} offsetY={60} onPress={() => { this.saveTreatment(treatment); }} />
+				{treatment._id && <ActionButton size={40} icon={<IconMaterial name="delete" size={28} color="white" />} buttonColor="#f08080" offsetX={10} offsetY={10} onPress={() => { this.deleteTreatmentConfirmationAlert(treatment); }} />}
+			</View>
+		);
 	}
 
 	renderRowImages(image) {
@@ -1233,139 +1322,25 @@ class AppointmentsInfo extends Component {
 						{this.appointmentButtons()}
 					</Tab>
 					<Tab heading={<TabHeading><Text style={{ fontSize: 12 }}>Treatment</Text></TabHeading>}>
+						<View style={{ padding: 10, borderColor: 'steelblue', borderBottomWidth: 2 }}>
+							<Text
+								style={{
+									fontWeight: 'bold',
+									justifyContent: 'center',
+									alignItems: 'center',
+									alignSelf: 'center'
+								}}
+							>
+								{this.state.appointment.date} - {this.state.appointment.contact_name}
+							</Text>
+						</View>
 						<Content>
 							{this.state.showspinner && <Spinner /> }
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									justifyContent: 'center',
-									paddingTop: 15
-								}}
-							>
-								<Text
-									style={{
-										fontWeight: 'bold',
-									}}
-								>
-									{this.state.appointment.date}
-								</Text>
-							</View>
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									justifyContent: 'center',
-									paddingTop: 15
-								}}
-							>
-								<Text
-									style={{
-										fontWeight: 'bold',
-										color: 'steelblue'
-									}}
-								>
-									{this.state.appointment.contact_name}
-								</Text>
-							</View>
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									paddingTop: 15,
-									paddingLeft: 12,
-									paddingRight: 12
-								}}
-							>
-								<Text
-									style={{
-										textDecorationLine: 'underline',
-								    textDecorationStyle: 'solid',
-								    textDecorationColor: 'steelblue',
-										color: 'steelblue'
-									}}
-									onPress={() => { this.treatmentListModalControl(); }}
-
-								>
-									Select previous treatment from a list
-								</Text>
-							</View>
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									paddingTop: 15,
-									paddingLeft: 12,
-									paddingRight: 12
-								}}
-							>
-								<Input
-									underlineColorAndroid={'transparent'}
-									autoCorrect={false}
-									maxLength={35}
-									returnKeyType="done"
-									style={{
-										backgroundColor: '#fff',
-										borderColor: '#C0C0C0',
-										borderWidth: 1,
-										borderRadius: 6,
-										color: '#424B4F',
-										width: fullWidth,
-										paddingVertical: 0
-									}}
-									onChangeText={(text) => {
-										this.onChangeTextTreatment(text, 'title');
-									}}
-									value={this.state.treatment.title}
-								/>
-							</View>
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									paddingLeft: 12,
-									paddingRight: 12,
-									paddingTop: 12,
-								}}
-							>
-								<Label
-									style={{
-										paddingTop: 12,
-										fontWeight: 'bold'
-									}}
-								>Treatment notes</Label>
-							</View>
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									paddingLeft: 12,
-									paddingRight: 12,
-									paddingTop: 12,
-								}}
-							>
-								<Input
-									underlineColorAndroid={'transparent'}
-									autoCorrect={false}
-									multiline
-									numberOfLines={10}
-									returnKeyType="done"
-									style={{
-										backgroundColor: '#fff',
-										height: 215,
-										borderColor: '#C0C0C0',
-										borderWidth: 1,
-										borderRadius: 6,
-										color: '#424B4F',
-										width: fullWidth,
-										paddingVertical: 0
-									}}
-									onChangeText={(text) => {
-										this.onChangeTextTreatment(text, 'notes');
-									}}
-									value={this.state.treatment.notes}
-								/>
-							</View>
+							<ListView
+								dataSource={this.state.treatmentslist}
+								enableEmptySections
+								renderRow={this.renderRowTreatments.bind(this)}
+							/>
 						<View style={{ height: 60 }} />
 						</Content>
 						{this.treatmentButtons()}

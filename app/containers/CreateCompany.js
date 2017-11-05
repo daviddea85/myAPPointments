@@ -242,7 +242,7 @@ class CreateCompany extends Component {
 					onPress={() => { Keyboard.dismiss(); }}
 					icon={<IconMaterial name="settings" size={28} color="white" />}
 				>
-					<ActionButton.Item buttonColor="#00b359" title="Create company" onPress={() => { this.checkIfCompanyExists(); }}>
+					<ActionButton.Item buttonColor="#8fbc8f" title="Create company" onPress={() => { this.checkIfCompanyExists(); }}>
 						<IconMaterial name="save" size={28} color="white" />
 					</ActionButton.Item>
 				</ActionButton>
@@ -260,10 +260,10 @@ class CreateCompany extends Component {
 				onPress={() => { Keyboard.dismiss(); }}
 				icon={<IconMaterial name="settings" size={28} color="white" />}
 			>
-				<ActionButton.Item buttonColor="#00b359" title="Save company" onPress={() => { this.createCompany(); }}>
+				<ActionButton.Item buttonColor="#8fbc8f" title="Save company" onPress={() => { this.createCompany(); }}>
 					<IconMaterial name="save" size={28} color="white" />
 				</ActionButton.Item>
-				<ActionButton.Item buttonColor="#ff4c4c" title="Delete company" onPress={() => { this.deleteCompany(); }}>
+				<ActionButton.Item buttonColor="#f08080" title="Delete company" onPress={() => { this.deleteCompany(); }}>
 					<IconMaterial name="delete" size={28} color="white" />
 				</ActionButton.Item>
 			</ActionButton>
