@@ -67,17 +67,11 @@ class ModalSide extends Component {
 	}
 
 	componentWillMount() {
-		console.log('modal componentWillMount');
 		AsyncStorage.getItem('companyDatabase').then((companyDatabaseValue) => {
 			if (companyDatabaseValue !== null) {
 				this.companyDatabase = companyDatabaseValue;
-				console.log('this.companyDatabase');
-				console.log(this.companyDatabase);
 				AsyncStorage.getItem('userLoggedId').then((userLoggedIdValue) => {
 					if (userLoggedIdValue !== null) {
-
-						console.log('this.state.settings.userid');
-						console.log(this.state.settings.userid);
 						if (this.state.settings.userid === '') {
 							const insettings = this.state.settings;
 							insettings['userid'] = userLoggedIdValue;
@@ -91,7 +85,6 @@ class ModalSide extends Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		console.log('modal receive props');
 		AsyncStorage.getItem('companyDatabase').then((companyDatabaseValue) => {
 			if (companyDatabaseValue !== null) {
 				this.companyDatabase = companyDatabaseValue;
@@ -213,6 +206,8 @@ class ModalSide extends Component {
 			AsyncStorage.setItem('accessType', '');
 			AsyncStorage.setItem('companyDatabase', '');
 			AsyncStorage.setItem('userLoggedEmail', '');
+			AsyncStorage.setItem('companyId', '');
+			AsyncStorage.setItem('companyName', '');
 			firebase.auth().signOut();
 			this.props.setModalState({ prop: 'modalConfigShow', value: false });
 			Actions.Login();

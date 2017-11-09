@@ -181,6 +181,7 @@ class GetCompanyList extends Component {
 			AsyncStorage.setItem('accessType', userInfo.docs[0].accessType);
 			AsyncStorage.setItem('companyName', member.memberCompanyName);
 			AsyncStorage.setItem('companyDatabase', member.databaseId);
+			AsyncStorage.setItem('companyId', member.companyId);
 			Actions.Appointments();
 		}
 	}
@@ -250,20 +251,20 @@ class GetCompanyList extends Component {
 		}
 	}
 
-	checkCompanyEditAccess(member) {
-		if (member.userCreated === this.userLoggedEmail) {
-			Actions.CreateCompany({ title: member.memberCompanyName, companyid: member.companyId });
-		} else {
-			Alert.alert(
-				'User access',
-				`The user ${member.userEmail} does not have access to modify the company information`,
-				[
-					{ text: 'Ok', onPress: () => this.getCompanyList(), style: 'cancel' },
-				],
-				{ cancelable: false }
-			);
-		}
-	}
+	// checkCompanyEditAccess(member) {
+	// 	if (member.userCreated === this.userLoggedEmail) {
+	// 		Actions.CreateCompany({ title: member.memberCompanyName, companyid: member.companyId });
+	// 	} else {
+	// 		Alert.alert(
+	// 			'User access',
+	// 			`The user ${member.userEmail} does not have access to modify the company information`,
+	// 			[
+	// 				{ text: 'Ok', onPress: () => this.getCompanyList(), style: 'cancel' },
+	// 			],
+	// 			{ cancelable: false }
+	// 		);
+	// 	}
+	// }
 
 	renderRow(member) {
 		if (member !== null) {
@@ -271,7 +272,7 @@ class GetCompanyList extends Component {
 				<ListItem
 					style={{ height: 70, backgroundColor: 'white' }}
 					button
-					onLongPress={() => { this.checkCompanyEditAccess(member); }}
+					/* onLongPress={() => { this.checkCompanyEditAccess(member); }} */
 					iconRight
 				>
 					<Text

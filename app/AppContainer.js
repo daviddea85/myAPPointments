@@ -22,6 +22,7 @@ import Contacts from './containers/Contacts';
 import ContactInfo from './containers/ContactInfo';
 import Alerts from './containers/Alerts';
 import More from './containers/More';
+import UserProfile from './containers/UserProfile';
 
 import AppointmentsEmployeesList from './containers/AppointmentsEmployeesList';
 
@@ -74,6 +75,7 @@ class AppContainer extends Component {
 					<Scene key="ContactInfo" component={ContactInfo} hideNavBar={false} title="Contact info" />
 					<Scene key="Alerts" component={Alerts} hideNavBar={false} title="Alerts" type={ActionConst.REPLACE} renderBackButton={()=>(null)} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
 					<Scene key="More" component={More} hideNavBar={false} title="More" type={ActionConst.REPLACE} renderBackButton={()=>(null)} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
+					<Scene key="UserProfile" component={UserProfile} hideNavBar={false} title="User profile" />
 				</Scene>
 			</Router>
 		);

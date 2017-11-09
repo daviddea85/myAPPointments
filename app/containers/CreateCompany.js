@@ -36,7 +36,8 @@ class CreateCompany extends Component {
 				alias: '',
 				accessType: 'admin',
 				role: 'chief',
-				telephone: ''
+				telephone: '',
+				shareProfile: false
 			},
 			company: {
 				doctype: 'company',

@@ -27,6 +27,7 @@ class LoginForm extends Component {
 				email: '',
 				name: '',
 				accessType: '',
+				shareProfile: false,
 			},
 		};
 	}

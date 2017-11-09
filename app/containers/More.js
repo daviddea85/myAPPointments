@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { AsyncStorage, Platform, TouchableOpacity, Image, View, Dimensions } from 'react-native';
+import { AsyncStorage, Platform, TouchableOpacity, Image, View, Dimensions, Alert } from 'react-native';
 import {
 	StyleProvider,
 	Container,
@@ -21,20 +21,35 @@ class More extends Component {
 			active: false
 		};
 		this.userLoggedEmail = '';
+		this.companyId = '';
+		this.companyName = '';
+		this.accessType = '';
 	}
 
 	componentWillMount() {
 		AsyncStorage.getItem('userLoggedEmail').then((userLoggedEmailValue) => {
 			if (userLoggedEmailValue !== null) {
 				this.userLoggedEmail = userLoggedEmailValue;
-				// this.connectAppPouchDb(true);
-				console.log('this.userLoggedEmail');
-				console.log(this.userLoggedEmail);
+			}
+		});
+		AsyncStorage.getItem('companyId').then((companyIdValue) => {
+			if (companyIdValue !== null) {
+				this.companyId = companyIdValue;
+			}
+		});
+		AsyncStorage.getItem('companyName').then((companyNameValue) => {
+			if (companyNameValue !== null) {
+				this.companyName = companyNameValue;
+			}
+		});
+		AsyncStorage.getItem('accessType').then((accessTypeValue) => {
+			if (accessTypeValue !== null) {
+				this.accessType = accessTypeValue;
 			}
 		});
 	}
 
-	componentDidMount() { }
+	componentDidMount() {}
 
 	componentWillReceiveProps() {}
 
@@ -42,25 +57,33 @@ class More extends Component {
 
 	componentWillUnmount() {}
 
-	usersManagement() {
+	usersManagement() {}
+	
+	rolesManagement() {}
 
-	}
-
-	useProfile() {
-
+	userProfile() {
+		Actions.UserProfile({ title: 'User profile' });
 	}
 
 	companyInformation() {
-
+		if (this.accessType === 'admin') {
+			Actions.CreateCompany({ title: this.companyName, companyid: this.companyId });
+		} else {
+			Alert.alert(
+				'User access',
+				`The user ${this.userLoggedEmail} does not have access to modify the company information`,
+				[
+					{ text: 'Ok', onPress: () => console.log('permission to modify company information denied'), style: 'cancel' },
+				],
+				{ cancelable: false }
+			);
+		}
+		
 	}
 
-	treatmentsManagement() {
+	treatmentsManagement() {}
 
-	}
-
-	reportsList() {
-
-	}
+	reportsList() {}
 
 	render() {
 		return (
@@ -93,7 +116,34 @@ class More extends Component {
 							/>
 						</View>
 					</TouchableOpacity>
-					<TouchableOpacity style={{ marginLeft: 5, marginRight: 5 }} onPress={() => { this.useProfile(); }}>
+					<TouchableOpacity style={{ marginLeft: 5, marginRight: 5 }} onPress={() => { this.rolesManagement(); }}>
+						<View
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								height: 50,
+								borderColor: '#E8E8E8',
+								borderRadius: 5,
+								borderWidth: 2,
+								backgroundColor: 'white'
+							}}
+						>
+							<Text style={{ marginTop: 12.5, marginLeft: 12, flex: 0.8 }}>Roles management</Text>
+							<MaterialCommunityIcons
+								name="chevron-right"
+								style={{
+									fontSize: 30,
+									height: 40,
+									color: '#9b9cb1',
+									position: 'absolute',
+									top: 7.5,
+									right: 10,
+									backgroundColor: 'transparent'
+								}}
+							/>
+						</View>
+					</TouchableOpacity>
+					<TouchableOpacity style={{ marginLeft: 5, marginRight: 5 }} onPress={() => { this.userProfile(); }}>
 						<View
 							style={{
 								flex: 1,
