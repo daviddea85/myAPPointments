@@ -20,6 +20,7 @@ class More extends Component {
 			showspinner: false,
 			active: false
 		};
+		this.userLoggedId = '';
 		this.userLoggedEmail = '';
 		this.companyId = '';
 		this.companyName = '';
@@ -27,6 +28,11 @@ class More extends Component {
 	}
 
 	componentWillMount() {
+		AsyncStorage.getItem('userLoggedId').then((userLoggedIdValue) => {
+			if (userLoggedIdValue !== null) {
+				this.userLoggedId = userLoggedIdValue;
+			}
+		});
 		AsyncStorage.getItem('userLoggedEmail').then((userLoggedEmailValue) => {
 			if (userLoggedEmailValue !== null) {
 				this.userLoggedEmail = userLoggedEmailValue;
@@ -57,12 +63,25 @@ class More extends Component {
 
 	componentWillUnmount() {}
 
-	usersManagement() {}
+	usersManagement() {
+		if (this.accessType === 'admin') {
+			Actions.UsersManagement({ title: 'Users management' });
+		} else {
+			Alert.alert(
+				'User access',
+				`The user ${this.userLoggedEmail} does not have access to the area, please contact your administrator`,
+				[
+					{ text: 'Ok', onPress: () => console.log('permission access to users management denied'), style: 'cancel' },
+				],
+				{ cancelable: false }
+			);
+		}
+	}
 	
 	rolesManagement() {}
 
 	userProfile() {
-		Actions.UserProfile({ title: 'User profile' });
+		Actions.UserProfileInformation({ title: 'User profile', area: 'profile', userid: this.userLoggedId });
 	}
 
 	companyInformation() {

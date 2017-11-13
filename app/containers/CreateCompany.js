@@ -59,7 +59,7 @@ class CreateCompany extends Component {
 				doctype: 'invites',
 				databaseId: '',
 				companyId: '',
-				memberStatus: 'member',
+				inviteStatus: 'member',
 				userEmail: ''
 			}
 		};
@@ -147,8 +147,6 @@ class CreateCompany extends Component {
 	}
 
 	async checkIfCompanyExists() {
-		console.log('this.companyDatabasethis.companyDatabasethis.companyDatabase');
-		console.log(this.companyDatabase);
 		const query = { selector: { doctype: 'company', databaseId: this.companyDatabase, companyName: this.state.company.name }, };
 		const companyExists = await DBAppointmentsConnection.find(query);
 		if (companyExists.docs.length > 0) {

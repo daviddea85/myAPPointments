@@ -138,7 +138,7 @@ class GetCompanyList extends Component {
 	}
 
 	async joinPending(pending) {
-		pending.memberStatus = 'member';
+		pending.inviteStatus = 'member';
 		await DBAppConnection.post(pending);
 		this.getCompanyList();
 	}
@@ -156,7 +156,7 @@ class GetCompanyList extends Component {
 	}
 
 	async rejectPending(pending) {
-		pending.memberStatus = 'rejected';
+		pending.inviteStatus = 'rejected';
 		await DBAppConnection.post(pending);
 		this.getCompanyList();
 	}
@@ -205,14 +205,14 @@ class GetCompanyList extends Component {
 	}
 
 	async leaveMember(member) {
-		member.memberStatus = 'pending';
+		member.inviteStatus = 'pending';
 		await DBAppConnection.post(member);
 		this.connectAppPouchDb(true);
 	}
 
 	async showMembers() {
 		// members of
-		const queryMember = { selector: { doctype: 'invites', userEmail: this.userLoggedEmail, memberStatus: 'member' }, };
+		const queryMember = { selector: { doctype: 'invites', userEmail: this.userLoggedEmail, inviteStatus: 'member' }, };
 		const companyMember = await DBAppConnection.find(queryMember);
 		const dsMembers = new ListView.DataSource({
 			rowHasChanged: (r1, r2) => r1 !== r2
@@ -233,7 +233,7 @@ class GetCompanyList extends Component {
 
 	async showPendings() {
 		// pendings
-		const queryPendings = { selector: { doctype: 'invites', userEmail: this.userLoggedEmail, memberStatus: 'pending' }, };
+		const queryPendings = { selector: { doctype: 'invites', userEmail: this.userLoggedEmail, inviteStatus: 'pending' }, };
 		const companyPending = await DBAppConnection.find(queryPendings);
 		const dsPendings = new ListView.DataSource({
 			rowHasChanged: (r1, r2) => r1 !== r2
@@ -251,28 +251,12 @@ class GetCompanyList extends Component {
 		}
 	}
 
-	// checkCompanyEditAccess(member) {
-	// 	if (member.userCreated === this.userLoggedEmail) {
-	// 		Actions.CreateCompany({ title: member.memberCompanyName, companyid: member.companyId });
-	// 	} else {
-	// 		Alert.alert(
-	// 			'User access',
-	// 			`The user ${member.userEmail} does not have access to modify the company information`,
-	// 			[
-	// 				{ text: 'Ok', onPress: () => this.getCompanyList(), style: 'cancel' },
-	// 			],
-	// 			{ cancelable: false }
-	// 		);
-	// 	}
-	// }
-
 	renderRow(member) {
 		if (member !== null) {
 			return (
 				<ListItem
 					style={{ height: 70, backgroundColor: 'white' }}
 					button
-					/* onLongPress={() => { this.checkCompanyEditAccess(member); }} */
 					iconRight
 				>
 					<Text

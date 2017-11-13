@@ -22,13 +22,15 @@ import Contacts from './containers/Contacts';
 import ContactInfo from './containers/ContactInfo';
 import Alerts from './containers/Alerts';
 import More from './containers/More';
-import UserProfile from './containers/UserProfile';
+import UserProfileInformation from './containers/UserProfileInformation';
 
 import AppointmentsEmployeesList from './containers/AppointmentsEmployeesList';
 
 import LoginForm from './containers/LoginForm';
 import CompanyList from './containers/CompanyList';
 import CreateCompany from './containers/CreateCompany';
+
+import UsersManagement from './containers/UsersManagement';
 
 import FirebaseApp from './lib/firebaseData';
 
@@ -75,7 +77,8 @@ class AppContainer extends Component {
 					<Scene key="ContactInfo" component={ContactInfo} hideNavBar={false} title="Contact info" />
 					<Scene key="Alerts" component={Alerts} hideNavBar={false} title="Alerts" type={ActionConst.REPLACE} renderBackButton={()=>(null)} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
 					<Scene key="More" component={More} hideNavBar={false} title="More" type={ActionConst.REPLACE} renderBackButton={()=>(null)} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
-					<Scene key="UserProfile" component={UserProfile} hideNavBar={false} title="User profile" />
+					<Scene key="UsersManagement" component={UsersManagement} hideNavBar={false} title="Users management" />
+					<Scene key="UserProfileInformation" component={UserProfileInformation} hideNavBar={false} title="User profile" />
 				</Scene>
 			</Router>
 		);
