@@ -6,6 +6,8 @@ import { Actions } from 'react-native-router-flux';
 import { ListView, Alert, AsyncStorage, Platform, Dimensions, Text } from 'react-native';
 import ActionButton from 'react-native-action-button';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
+import IconMaterial from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Body, Container, Content, ListItem, Header, Button, Title, View } from 'native-base';
 
 let DBCompanyConnection = null;
@@ -254,55 +256,34 @@ class GetCompanyList extends Component {
 	renderRow(member) {
 		if (member !== null) {
 			return (
-				<ListItem
-					style={{ height: 70, backgroundColor: 'white' }}
-					button
-					iconRight
+				<View
+					style={{
+						flex: 1,
+						flexDirection: 'row',
+						borderBottomWidth: 1,
+						borderColor: '#d7d7d6',
+						height: 65,
+					}}
 				>
 					<Text
-						style={{ color: 'black',
-							fontFamily: 'Arial', }}
-					>
-					{member.memberCompanyName}
-					</Text>
-					<View
 						style={{
-							position: 'absolute',
-							right: 80
+							paddingTop: 25,
+							marginLeft: 12,
+							marginRight: 15,
+							flex: 0.6
 						}}
-					>
-						<SimpleLineIcons
-							name="direction"
-							size={24}
-							color="green"
-							onPress={() => { this.loadMemberConfirmation(member); }}
-						/>
-						<Text
+					>{member.memberCompanyName}</Text>
+						<View
 							style={{
-								fontSize: 12,
+								flex: 0.4,
+								marginBottom: 5,
+								flexDirection: 'row',
 							}}
-						>Load</Text>
-					</View>
-					<View
-						style={{
-							position: 'absolute',
-							right: 20
-						}}
-					>
-						<SimpleLineIcons
-							name="rocket"
-							size={24}
-							color="red"
-							onPress={() => { this.leaveMemberConfirmation(member); }}
-						/>
-						<Text
-							style={{
-								fontSize: 12,
-								right: 6
-							}}
-						>Leave</Text>
-					</View>
-				</ListItem>
+						>
+							<ActionButton size={40} icon={<MaterialCommunityIcons name="account-key" size={28} color="white" />} buttonColor="#8fbc8f" offsetX={10} offsetY={10} onPress={() => { this.loadMemberConfirmation(member); }} />
+							<ActionButton size={40} icon={<MaterialCommunityIcons name="account-off" size={28} color="white" />} buttonColor="#f08080" offsetX={65} offsetY={10} onPress={() => { this.loadMemberConfirmation(member); }} />
+						</View>
+				</View>
 			);
 		}
 		return (null);
@@ -311,53 +292,34 @@ class GetCompanyList extends Component {
 	renderRowPendings(pending) {
 		if (pending !== null) {
 			return (
-				<ListItem
-					style={{ height: 70, backgroundColor: 'white' }}
+				<View
+					style={{
+						flex: 1,
+						flexDirection: 'row',
+						borderBottomWidth: 1,
+						borderColor: '#d7d7d6',
+						height: 65,
+					}}
 				>
 					<Text
-						style={{ color: 'black',
-							fontFamily: 'Arial', }}
-					>
-						{pending.pendingCompanyName}
-					</Text>
-					<View
 						style={{
-							position: 'absolute',
-							right: 80
+							paddingTop: 25,
+							marginLeft: 12,
+							marginRight: 15,
+							flex: 0.6
 						}}
-					>
-						<SimpleLineIcons
-							name="user-follow"
-							size={24}
-							color="green"
-							onPress={() => { this.joinPendingConfirmation(pending); }}
-						/>
-						<Text
+					>{pending.pendingCompanyName}</Text>
+						<View
 							style={{
-								fontSize: 12,
+								flex: 0.4,
+								marginBottom: 5,
+								flexDirection: 'row',
 							}}
-						>Join</Text>
-					</View>
-					<View
-						style={{
-							position: 'absolute',
-							right: 20
-						}}
-					>
-						<SimpleLineIcons
-							name="trash"
-							size={24}
-							color="red"
-							onPress={() => { this.rejectPendingConfirmation(pending); }}
-						/>
-						<Text
-							style={{
-								fontSize: 12,
-								right: 6
-							}}
-						>Reject</Text>
-					</View>
-				</ListItem>
+						>
+							<ActionButton size={40} icon={<MaterialCommunityIcons name="account-plus" size={28} color="white" />} buttonColor="#8fbc8f" offsetX={10} offsetY={10} onPress={() => { this.joinPendingConfirmation(pending); }} />
+							<ActionButton size={40} icon={<MaterialCommunityIcons name="account-remove" size={28} color="white" />} buttonColor="#f08080" offsetX={65} offsetY={10} onPress={() => { this.rejectPendingConfirmation(pending); }} />
+						</View>
+				</View>
 			);
 		}
 		return (null);

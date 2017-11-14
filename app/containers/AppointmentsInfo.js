@@ -387,13 +387,13 @@ class AppointmentsInfo extends Component {
 			if (appointmentInfo.docs.length > 0) {
 				const queryContact = { selector: { doctype: 'contact', _id: appointmentInfo.docs[0].contact_id }, };
 				const contactInfo = await DBCompanyConnection.find(queryContact);
-				appointmentInfo.docs[0].contact_name = 'Missing contact name';
+				appointmentInfo.docs[0].contact_name = 'Missing contact';
 				if (contactInfo.docs.length > 0) {
 					appointmentInfo.docs[0].contact_name = contactInfo.docs[0].givenName +' '+contactInfo.docs[0].familyName;
 				}
 				const queryEmployee = { selector: { doctype: 'user', _id: appointmentInfo.docs[0].employee_id }, };
 				const employeeInfo = await DBCompanyConnection.find(queryEmployee);
-				appointmentInfo.docs[0].employee_alias = 'Missing employee alias';
+				appointmentInfo.docs[0].employee_alias = 'Missing employee';
 				if (employeeInfo.docs.length > 0) {
 					appointmentInfo.docs[0].employee_alias = employeeInfo.docs[0].alias;
 					if (employeeInfo.docs[0].alias === '') {

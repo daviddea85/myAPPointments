@@ -140,7 +140,7 @@ class Appointments extends Component {
 			for (let i = 0; i < appointmentsList.docs.length; i += 1) {
 				const queryContact = { selector: { doctype: 'contact', _id: appointmentsList.docs[i].contact_id }, };
 				const contactInfo = await DBCompanyConnection.find(queryContact);
-				appointmentsList.docs[i].contact_name = 'Missing contact name';
+				appointmentsList.docs[i].contact_name = 'Missing contact';
 				if (contactInfo.docs.length > 0) {
 					appointmentsList.docs[i].contact_name = contactInfo.docs[0].givenName +' '+ contactInfo.docs[0].familyName;
 					if (contactInfo.docs[0].phoneNumbers.length > 0) {
@@ -154,8 +154,8 @@ class Appointments extends Component {
 				if (appointmentsList.docs[i].employee_id !== '') {
 					const queryEmployee = { selector: { doctype: 'user', _id: appointmentsList.docs[i].employee_id }, };
 					const employeeInfo = await DBCompanyConnection.find(queryEmployee);
-					appointmentsList.docs[i].employee_alias = 'Missing employee alias';
-					if (contactInfo.docs.length > 0) {
+					appointmentsList.docs[i].employee_alias = 'Missing employee';
+					if (employeeInfo.docs.length > 0) {
 						appointmentsList.docs[i].employee_alias = employeeInfo.docs[0].alias;
 						if (employeeInfo.docs[0].alias === '') {
 							appointmentsList.docs[i].employee_alias = employeeInfo.docs[0].name;
