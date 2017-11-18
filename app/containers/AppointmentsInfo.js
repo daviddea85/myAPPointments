@@ -35,7 +35,9 @@ import TextField from '../containers/common/TextField';
 import ModalPicker from './common/ModalPicker';
 import moment from 'moment';
 
-const fullWidth = Dimensions.get('window').width;
+const fullWidth = Dimensions.get('window').width; // full width
+const fullHeight = Dimensions.get('window').height; // full height
+
 const hat = require('hat');
 
 PouchDB.plugin(require('pouchdb-find'));
@@ -65,6 +67,7 @@ class AppointmentsInfo extends Component {
 		});
 		this.state = {
 			showspinner: false,
+			showspinnertext: 'Loading appointment info, please wait',
 			appointmentid: this.props.appointmentid || '',
 			appointment: {
 				_id: '',
@@ -106,14 +109,20 @@ class AppointmentsInfo extends Component {
 		this.renderRowEmails = this.renderRowEmails.bind(this);
 		this.companyDatabase = '';
 		this.currentTab = this.props.currentTab || 0;
+		this.userLoggedId = '';
 	}
 
 	componentWillMount() {
 		AsyncStorage.getItem('companyDatabase').then((companyDatabaseValue) => {
 			if (companyDatabaseValue !== null) {
 				this.companyDatabase = companyDatabaseValue;
-				this.connectCompanyDb(true);
-				this._tabs.goToPage(this.currentTab);
+				AsyncStorage.getItem('userLoggedId').then((userLoggedIdValue) => {
+					if (userLoggedIdValue !== null) {
+						this.userLoggedId = userLoggedIdValue;
+						this.connectCompanyDb(true);
+						this._tabs.goToPage(this.currentTab);
+					}
+				});
 			}
 		});
 	}
@@ -220,8 +229,18 @@ class AppointmentsInfo extends Component {
 		const dsAdresses = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 		const dsTelephones = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 		const dsEmails = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
-		const queryContact = { selector: { doctype: 'contact' }, };
-		const contactInfo = await DBCompanyConnection.find(queryContact);
+		this.queryContacts = {
+			'selector': {
+				'doctype': 'contact',
+				'$or': [
+					{ 'shareimportedcontacts': { '$eq': true }},
+					{ 'sharecreatedcontacts': { '$eq': true }},
+					{ 'userid': { '$eq': this.userLoggedId }},
+				]
+			},
+			'fields': []
+		};
+		const contactInfo = await DBCompanyConnection.find(this.queryContacts);
 		this.contactsList = [];
 		if (contactInfo.docs.length > 0) {
 			for (let e = 0; e < contactInfo.docs.length; e += 1) {
@@ -790,10 +809,10 @@ class AppointmentsInfo extends Component {
 			this.setState({ imageslist: ds.cloneWithRows(newimage), images: newimage });
 		}).catch('error', (error) => {
 			Alert.alert(
-				'Image Upload Error',
+				'Image selected error',
 				error.message,
 				[
-					{ text: 'Ok', onPress: () => console.log('error upload image'), style: 'cancel' },
+					{ text: 'Ok', onPress: () => console.log('error select image'), style: 'cancel' },
 				],
 				{ cancelable: false }
 			);
@@ -821,7 +840,7 @@ class AppointmentsInfo extends Component {
 			this.setState({ imageslist: ds.cloneWithRows(newimage), images: newimage });
 		}).catch('error', (error) => {
 			Alert.alert(
-				'Image Upload Error',
+				'Image upload error',
 				error.message,
 				[
 					{ text: 'Ok', onPress: () => console.log('error upload image'), style: 'cancel' },
@@ -925,12 +944,11 @@ class AppointmentsInfo extends Component {
 						<Image style={{ width: 100, height: 120 }} source={{ uri: image.uri }} />
 						</View>
 					</Body>			
-					<Body style={{ flex: 0.7 }}>
+					<Body style={{ flex: 0.7, flexDirection: 'row' }}>
 						<View
 							style={{
-								flex: 1,
+								flex: 0.7,
 								flexDirection: 'row',
-								paddingRight: 12,
 								paddingTop: 3,
 							}}
 						>
@@ -943,7 +961,7 @@ class AppointmentsInfo extends Component {
 								returnKeyType="done"
 								style={{
 									backgroundColor: '#fff',
-									height: 80,
+									height: 120,
 									borderColor: '#C0C0C0',
 									borderWidth: 1,
 									borderRadius: 6,
@@ -956,49 +974,10 @@ class AppointmentsInfo extends Component {
 								}}
 								value={image.notes}
 							/>
-						</View>
-						<View
-							style={{
-								flex: 1,
-								flexDirection: 'row',
-								paddingRight: 12,
-								paddingTop: 3,
-							}}
-						>
-							<Button
-								success
-								small
-								rounded
-								onPress={() =>
-									{
-									this.saveImageAppointment(image);
-								}}
-								style={{
-									marginLeft: 12,
-									width: 80,
-									justifyContent: 'center',
-								}}
-							>
-								<Text>Save</Text>
-							</Button>
-							{image._id &&
-							<Button
-								danger
-								small
-								rounded
-								onPress={() =>
-									{
-									this.deleteImageTreatmentConfirmation(image);
-								}}
-								style={{
-									marginLeft: 12,
-									width: 80,
-									justifyContent: 'center',
-								}}
-							>
-								<Text>Delete</Text>
-							</Button>
-							}
+							<View style={{ flex: 0.3 }}>
+								<ActionButton size={40} icon={<IconMaterial name="save" size={28} color="white" />} buttonColor="#8fbc8f" offsetX={10} offsetY={58} onPress={() => { this.saveImageAppointment(image); }} />
+								{image._id && <ActionButton size={40} icon={<IconMaterial name="delete" size={28} color="white" />} buttonColor="#f08080" offsetX={10} offsetY={5} onPress={() => { this.deleteImageTreatmentConfirmation(image); }} />}
+							</View>
 						</View>
 					</Body>
 				</View>
@@ -1010,7 +989,7 @@ class AppointmentsInfo extends Component {
 		address.label = address.label.charAt(0).toUpperCase() + address.label.slice(1);
 		if (_.isEmpty(address) !== true) {
 			return (
-				<ListItem>
+				<ListItem style={{ borderColor: 'transparent' }}>
 					<View
 						style={{
 							flex: 1,
@@ -1018,30 +997,13 @@ class AppointmentsInfo extends Component {
 						}}
 					>
 						<Body style={{ flex: 1 }}>
-							{address.label !== '' &&
-							<Label>
-								{address.label}
-								<Text
-									style={{
-										color: '#AEB1B7'
-									}}
-								>
-									&nbsp;{address.address}
-								</Text>
-							</Label>
-							}
-							{address.label === '' &&
-							<Label>
-								Address
-								<Text
-									style={{
-										color: '#AEB1B7'
-									}}
-								>
-									&nbsp;{address.address}
-								</Text>
-							</Label>
-							}
+							<Text note style={{ color: 'black' }}>{address.label}</Text>
+							<Text note>Street: {address.street}</Text>
+							<Text note>Postcode: {address.postCode}</Text>
+							<Text note>Region: {address.region}</Text>
+							<Text note>City: {address.city}</Text>
+							<Text note>State: {address.state}</Text>
+							<Text note>Country: {address.country}</Text>
 						</Body>
 					</View>
 				</ListItem>
@@ -1054,7 +1016,7 @@ class AppointmentsInfo extends Component {
 		if (_.isEmpty(telephone) !== true) {
 			telephone.label = telephone.label.charAt(0).toUpperCase() + telephone.label.slice(1);
 			return (
-				<ListItem>
+				<ListItem style={{ borderColor: 'transparent' }}>
 					<View
 						style={{
 							flex: 1,
@@ -1062,30 +1024,8 @@ class AppointmentsInfo extends Component {
 						}}
 					>
 						<Body style={{ flex: 1 }}>
-							{telephone.label !== '' &&
-								<Label>
-									{telephone.label}
-									<Text
-										style={{
-											color: '#AEB1B7'
-										}}
-									>
-										&nbsp;{telephone.number}
-									</Text>
-								</Label>
-							}
-							{telephone.label === '' &&
-								<Label>
-									Telephone
-									<Text
-										style={{
-											color: '#AEB1B7'
-										}}
-									>
-										&nbsp;{telephone.number}
-									</Text>
-								</Label>
-							}
+							<Text note style={{ color: 'black' }}>{telephone.label}</Text>
+							<Text note>Number: {telephone.number}</Text>
 						</Body>
 					</View>
 				</ListItem>
@@ -1098,7 +1038,7 @@ class AppointmentsInfo extends Component {
 		if (_.isEmpty(email) !== true) {
 			email.label = email.label.charAt(0).toUpperCase() + email.label.slice(1);
 			return (
-				<ListItem>
+				<ListItem style={{ borderColor: 'transparent' }}>
 					<View
 						style={{
 							flex: 1,
@@ -1106,30 +1046,8 @@ class AppointmentsInfo extends Component {
 						}}
 					>
 						<Body style={{ flex: 1 }}>
-							{email.label !== '' &&
-								<Label>
-									{email.label}
-									<Text
-										style={{
-											color: '#AEB1B7'
-										}}
-									>
-										&nbsp;{email.email}
-									</Text>
-								</Label>
-							}
-							{email.label === '' &&
-								<Label>
-									Email
-									<Text
-										style={{
-											color: '#AEB1B7'
-										}}
-									>
-										&nbsp;{email.email}
-									</Text>
-								</Label>
-							}
+							<Text note style={{ color: 'black' }}>{email.label}</Text>
+							<Text note>Email: {email.email}</Text>
 						</Body>
 					</View>
 				</ListItem>
@@ -1144,184 +1062,207 @@ class AppointmentsInfo extends Component {
 				<Tabs initialPage={this.currentTab} ref={(c) => { this._tabs = c; }}>
 					<Tab heading={<TabHeading><Text style={{ fontSize: 12 }}>Appointment</Text></TabHeading>}>
 						<Content>
-							{this.state.showspinner && <Spinner /> }
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									justifyContent: 'center',
-								}}
-							>
-								<DatePicker
-									date={this.state.appointment.date}
-									mode="date"
-									placeholder="Select date"
-									format="DD-MM-YYYY"
-									confirmBtnText="Ok"
-									cancelBtnText="Cancel"
-									customStyles={{
-										dateIcon: {
+							{this.state.showspinner &&
+								<View
+									style={{
+										backgroundColor: 'white',
+										justifyContent: 'center',
+										marginTop: fullHeight / 4,
+									}}
+								>
+									<Spinner />
+									<Text
+										style={{
+											justifyContent: 'center',
 											alignItems: 'center',
-											alignSelf: 'center'
-										},
-										dateInput: {
-											height: 40,
-											borderColor: 'transparent',
-											backgroundColor: 'white'
-										}
-									}}
-									onDateChange={(date) => {
-										this.onChangeText(date, 'date');
-									}}
-								/>
-							</View>
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									justifyContent: 'center',
-									paddingLeft: 40,
-									paddingRight: 40,
-								}}
-							>
-								<IconMaterial
-									name="access-time"
-									size={20}
+											alignSelf: 'center',
+											fontWeight: 'bold',
+										}}
+									>{this.state.showspinnertext}</Text>
+								</View>
+							}
+							{this.state.showspinner === false &&
+							<View>
+								<View
 									style={{
-										paddingTop: 25
-									}}
-								/>
-								<Label
-									style={{
-										paddingLeft: 12,
-										paddingRight: 12,
-										fontWeight: 'bold',
-										alignItems: 'center',
-										alignSelf: 'center',
+										flex: 1,
+										flexDirection: 'row',
+										justifyContent: 'center',
 									}}
 								>
-									Hour
-								</Label>
-								<ModalPicker data={this.hoursList} label="" initValue={this.state.appointment.hour} onChange={(option)=>{ this.onChangeText(option, 'hour'); }} />
-								<Label
+									<DatePicker
+										date={this.state.appointment.date}
+										mode="date"
+										placeholder="Select date"
+										format="DD-MM-YYYY"
+										confirmBtnText="Ok"
+										cancelBtnText="Cancel"
+										customStyles={{
+											dateIcon: {
+												alignItems: 'center',
+												alignSelf: 'center'
+											},
+											dateInput: {
+												height: 40,
+												borderColor: 'transparent',
+												backgroundColor: 'white'
+											}
+										}}
+										onDateChange={(date) => {
+											this.onChangeText(date, 'date');
+										}}
+									/>
+								</View>
+								<View
 									style={{
-										paddingLeft: 12,
-										paddingRight: 12,
-										fontWeight: 'bold',
-										alignItems: 'center',
-										alignSelf: 'center',
+										flex: 1,
+										flexDirection: 'row',
+										justifyContent: 'center',
+										paddingLeft: 40,
+										paddingRight: 40,
 									}}
 								>
-									Minute
-								</Label>
-								<ModalPicker data={this.minutesList} label="" initValue={this.state.appointment.minute} onChange={(option)=>{ this.onChangeText(option, 'minute'); }} />
-							</View>
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									paddingLeft: 12,
-									paddingRight: 12,
-									width: fullWidth
-								}}
-							>
-								<IconMaterial
-									name="perm-identity"
-									size={20}
+									<IconMaterial
+										name="access-time"
+										size={20}
+										style={{
+											paddingTop: 25
+										}}
+									/>
+									<Label
+										style={{
+											paddingLeft: 12,
+											paddingRight: 12,
+											fontWeight: 'bold',
+											alignItems: 'center',
+											alignSelf: 'center',
+										}}
+									>
+										Hour
+									</Label>
+									<ModalPicker data={this.hoursList} label="" initValue={this.state.appointment.hour} onChange={(option)=>{ this.onChangeText(option, 'hour'); }} />
+									<Label
+										style={{
+											paddingLeft: 12,
+											paddingRight: 12,
+											fontWeight: 'bold',
+											alignItems: 'center',
+											alignSelf: 'center',
+										}}
+									>
+										Minute
+									</Label>
+									<ModalPicker data={this.minutesList} label="" initValue={this.state.appointment.minute} onChange={(option)=>{ this.onChangeText(option, 'minute'); }} />
+								</View>
+								<View
 									style={{
-										paddingTop: 25,
-										width: 20
-									}}
-								/>
-								<Label
-									style={{
-										paddingTop: 25,
+										flex: 1,
+										flexDirection: 'row',
 										paddingLeft: 12,
-										fontWeight: 'bold',
-										width: 110
+										paddingRight: 12,
+										width: fullWidth
 									}}
-								>Contact</Label>
-								<ModalPicker data={this.contactsList} label="" initValue={this.state.appointment.contact_name} onChange={(option)=>{ this.onChangeText(option, 'contact_id'); }} />
-							</View>
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									paddingLeft: 12,
-									paddingRight: 12,
-									width: fullWidth
-								}}
-							>
-								<IconMaterial
-									name="supervisor-account"
-									size={20}
+								>
+									<IconMaterial
+										name="perm-identity"
+										size={20}
+										style={{
+											paddingTop: 25,
+											width: 20
+										}}
+									/>
+									<Label
+										style={{
+											paddingTop: 25,
+											paddingLeft: 12,
+											fontWeight: 'bold',
+											width: 110
+										}}
+									>Contact</Label>
+									<ModalPicker data={this.contactsList} label="" initValue={this.state.appointment.contact_name} onChange={(option)=>{ this.onChangeText(option, 'contact_id'); }} />
+								</View>
+								<View
 									style={{
-										paddingTop: 25,
-										width: 20
-									}}
-								/>
-								<Label
-									style={{
-										paddingTop: 25,
+										flex: 1,
+										flexDirection: 'row',
 										paddingLeft: 12,
-										fontWeight: 'bold',
-										width: 110
+										paddingRight: 12,
+										width: fullWidth
 									}}
-								>Employee</Label>
-								<ModalPicker data={this.employeesList} label="" initValue={this.state.appointment.employee_alias} onChange={(option)=>{ this.onChangeText(option, 'employee_id'); }} />
-							</View>
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									paddingLeft: 12,
-									paddingRight: 12,
-									paddingTop: 12,
-								}}
-							>
-								<Label
+								>
+									<IconMaterial
+										name="supervisor-account"
+										size={20}
+										style={{
+											paddingTop: 25,
+											width: 20
+										}}
+									/>
+									<Label
+										style={{
+											paddingTop: 25,
+											paddingLeft: 12,
+											fontWeight: 'bold',
+											width: 110
+										}}
+									>Employee</Label>
+									<ModalPicker data={this.employeesList} label="" initValue={this.state.appointment.employee_alias} onChange={(option)=>{ this.onChangeText(option, 'employee_id'); }} />
+								</View>
+								<View
 									style={{
+										flex: 1,
+										flexDirection: 'row',
+										paddingLeft: 12,
+										paddingRight: 12,
 										paddingTop: 12,
-										fontWeight: 'bold'
 									}}
-								>General notes</Label>
-							</View>
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									paddingLeft: 12,
-									paddingRight: 12,
-									paddingTop: 12,
-								}}
-							>
-								<Input
-									underlineColorAndroid={'transparent'}
-									autoCorrect={false}
-									multiline
-									numberOfLines={5}
-									returnKeyType="done"
+								>
+									<Label
+										style={{
+											paddingTop: 12,
+											fontWeight: 'bold'
+										}}
+									>General notes</Label>
+								</View>
+								<View
 									style={{
-										backgroundColor: '#fff',
-										height: 150,
-										borderColor: '#C0C0C0',
-										borderWidth: 1,
-										borderRadius: 6,
-										color: '#424B4F',
-										width: fullWidth,
-										paddingVertical: 0
+										flex: 1,
+										flexDirection: 'row',
+										paddingLeft: 12,
+										paddingRight: 12,
+										paddingTop: 12,
 									}}
-									onChangeText={(text) => {
-										this.onChangeText(text, 'notes');
-									}}
-									value={this.state.appointment.notes}
-								/>
+								>
+									<Input
+										underlineColorAndroid={'transparent'}
+										autoCorrect={false}
+										multiline
+										numberOfLines={5}
+										returnKeyType="done"
+										style={{
+											backgroundColor: '#fff',
+											height: 150,
+											borderColor: '#C0C0C0',
+											borderWidth: 1,
+											borderRadius: 6,
+											color: '#424B4F',
+											width: fullWidth,
+											paddingVertical: 0
+										}}
+										onChangeText={(text) => {
+											this.onChangeText(text, 'notes');
+										}}
+										value={this.state.appointment.notes}
+									/>
+								</View>
 							</View>
+							}
 							<View style={{ height: 60 }} />
 						</Content>
 						{this.appointmentButtons()}
 					</Tab>
 					<Tab heading={<TabHeading><Text style={{ fontSize: 12 }}>Treatment</Text></TabHeading>}>
+						{this.hideKeyboard()}
 						<View style={{ padding: 10, borderColor: 'steelblue', borderBottomWidth: 2 }}>
 							<Text
 								style={{
@@ -1335,24 +1276,64 @@ class AppointmentsInfo extends Component {
 							</Text>
 						</View>
 						<Content>
-							{this.state.showspinner && <Spinner /> }
-							<ListView
-								dataSource={this.state.treatmentslist}
-								enableEmptySections
-								renderRow={this.renderRowTreatments.bind(this)}
-							/>
+							{this.state.showspinner &&
+								<View
+									style={{
+										backgroundColor: 'white',
+										justifyContent: 'center',
+										marginTop: fullHeight / 4,
+									}}
+								>
+									<Spinner />
+									<Text
+										style={{
+											justifyContent: 'center',
+											alignItems: 'center',
+											alignSelf: 'center',
+											fontWeight: 'bold',
+										}}
+									>{this.state.showspinnertext}</Text>
+								</View>
+							}
+							{this.state.showspinner === false &&
+								<ListView
+									dataSource={this.state.treatmentslist}
+									enableEmptySections
+									renderRow={this.renderRowTreatments.bind(this)}
+								/>
+							}
 						<View style={{ height: 60 }} />
 						</Content>
 						{this.treatmentButtons()}
 					</Tab>
 					<Tab heading={<TabHeading><Text style={{ fontSize: 12 }}>Gallery</Text></TabHeading>}>
 						<Content>
-							{this.state.showspinner && <Spinner /> }
-							<ListView
-								dataSource={this.state.imageslist}
-								enableEmptySections
-								renderRow={this.renderRowImages.bind(this)}
-							/>
+							{this.state.showspinner &&
+								<View
+									style={{
+										backgroundColor: 'white',
+										justifyContent: 'center',
+										marginTop: fullHeight / 4,
+									}}
+								>
+									<Spinner />
+									<Text
+										style={{
+											justifyContent: 'center',
+											alignItems: 'center',
+											alignSelf: 'center',
+											fontWeight: 'bold',
+										}}
+									>{this.state.showspinnertext}</Text>
+								</View>
+							}
+							{this.state.showspinner === false &&
+								<ListView
+									dataSource={this.state.imageslist}
+									enableEmptySections
+									renderRow={this.renderRowImages.bind(this)}
+								/>
+							}
 						<View style={{ height: 60 }} />
 						</Content>
 						<ActionButton
@@ -1375,8 +1356,7 @@ class AppointmentsInfo extends Component {
 						</ActionButton>
 					</Tab>
 					<Tab heading={<TabHeading><Text style={{ fontSize: 12 }}>Contact</Text></TabHeading>}>
-						<Content>
-							{this.state.showspinner && <Spinner /> }
+						{this.state.showspinner === false && <Content>
 							<View
 								style={{
 									flex: 1,
@@ -1391,14 +1371,14 @@ class AppointmentsInfo extends Component {
 											flex: 0.2,
 											margin: 12,
 											width: 80,
-									    height: 80,
-									    borderRadius: 80/2,
-									    borderWidth: 2,
-									    borderColor: 'steelblue',
-									    backgroundColor: 'transparent',
+											height: 80,
+											borderRadius: 80/2,
+											borderWidth: 2,
+											borderColor: 'steelblue',
+											backgroundColor: 'transparent',
 										}}
-										source={require('../img/contacts.png')}>
-									</Image>
+										source={require('../img/contacts.png')}
+									/>
 								}
 								{this.state.contact.thumbnailPath !== '' &&
 									<Image
@@ -1406,14 +1386,14 @@ class AppointmentsInfo extends Component {
 											flex: 0.2,
 											margin: 12,
 											width: 80,
-									    height: 80,
-									    borderRadius: 80/2,
-									    borderWidth: 1,
-									    borderColor: 'steelblue',
-									    backgroundColor: 'transparent',
+											height: 80,
+											borderRadius: 80/2,
+											borderWidth: 2,
+											borderColor: 'steelblue',
+											backgroundColor: 'transparent',
 										}}
-										source={{ uri: this.state.contact.thumbnailPath }}>
-									</Image>
+										source={{ uri: this.state.contact.thumbnailPath }}
+									/>
 								}
 								<View
 									style={{
@@ -1453,39 +1433,52 @@ class AppointmentsInfo extends Component {
 									</Label>
 								</View>
 							</View>
-							<Item>
-								<Label style={{ marginLeft: 12, color: '#000000' }}>Company</Label>
-									<Input
-										editable={false}
-										style={{ marginLeft: 7, color: '#AEB1B7' }}
-										value={this.state.contact.company}
-									/>
-							</Item>
-							<Item>
-								<Label style={{ marginLeft: 12, color: '#000000' }}>Job title</Label>
-									<Input
-										editable={false}
-										style={{ marginLeft: 7, color: '#AEB1B7' }}
-										value={this.state.contact.jobTitle}
-									/>
-							</Item>
-							<ListView
-								dataSource={this.state.addresseslist}
-								enableEmptySections
-								renderRow={this.renderRowAddresses.bind(this)}
-							/>
-							<ListView
-								dataSource={this.state.telephoneslist}
-								enableEmptySections
-								renderRow={this.renderRowTelephones.bind(this)}
-							/>
-							<ListView
-								dataSource={this.state.emailslist}
-								enableEmptySections
-								renderRow={this.renderRowEmails.bind(this)}
-							/>
+							{this.state.contact.company !== '' &&
+								<Item>
+									<Label style={{ marginLeft: 12, color: '#000000' }}>Company</Label>
+										<Input
+											editable={false}
+											style={{ marginLeft: 7, color: '#AEB1B7' }}
+											value={this.state.contact.company}
+										/>
+								</Item>
+							}
+							{this.state.contact.jobTitle !== '' &&
+								<Item>
+									<Label style={{ marginLeft: 12, color: '#000000' }}>Job title</Label>
+										<Input
+											editable={false}
+											style={{ marginLeft: 7, color: '#AEB1B7' }}
+											value={this.state.contact.jobTitle}
+										/>
+								</Item>
+							}
+							<Label style={{ paddingLeft: 15, paddingTop: 15 }}>Address(es)</Label>
+							<View style={{ borderBottomWidth: 1, borderColor: '#d7d7d6', }}>
+								<ListView
+									dataSource={this.state.addresseslist}
+									enableEmptySections
+									renderRow={this.renderRowAddresses.bind(this)}
+								/>
+							</View>
+							<Label style={{ paddingLeft: 15, paddingTop: 15 }}>Telephone(s)</Label>
+							<View style={{ borderBottomWidth: 1, borderColor: '#d7d7d6', }}>
+								<ListView
+									dataSource={this.state.telephoneslist}
+									enableEmptySections
+									renderRow={this.renderRowTelephones.bind(this)}
+								/>
+							</View>
+							<Label style={{ paddingLeft: 15, paddingTop: 15 }}>Email(s)</Label>
+							<View style={{ borderBottomWidth: 1, borderColor: '#d7d7d6', }}>
+								<ListView
+									dataSource={this.state.emailslist}
+									enableEmptySections
+									renderRow={this.renderRowEmails.bind(this)}
+								/>
+							</View>
 						<View style={{ height: 60 }} />
-						</Content>
+						</Content>}
 					</Tab>
 				</Tabs>
 				<FooterMain activeArea="Appointments" />

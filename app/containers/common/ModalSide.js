@@ -45,22 +45,23 @@ class ModalSide extends Component {
 		super(props);
 		this.state = {
 			showspinner: false,
-			showimporting: false,
-			showremoving: false,
-			showrefreshing: false,
+			showspinnertext: '',
 			settings: {
 				_id: '',
 				doctype: 'settings',
 				importcontacts: false,
-				appointmentsameday: false,
-				appointmentdaysbefore: '',
+				shareimportedcontacts: false,
+				sendrecallnotifications: false,
+				sendrecalleverymonthsnumber: '',
 				remindersameday: false,
 				reminderdaysbefore: '',
 				notificationsmethodemail: false,
 				notifificationsmethodsms: false,
 				systemalerts: false,
 				useralerts: false,
-				userid: ''
+				userid: '',
+				shareimportedcontacts: false,
+				sharecreatedcontacts: false
 			},
 		};
 		this.companyDatabase = '';
@@ -88,13 +89,8 @@ class ModalSide extends Component {
 		AsyncStorage.getItem('companyDatabase').then((companyDatabaseValue) => {
 			if (companyDatabaseValue !== null) {
 				this.companyDatabase = companyDatabaseValue;
-				console.log('this.companyDatabase');
-				console.log(this.companyDatabase);
 				AsyncStorage.getItem('userLoggedId').then((userLoggedIdValue) => {
 					if (userLoggedIdValue !== null) {
-
-						console.log('this.state.settings.userid');
-						console.log(this.state.settings.userid);
 						if (this.state.settings.userid === '') {
 							const insettings = this.state.settings;
 							insettings['userid'] = userLoggedIdValue;
@@ -110,21 +106,32 @@ class ModalSide extends Component {
 	onChangeText(newValue, prop) {
 		if (prop === 'importcontacts') {
 			if (newValue === true) {
+				this.getContactsFromDevice(prop, newValue);
+			} else {
 				const insettings = this.state.settings;
 				insettings[prop] = newValue;
+				insettings['shareimportedcontacts'] = false;
+				insettings['sharecreatedcontacts'] = false;
 				this.setState({ settings: insettings });
-				this.setState({ showspinner: true });
-				this.setState({ showimporting: true });
-				this.saveSettings();
-				this.getContactsFromDevice();
+				this.deleteContactsFromDB();
+			}
+		} else if (prop === 'shareimportedcontacts') {
+			if (newValue === true) {
+				this.getContactsFromDevice(prop, newValue);
 			} else {
 				const insettings = this.state.settings;
 				insettings[prop] = newValue;
 				this.setState({ settings: insettings });
-				this.setState({ showspinner: true });
-				this.setState({ showremoving: true });
-				this.saveSettings();
-				this.deleteContactsFromDB();
+				this.getContactsFromDevice(prop);
+			}
+		} else if (prop === 'sharecreatedcontacts') {
+			if (newValue === true) {
+				this.getContactsFromDevice(prop, newValue);
+			} else {
+				const insettings = this.state.settings;
+				insettings[prop] = newValue;
+				this.setState({ settings: insettings });
+				this.getContactsFromDevice(prop, newValue);
 			}
 		} else {
 			const insettings = this.state.settings;
@@ -136,32 +143,33 @@ class ModalSide extends Component {
 
 	async saveSettings() {
 		if (this.state.settings._id !== '') {
-			console.log('save');
 			const savedSettings = await DBCompanyConnection.put(this.state.settings);
+			newrev = savedSettings.rev;
 			const insettings = this.state.settings;
-			insettings['_rev'] = savedSettings._rev;
+			insettings['_rev'] = savedSettings.rev;
 			this.setState({ settings: insettings });
-			// this.getSettingsInfo();
 		} else {
-			console.log('create');
 			const settings = {
 				doctype: 'settings',
 				importcontacts: this.state.settings.importcontacts,
-				appointmentsameday: this.state.settings.appointmentsameday,
-				appointmentdaysbefore: this.state.settings.appointmentdaysbefore,
+				sendrecallnotifications: this.state.settings.sendrecallnotifications,
+				sendrecalleverymonthsnumber: this.state.settings.sendrecalleverymonthsnumber,
 				remindersameday: this.state.settings.remindersameday,
 				reminderdaysbefore: this.state.settings.reminderdaysbefore,
 				notificationsmethodemail: this.state.settings.notificationsmethodemail,
 				notifificationsmethodsms: this.state.settings.notifificationsmethodsms,
 				systemalerts: this.state.settings.systemalerts,
 				useralerts: this.state.settings.useralerts,
-				userid: this.state.settings.userid
+				userid: this.state.settings.userid,
+				shareimportedcontacts: this.state.settings.shareimportedcontacts,
+				sharecreatedcontacts: this.state.settings.sharecreatedcontacts
 			};
 			const newSettings = await DBCompanyConnection.post(settings);
-			const insettings = this.state.settings;
+			newrev = newSettings.rev;
+			const insettings = settings;
 			insettings['_rev'] = newSettings.rev;
+			insettings['_id'] = newSettings.id;
 			this.setState({ settings: insettings });
-			// this.getSettingsInfo();
 		}
 	}
 
@@ -228,27 +236,26 @@ class ModalSide extends Component {
 		const contactinfo = await DBCompanyConnection.find(queryContact);
 		if (contactinfo.docs.length > 0) {
 			for (let i = 0; i < contactinfo.docs.length; i += 1) {
-				this.setState({ showspinner: true });
-				this.setState({ showremoving: true });
+				this.setState({ showspinner: true, showspinnertext: 'Removing contacts, please wait' });
 				const contactdeleted = await DBCompanyConnection.remove(contactinfo.docs[i]);
 			}
 			this.setState({ showspinner: false });
-			this.setState({ showremoving: false });
+		} else {
+			this.setState({ showspinner: false });
 		}
+		this.saveSettings();
 	}
 
 	async updateDBContacts(contacts) {
+		this.saveSettings();
+		this.setState({ showspinner: true, showspinnertext: 'Updating contacts, please wait' });
 		if (this.state.settings.importcontacts === true) {
-			const queryContact = { selector: { doctype: 'contact', 'imported': true, 'userid': this.state.settings.userid }, };
-			const contactsdb = await DBCompanyConnection.find(queryContact);
+			this.queryContact = { selector: { doctype: 'contact', 'imported': true, 'userid': this.state.settings.userid }, };
+			const contactsdb = await DBCompanyConnection.find(this.queryContact);
 			if (contactsdb.docs.length > 0) {
 				for (let i = 0; i < contacts.length; i += 1) {
-					this.setState({ showspinner: true });
-					let contactfound = _.find(contactsdb.docs, {recordID : contacts[i].recordID});
-					this.setState({ showrefreshing: true });
-					console.log('contactfound');
-					console.log(contactfound);
-					if (contactfound !== undefined) {
+					let contactfound = _.find(contactsdb.docs, { recordID : contacts[i].recordID });
+					if (!_.isEmpty(contactfound)) {
 						contactfound.company = contacts[i].company;
 						contactfound.emailAddresses = contacts[i].emailAddresses;
 						contactfound.familyName = contacts[i].familyName;
@@ -258,28 +265,38 @@ class ModalSide extends Component {
 						contactfound.phoneNumbers = contacts[i].phoneNumbers;
 						contactfound.postalAddresses = contacts[i].postalAddresses;
 						contactfound.thumbnailPath = contacts[i].thumbnailPath;
+						if (this.state.settings.shareimportedcontacts === true) {
+							contactfound.shareimportedcontacts = true;
+						} else {
+							contactfound.shareimportedcontacts = false;
+						}
+						if (this.state.settings.sharecreatedcontacts === true) {
+							contactfound.sharecreatedcontacts = true;
+						} else {
+							contactfound.sharecreatedcontacts = false;
+						}
 						const savedcontact = await DBCompanyConnection.put(contactfound);
 					} else {
 						contacts[i].doctype = 'contact';
 						contacts[i].imported = true;
+						contacts[i].shareimportedcontacts = false;
+						contacts[i].sharecreatedcontacts = false;
 						contacts[i].userid = this.state.settings.userid;
 						const newcontact = await DBCompanyConnection.post(contacts[i]);
 					}
 				}
 				this.setState({ showspinner: false });
-				this.setState({ showrefreshing: false });
 			} else {
 				for (let i = 0; i < contacts.length; i += 1) {
 					this.setState({ showspinner: true });
-					this.setState({ showimporting: true });
 					contacts[i].doctype = 'contact';
 					contacts[i].imported = true;
+					contacts[i].shareimportedcontacts = false;
+					contacts[i].sharecreatedcontacts = false;
 					contacts[i].userid = this.state.settings.userid;
 					await DBCompanyConnection.post(contacts[i]);
 				}
 				this.setState({ showspinner: false });
-				this.setState({ showimporting: false });
-				this.setState({ showrefreshing: false });
 			}
 		} else {
 			Alert.alert(
@@ -293,34 +310,38 @@ class ModalSide extends Component {
 		}
 	}
 
-	getContactsFromDevice() {
-		ContactsDevice.getAll((err, contacts) => {
-			if(err === 'denied'){
+	permissionGetContactsDenied() {
+		this.setState({ showspinner: false });
+		newValue = false;
+		prop = 'importcontacts';
+		const insettings = this.state.settings;
+		insettings[prop] = newValue;
+		this.setState({ settings: insettings });
+		this.saveSettings();
+	}
+	
+
+	getContactsFromDevice(prop, newValue) {
+		ContactsDevice.getAll((error, contacts) => {
+			if(error === 'denied'){
 				Alert.alert(
-					error.code,
-					error.message,
+					'Access denied',
+					'Please allow access to your contact list if you want to import contacts from your settings phone area',
 					[
-						{ text: 'OK', onPress: () => console.log('OK Pressed') },
+						{ text: 'OK', onPress: () => this.permissionGetContactsDenied() },
 					],
 					{ cancelable: false }
 				);
-				console.log('error');
 			} else {
+				const insettings = this.state.settings;
+				insettings[prop] = newValue;
+				this.setState({ settings: insettings });
 				this.updateDBContacts(contacts);
 			}
 		});
 	}
 
 	render() {
-		if (this.state.showspinner === true) {
-			this.processed_background = '#EFEFEF';
-			this.processed_text = '#787878';
-			this.processed_opacity = 0.1;
-		} else {
-			this.processed_background = 'white';
-			this.processed_text = '#000000';
-			this.processed_opacity = 1;
-		}
 		return (
 			<View>
 				<Modal transparent={false} visible={this.props.ModalState.modalConfigShow} onRequestClose={() => { console.log('settings closed'); }} >
@@ -342,16 +363,48 @@ class ModalSide extends Component {
 						}
 						</Right>
 					</Header>
+					{this.state.showspinner &&
+						<View
+							style={{
+								backgroundColor: 'white',
+								justifyContent: 'center',
+								marginTop: fullHeight / 3,
+							}}
+						>
+							<Spinner />
+							<Text
+								style={{
+									justifyContent: 'center',
+									alignItems: 'center',
+									alignSelf: 'center',
+									fontWeight: 'bold'
+								}}
+							>{this.state.showspinnertext}</Text>
+						</View>
+					}
+					{this.state.showspinner === false &&
 						<KeyboardAwareScrollView>
 							<View
 								style={{
 									flex: 1,
 									flexDirection: 'row',
-									borderBottomWidth: 1,
-									borderColor: '#d7d7d6',
-									backgroundColor: this.processed_background,
 									marginRight: 15,
-									opacity: this.processed_opacity
+								}}
+							>
+								<Label
+									style={{
+										paddingTop: 15,
+										marginLeft: 12,
+										flex: 1,
+										fontWeight: 'bold'
+									}}
+								>Contacts</Label>
+							</View>
+							<View
+								style={{
+									flex: 1,
+									flexDirection: 'row',
+									marginRight: 15,
 								}}
 							>
 								<Label
@@ -378,11 +431,7 @@ class ModalSide extends Component {
 								style={{
 									flex: 1,
 									flexDirection: 'row',
-									borderBottomWidth: 1,
-									borderColor: '#d7d7d6',
-									backgroundColor: this.processed_background,
 									marginRight: 15,
-									opacity: this.processed_opacity
 								}}
 							>
 								<Label
@@ -406,10 +455,63 @@ class ModalSide extends Component {
 								style={{
 									flex: 1,
 									flexDirection: 'row',
-									backgroundColor:
-									this.processed_background,
 									marginRight: 15,
-									opacity: this.processed_opacity
+								}}
+							>
+								<Label
+									style={{
+										paddingTop: 15,
+										marginLeft: 12,
+										flex: 0.8
+									}}
+								>Share imported contacts</Label>
+									<Switch
+										style={{
+											flex: 0.2,
+											marginRight: 10,
+											marginTop: 10,
+											marginBottom: 10,
+										}}
+										onValueChange={(value) => {
+											this.onChangeText(value, 'shareimportedcontacts');
+										}}
+										value={this.state.settings.shareimportedcontacts}
+									/>
+							</View>
+							<View
+								style={{
+									flex: 1,
+									flexDirection: 'row',
+									borderBottomWidth: 1,
+									borderColor: '#d7d7d6',
+									marginRight: 15,
+								}}
+							>
+								<Label
+									style={{
+										paddingTop: 15,
+										marginLeft: 12,
+										flex: 0.8
+									}}
+								>Share created contacts</Label>
+									<Switch
+										style={{
+											flex: 0.2,
+											marginRight: 10,
+											marginTop: 10,
+											marginBottom: 10,
+										}}
+										onValueChange={(value) => {
+											this.onChangeText(value, 'sharecreatedcontacts');
+										}}
+										value={this.state.settings.sharecreatedcontacts}
+									/>
+							</View>
+							<View
+								style={{
+									flex: 1,
+									flexDirection: 'row',
+									marginRight: 15,
 								}}
 							>
 								<Label
@@ -419,15 +521,13 @@ class ModalSide extends Component {
 										flex: 0.8,
 										fontWeight: 'bold'
 									}}
-								>Send appointment notifications</Label>
+								>Recall notifications</Label>
 							</View>
 							<View
 								style={{
 									flex: 1,
 									flexDirection: 'row',
-									backgroundColor: this.processed_background,
 									marginRight: 15,
-									opacity: this.processed_opacity
 								}}
 							>
 								<Label
@@ -435,7 +535,7 @@ class ModalSide extends Component {
 										paddingTop: 15,
 										marginLeft: 12,
 										flex: 0.8 }}
-									>Appointment same day</Label>
+									>Send recall notifications</Label>
 									<Switch
 										style={{
 											flex: 0.2,
@@ -443,9 +543,9 @@ class ModalSide extends Component {
 											marginTop: 10
 										}}
 										onValueChange={(value) => {
-											this.onChangeText(value, 'appointmentsameday');
+											this.onChangeText(value, 'sendrecallnotifications');
 										}}
-										value={this.state.settings.appointmentsameday}
+										value={this.state.settings.sendrecallnotifications}
 									/>
 							</View>
 							<View
@@ -454,9 +554,7 @@ class ModalSide extends Component {
 									flexDirection: 'row',
 									borderBottomWidth: 1,
 									borderColor: '#d7d7d6',
-									backgroundColor: this.processed_background,
 									marginRight: 15,
-									opacity: this.processed_opacity
 								}}
 							>
 								<Label
@@ -465,7 +563,7 @@ class ModalSide extends Component {
 										marginLeft: 12,
 										flex: 0.8
 									}}
-								>Appointment days before</Label>
+								>Send every * months</Label>
 								<TextInput
 									keyboardType="numeric"
 									underlineColorAndroid={'transparent'}
@@ -486,24 +584,22 @@ class ModalSide extends Component {
 									}}
 									returnKeyType="done"
 									onChangeText={(text) => {
-										this.onChangeText(text, 'appointmentdaysbefore');
+										this.onChangeText(text, 'sendrecalleverymonthsnumber');
 									}}
-									value={this.state.settings.appointmentdaysbefore}
+									value={this.state.settings.sendrecalleverymonthsnumber}
 								/>
 							</View>
-							{this.state.showspinner &&
+							{/* {this.state.showspinner &&
 								<View
 									style={{
-										backgroundColor: 'white',
 										marginRight: 15,
 										marginLeft: 15,
-										opacity: 1
 									}}
 								>
 								<Spinner />
 								</View>
-							}
-							{this.state.showimporting &&
+							} */}
+							{/* {this.state.showimporting &&
 								<Text
 									style={{
 										justifyContent: 'center',
@@ -532,14 +628,12 @@ class ModalSide extends Component {
 										fontWeight: 'bold'
 									}}
 								>Refreshing contacts, please wait</Text>
-							}
+							} */}
 							<View
 								style={{
 									flex: 1,
 									flexDirection: 'row',
-									backgroundColor: this.processed_background,
 									marginRight: 15,
-									opacity: this.processed_opacity
 								}}
 							>
 								<Label
@@ -555,9 +649,7 @@ class ModalSide extends Component {
 								style={{
 									flex: 1,
 									flexDirection: 'row',
-									backgroundColor: this.processed_background,
 									marginRight: 15,
-									opacity: this.processed_opacity
 								}}
 							>
 								<Label
@@ -584,9 +676,7 @@ class ModalSide extends Component {
 									flexDirection: 'row',
 									borderBottomWidth: 1,
 									borderColor: '#d7d7d6',
-									backgroundColor: this.processed_background,
 									marginRight: 15,
-									opacity: this.processed_opacity
 								}}
 							>
 								<Label
@@ -624,9 +714,7 @@ class ModalSide extends Component {
 								style={{
 									flex: 1,
 									flexDirection: 'row',
-									backgroundColor: this.processed_background,
 									marginRight: 15,
-									opacity: this.processed_opacity
 								}}
 							>
 								<Label
@@ -642,9 +730,7 @@ class ModalSide extends Component {
 								style={{
 									flex: 1,
 									flexDirection: 'row',
-									backgroundColor: this.processed_background,
 									marginRight: 15,
-									opacity: this.processed_opacity
 								}}
 							>
 								<Label
@@ -672,9 +758,7 @@ class ModalSide extends Component {
 									flexDirection: 'row',
 									borderBottomWidth: 1,
 									borderColor: '#d7d7d6',
-									backgroundColor: this.processed_background,
 									marginRight: 15,
-									opacity: this.processed_opacity
 								}}
 							>
 								<Label
@@ -701,11 +785,23 @@ class ModalSide extends Component {
 								style={{
 									flex: 1,
 									flexDirection: 'row',
-									borderBottomWidth: 1,
-									borderColor: '#d7d7d6',
-									backgroundColor: this.processed_background,
 									marginRight: 15,
-									opacity: this.processed_opacity
+								}}
+							>
+								<Label
+									style={{
+										paddingTop: 15,
+										marginLeft: 12,
+										flex: 1,
+										fontWeight: 'bold'
+									}}
+								>Alerts</Label>
+							</View>
+							<View
+								style={{
+									flex: 1,
+									flexDirection: 'row',
+									marginRight: 15,
 								}}
 							>
 								<Label
@@ -733,9 +829,7 @@ class ModalSide extends Component {
 									flexDirection: 'row',
 									borderBottomWidth: 1,
 									borderColor: '#d7d7d6',
-									backgroundColor: this.processed_background,
 									marginRight: 15,
-									opacity: this.processed_opacity
 								}}
 							>
 								<Label
@@ -766,9 +860,6 @@ class ModalSide extends Component {
 									flexDirection: 'row',
 									alignSelf: 'center',
 									alignItems: 'center',
-									backgroundColor: this.processed_background,
-									marginRight: 15,
-									opacity: this.processed_opacity
 								}}
 							>
 								<Button
@@ -788,6 +879,7 @@ class ModalSide extends Component {
 								</Button>
 							</View>
 						</KeyboardAwareScrollView>
+					}
 					</Modal>
 			</View>
 		);

@@ -189,8 +189,6 @@ class GetCompanyList extends Component {
 	}
 
 	async loadMember(member) {
-		console.log('hola member yes');
-		console.log(member);
 		this.connectCompanyDb(true, member);
 	}
 

@@ -161,7 +161,7 @@ class CreateCompany extends Component {
 			);
 		} else {
 			this.checkIfUserExists();
-			this.createCompanyConfirmation();
+			this.createCompany();
 		}
 	}
 
@@ -177,20 +177,6 @@ class CreateCompany extends Component {
 		if (userExists.docs.length === 0) {
 			DBCompanyConnection.post(this.state.user);
 		}
-	}
-
-	createCompanyConfirmation() {
-		console.log('this.state.companythis.state.companythis.state.companythis.state.company');
-		console.log(this.state.company);
-		Alert.alert(
-			'Create a new company',
-			`Are you sure you want to create the company ${this.state.company.name}?`,
-			[
-				{ text: 'Yes', onPress: () => this.createCompany(), style: 'cancel' },
-				{ text: 'No', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
-			],
-			{ cancelable: false }
-		);
 	}
 
 	async createCompany() {

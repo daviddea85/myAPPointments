@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Platform, Image, AsyncStorage, ListView, View, Keyboard, TouchableOpacity, TextInput } from 'react-native';
+import { Platform, Image, AsyncStorage, ListView, View, Keyboard, TouchableOpacity, TextInput, Dimensions } from 'react-native';
 import { Container, Label, Content, Text, Card, Header, Body, Button, Title, CardItem, Icon, ListItem,
 Spinner } from 'native-base';
 import { Actions } from 'react-native-router-flux';
@@ -14,6 +14,9 @@ import PouchDB from 'pouchdb-react-native';
 
 let DBCompanyConnection = null;
 
+const fullWidth = Dimensions.get('window').width; // full width
+const fullHeight = Dimensions.get('window').height; // full height
+
 class Contacts extends Component {
 
 	constructor(props) {
@@ -24,6 +27,7 @@ class Contacts extends Component {
 		this.state = {
 			contactsList: dsContacts.cloneWithRows([]),
 			showspinner: false,
+			showspinnertext: 'Loading contacts, please wait',
 			filtervalue: ''
 		};
 		this.companyDatabase = '';
@@ -37,8 +41,6 @@ class Contacts extends Component {
 				AsyncStorage.getItem('userLoggedId').then((userLoggedIdValue) => {
 					if (userLoggedIdValue !== null) {
 						this.userLoggedId = userLoggedIdValue;
-						console.log('this.userLoggedId');
-						console.log(this.userLoggedId);
 						this.connectCompanyDb(true);
 					}
 				});
@@ -69,29 +71,42 @@ class Contacts extends Component {
 
 	componentWillUnmount() {}
 
+	createNewContact() {
+		Actions.ContactInfo({ contactid: '', title: 'Add contact' });
+	}
+
 	async getContacts(action) {
 		this.setState({ showspinner: true });
 		const dsContacts = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
-		// const queryContacts = { selector: { doctype: 'contact', userid: this.userLoggedId }, limit: 10 };
 		if (action === 'filter') {
-			this.queryContacts = { selector: { doctype: 'contact', userid: this.userLoggedId } };
-		} else {
-			this.queryContacts = {
+			this.queryContacts = { 
 				'selector': {
-				'doctype': 'contact',
-				'userid': this.userLoggedId,
+					'doctype': 'contact',
 					'$or': [
 						{ 'givenName': { '$regex': this.state.filtervalue }},
 						{ 'middleName': { '$regex': this.state.filtervalue }},
-						{ 'familyName':  { '$regex': this.state.filtervalue }}
+						{ 'familyName':  { '$regex': this.state.filtervalue }},
+						{ 'shareimportedcontacts': { '$eq': true }},
+						{ 'sharecreatedcontacts': { '$eq': true }},
+						{ 'userid': { '$eq': this.userLoggedId }},
+					]
+				},
+				'fields': []
+			};
+		} else {
+			this.queryContacts = {
+				'selector': {
+					'doctype': 'contact',
+					'$or': [
+						{ 'shareimportedcontacts': { '$eq': true }},
+						{ 'sharecreatedcontacts': { '$eq': true }},
+						{ 'userid': { '$eq': this.userLoggedId }},
 					]
 				},
 				'fields': []
 			};
 		}
 		const contactsInfo = await DBCompanyConnection.find(this.queryContacts);
-		console.log('contactsInfo.docs');
-		console.log(contactsInfo.docs);
 		if (contactsInfo.docs.length > 0) {
 			for (let i = 0; i < contactsInfo.docs.length; i += 1) {
 				if (contactsInfo.docs[i].middleName !== '') {
@@ -142,7 +157,6 @@ class Contacts extends Component {
 		// DBCompanyConnection = new PouchDB(companyLocalDatabase);
 		this.companyDBConnected = true;
 		if (isConnected && this.companyDBConnected) {
-			// this.checkSettings();
 			this.getContacts('search');
 		}
 	}
@@ -153,18 +167,20 @@ class Contacts extends Component {
 
 	renderRowContacts(contact) {
 		return (
-			<ListItem button onPress={() => { Actions.ContactInfo({ contactid: contact._id, title: 'Contact info' }); }}>
+			<TouchableOpacity button onPress={() => { Actions.ContactInfo({ contactid: contact._id, title: 'Contact info' }); }}>
 				<View
 					style={{
 						flex: 1,
 						flexDirection: 'row',
+						borderBottomWidth: 1,
+						borderColor: '#d7d7d6',
 					}}
 				>
 					{contact.thumbnailPath === '' &&
 						<Image
 							style={{
+								margin: 12,
 								flex: 0.2,
-								marginRight: 12,
 								width: 80,
 								height: 80,
 								borderRadius: 80/2,
@@ -178,12 +194,12 @@ class Contacts extends Component {
 					{contact.thumbnailPath !== '' &&
 						<Image
 							style={{
+								margin: 12,
 								flex: 0.2,
-								marginRight: 12,
 								width: 80,
 								height: 80,
 								borderRadius: 80/2,
-								borderWidth: 1,
+								borderWidth: 2,
 								borderColor: 'steelblue',
 								backgroundColor: 'transparent',
 							}}
@@ -192,37 +208,31 @@ class Contacts extends Component {
 					}
 					<View
 						style={{
-							flex: 0.7
+							paddingTop: 25,
+							flex: 0.7,
 						}}
 					>
-						<View style={{ flex: 1, flexDirection: 'row' }}>
-							<Text note>Name: {contact.fullName}</Text>
-						</View>
-						<View style={{ flex: 1, flexDirection: 'row' }}>
-							<Text note>Phone: {contact.telephone}</Text>
-						</View>
-						<View style={{ flex: 1, flexDirection: 'row' }}>
-							<Text note>Email: {contact.email}</Text>
-						</View>
+						<Text note>Name: {contact.fullName}</Text>
+						<Text note>Phone: {contact.telephone}</Text>
+						<Text note>Email: {contact.email}</Text>
 					</View>
 					<MaterialCommunityIcons
 						name="chevron-right"
 						style={{
 							fontSize: 30,
 							height: 40,
-							top: 25,
+							top: 35,
 							color: '#9b9cb1',
 							position: 'absolute',
 							right: 10,
 						}}
 					/>
 				</View>
-			</ListItem>
+			</TouchableOpacity>
 		);
 	}
 
 	clearFilter() {
-		console.log('clear filter');
 		this.setState({ filtervalue: '' });
 		this.getContacts('filter');
 	}
@@ -263,29 +273,51 @@ class Contacts extends Component {
 					</TouchableOpacity>
 				</View>
 				<Content>
-					{this.state.showspinner && <Spinner /> }
-					<ListView
-						enableEmptySections
-						dataSource={this.state.contactsList}
-						renderRow={this.renderRowContacts}
-					/>
+					{this.state.showspinner &&
+						<View
+							style={{
+								backgroundColor: 'white',
+								justifyContent: 'center',
+								marginTop: fullHeight / 4,
+							}}
+						>
+							<Spinner />
+							<Text
+								style={{
+									justifyContent: 'center',
+									alignItems: 'center',
+									alignSelf: 'center',
+									fontWeight: 'bold'
+								}}
+							>{this.state.showspinnertext}</Text>
+						</View>
+					}
+					{this.state.showspinner === false &&
+						<ListView
+							enableEmptySections
+							dataSource={this.state.contactsList}
+							renderRow={this.renderRowContacts}
+						/>
+					}					
 					<View style={{ height: 60 }} />
 				</Content>
-				<ActionButton
-					size={40}
-					buttonColor="#9DBDF2"
-					offsetX={10}
-					offsetY={65}
-					ref={(btn) => {
-						this.floatingBtn = btn;
-					}}
-					onPress={() => { this.hideKeyboard(); }}
-					icon={<IconMaterial name="settings" size={28} color="white" />}
-				>
-					<ActionButton.Item buttonColor="steelblue" title="Create contact" onPress={() => { this.createNewAppointment(); }}>
-						<MaterialCommunityIcons name="plus" size={28} color="white" />
-					</ActionButton.Item>
-				</ActionButton>
+				{this.state.showspinner === false &&
+					<ActionButton
+						size={40}
+						buttonColor="#9DBDF2"
+						offsetX={10}
+						offsetY={65}
+						ref={(btn) => {
+							this.floatingBtn = btn;
+						}}
+						onPress={() => { this.hideKeyboard(); }}
+						icon={<IconMaterial name="settings" size={28} color="white" />}
+					>
+						<ActionButton.Item buttonColor="steelblue" title="Create contact" onPress={() => { this.createNewContact(); }}>
+							<MaterialCommunityIcons name="plus" size={28} color="white" />
+						</ActionButton.Item>
+					</ActionButton>
+				}
 				<ModalSide />
 				<FooterMain activeArea="Contacts" />
 			</Container>

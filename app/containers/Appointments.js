@@ -34,6 +34,7 @@ class Appointments extends Component {
 			appointmentsListCount: 0,
 			appointmentsList: dsAppointmentsList.cloneWithRows([]),
 			showspinner: false,
+			showspinnertext: 'Loading appointments, please wait',
 			todaysDate: this.props.appointmentsdate || '',
 			userSelected: this.props.userSelected || '',
 		};
@@ -144,9 +145,14 @@ class Appointments extends Component {
 				if (contactInfo.docs.length > 0) {
 					appointmentsList.docs[i].contact_name = contactInfo.docs[0].givenName +' '+ contactInfo.docs[0].familyName;
 					if (contactInfo.docs[0].phoneNumbers.length > 0) {
-						for (let m = 0; m < contactInfo.docs[0].phoneNumbers.length; m += 1) {
-							if (contactInfo.docs[0].phoneNumbers[m].label === 'mobile') {
-								appointmentsList.docs[i].telephone = contactInfo.docs[0].phoneNumbers[m].number;
+						let contactfound = _.find(contactInfo.docs[0].phoneNumbers, { label : 'mobile' });
+						if (_.isEmpty(contactfound)) {									
+							appointmentsList.docs[i].telephone = contactInfo.docs[0].phoneNumbers[0].number;
+						} else {
+							for (let m = 0; m < contactInfo.docs[0].phoneNumbers.length; m += 1) {
+								if (contactInfo.docs[0].phoneNumbers[m].label === 'mobile') {
+									appointmentsList.docs[i].telephone = contactfound.phoneNumbers[m].number;
+								}
 							}
 						}
 					}
@@ -306,31 +312,53 @@ class Appointments extends Component {
 					</View>
 				</View>
 				<Content>
-					{this.state.showspinner && <Spinner /> }
-					<View>
-						<ListView
-							enableEmptySections
-							dataSource={this.state.appointmentsList}
-							renderRow={this.renderRowAppointments}
-						/>
-					</View>
+					{this.state.showspinner &&
+						<View
+							style={{
+								backgroundColor: 'white',
+								justifyContent: 'center',
+								marginTop: fullHeight / 4,
+							}}
+						>
+							<Spinner />
+							<Text
+								style={{
+									justifyContent: 'center',
+									alignItems: 'center',
+									alignSelf: 'center',
+									fontWeight: 'bold'
+								}}
+							>{this.state.showspinnertext}</Text>
+						</View>
+					}
+					{this.state.showspinner === false &&
+						<View>
+							<ListView
+								enableEmptySections
+								dataSource={this.state.appointmentsList}
+								renderRow={this.renderRowAppointments}
+							/>
+						</View>
+					}
 					<View style={{ height: 60 }} />
 				</Content>
-				<ActionButton
-					size={40}
-					buttonColor="#9DBDF2"
-					offsetX={10}
-					offsetY={65}
-					ref={(btn) => {
-						this.floatingBtn = btn;
-					}}
-					onPress={() => { this.hideKeyboard(); }}
-					icon={<IconMaterial name="settings" size={28} color="white" />}
-				>
-					<ActionButton.Item buttonColor="steelblue" title="Create appointment" onPress={() => { this.createNewAppointment(); }}>
-						<MaterialCommunityIcons name="plus" size={28} color="white" />
-					</ActionButton.Item>
-				</ActionButton>
+				{this.state.showspinner === false &&
+					<ActionButton
+						size={40}
+						buttonColor="#9DBDF2"
+						offsetX={10}
+						offsetY={65}
+						ref={(btn) => {
+							this.floatingBtn = btn;
+						}}
+						onPress={() => { this.hideKeyboard(); }}
+						icon={<IconMaterial name="settings" size={28} color="white" />}
+					>
+						<ActionButton.Item buttonColor="steelblue" title="Create appointment" onPress={() => { this.createNewAppointment(); }}>
+							<MaterialCommunityIcons name="plus" size={28} color="white" />
+						</ActionButton.Item>
+					</ActionButton>
+				}
 				<ModalSide />
 				<FooterMain activeArea="Appointments" />
 			</Container>

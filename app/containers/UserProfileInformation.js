@@ -4,7 +4,7 @@ import _ from 'lodash';
 import PouchDB from 'pouchdb-react-native';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { ListView, Alert, AsyncStorage, Keyboard, View, Platform, ScrollView, Switch } from 'react-native';
+import { ListView, Alert, AsyncStorage, Keyboard, View, Platform, ScrollView, Switch, Dimensions } from 'react-native';
 import { Col, Row, Grid } from 'react-native-easy-grid';
 import ActionButton from 'react-native-action-button';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -20,6 +20,9 @@ PouchDB.plugin(require('pouchdb-find'));
 let DBCompanyConnection = null;
 let DBAppointmentsConnection = null;
 
+const fullWidth = Dimensions.get('window').width; // full width
+const fullHeight = Dimensions.get('window').height; // full height
+
 const hat = require('hat');
 
 class UserProfile extends Component {
@@ -31,6 +34,7 @@ class UserProfile extends Component {
 		});
 		this.state = {
 			showspinner: false,
+			showspinnertext: 'Loading user information, please wait',
 			newuser: this.props.newuser || false,
 			area: this.props.area || '',
 			userid: this.props.userid || '',
@@ -447,8 +451,26 @@ class UserProfile extends Component {
 		return (
 			<Container style={{ paddingTop: (Platform.OS === 'ios') ? 64 : 54 }}>
 				<Content>
-					{this.state.showspinner && <Spinner /> }
-					{this.state.area === 'profile' &&
+					{this.state.showspinner &&
+						<View
+							style={{
+								backgroundColor: 'white',
+								justifyContent: 'center',
+								marginTop: fullHeight / 4,
+							}}
+						>
+							<Spinner />
+							<Text
+								style={{
+									justifyContent: 'center',
+									alignItems: 'center',
+									alignSelf: 'center',
+									fontWeight: 'bold'
+								}}
+							>{this.state.showspinnertext}</Text>
+						</View>
+					}
+					{this.state.area === 'profile' && this.state.showspinner === false &&
 						<View style={{ padding: 20 }}>
 							<TextField label="Name" value={this.state.user.name} onChangeText={value => this.onChangeText(value, 'name')} />
 							<TextField label="Alias" value={this.state.user.alias} onChangeText={value => this.onChangeText(value, 'alias')} />
@@ -482,7 +504,7 @@ class UserProfile extends Component {
 							</View>
 						</View>
 					}
-					{this.state.area === 'management' &&
+					{this.state.area === 'management' && this.state.showspinner === false &&
 						<View style={{ padding: 20 }}>
 							{this.state.newuser === true &&
 								<TextField label="Name" value={this.state.user.name} onChangeText={value => this.onChangeText(value, 'name')} />
@@ -509,8 +531,8 @@ class UserProfile extends Component {
 					}
 					<View style={{ height: 60 }} />
 				</Content>
-				{this.renderButtonsProfile()}
-				{this.renderButtonsUsersManagement()}
+					{this.renderButtonsProfile()}
+					{this.renderButtonsUsersManagement()}
 				<FooterMain activeArea="More" />
 			</Container>
 		);

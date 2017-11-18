@@ -14,6 +14,9 @@ import { FooterMain } from '../containers/common';
 PouchDB.plugin(require('pouchdb-find'));
 let DBCompanyConnection = null;
 
+const fullWidth = Dimensions.get('window').width; // full width
+const fullHeight = Dimensions.get('window').height; // full height
+
 class UsersManagement extends Component {
 
 	constructor(props) {
@@ -23,7 +26,8 @@ class UsersManagement extends Component {
 		this.state = {
 			usersListCount: 0,
 			usersList: dsUsersList.cloneWithRows([]),
-			showspinner: false
+			showspinner: false,
+			showspinnertext: 'Loading users, please wait'
 		};
 		this.renderRowUsers = this.renderRowUsers.bind(this);
 		this.companyDatabase = '';
@@ -140,31 +144,54 @@ class UsersManagement extends Component {
 		return (
 			<Container style={{ paddingTop: (Platform.OS === 'ios') ? 64 : 54 }}>
 				<Content>
-					{this.state.showspinner && <Spinner /> }
-					<View>
-						<ListView
-							enableEmptySections
-							dataSource={this.state.usersList}
-							renderRow={this.renderRowUsers}
-						/>
-					</View>
+					{this.state.showspinner &&
+						<View
+							style={{
+								backgroundColor: 'white',
+								justifyContent: 'center',
+								marginTop: fullHeight / 4,
+							}}
+						>
+							<Spinner />
+							<Text
+								style={{
+									justifyContent: 'center',
+									alignItems: 'center',
+									alignSelf: 'center',
+									fontWeight: 'bold'
+								}}
+							>{this.state.showspinnertext}</Text>
+						</View>
+					}
+					{this.state.showspinner === false &&
+						<View>
+							<ListView
+								enableEmptySections
+								dataSource={this.state.usersList}
+								renderRow={this.renderRowUsers}
+							/>
+						</View>
+					}
+					
 					<View style={{ height: 60 }} />
 				</Content>
-				<ActionButton
-					size={40}
-					buttonColor="#9DBDF2"
-					offsetX={10}
-					offsetY={65}
-					ref={(btn) => {
-						this.floatingBtn = btn;
-					}}
-					onPress={() => { this.hideKeyboard(); }}
-					icon={<IconMaterial name="settings" size={28} color="white" />}
-				>
-					<ActionButton.Item buttonColor="steelblue" title="Create user" onPress={() => { this.createNewUser(); }}>
-						<MaterialCommunityIcons name="plus" size={28} color="white" />
-					</ActionButton.Item>
-				</ActionButton>
+				{this.state.showspinner === false &&
+					<ActionButton
+						size={40}
+						buttonColor="#9DBDF2"
+						offsetX={10}
+						offsetY={65}
+						ref={(btn) => {
+							this.floatingBtn = btn;
+						}}
+						onPress={() => { this.hideKeyboard(); }}
+						icon={<IconMaterial name="settings" size={28} color="white" />}
+					>
+						<ActionButton.Item buttonColor="steelblue" title="Create user" onPress={() => { this.createNewUser(); }}>
+							<MaterialCommunityIcons name="plus" size={28} color="white" />
+						</ActionButton.Item>
+					</ActionButton>
+				}
 				<FooterMain activeArea="More" />
 			</Container>
 		);

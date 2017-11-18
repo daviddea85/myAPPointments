@@ -68,7 +68,6 @@ class LoginForm extends Component {
 				{ cancelable: false }
 			);
 		} catch (error) {
-			console.log(error);
 			Alert.alert(
 				'Sign in',
 				'Email already exists, use log in instead',
