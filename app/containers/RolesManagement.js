@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Platform, AsyncStorage, ListView, View, TextInput, TouchableOpacity, Dimensions, Keyboard } from 'react-native';
+import { Platform, AsyncStorage, ListView, View, TextInput, TouchableOpacity, Dimensions, Keyboard, Alert } from 'react-native';
 import { Container, Content, Text, Card, Header, Body, Button, Title, CardItem, Icon, Fab, Tabs, Tab, TabHeading, Badge, Right, Label, Picker, Item, ListItem, Spinner  } from 'native-base';
 import { Actions } from 'react-native-router-flux';
 import ActionButton from 'react-native-action-button';
@@ -17,19 +17,19 @@ let DBCompanyConnection = null;
 const fullWidth = Dimensions.get('window').width; // full width
 const fullHeight = Dimensions.get('window').height; // full height
 
-class TreatmentsManagement extends Component {
+class RolesManagement extends Component {
 
 	constructor(props) {
 		super(props);
 		this.floatingBtn = null;
-		const dsTreatmentsList = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+		const dsRolesList = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 		this.state = {
-			treatmentsListCount: 0,
-			treatmentsList: dsTreatmentsList.cloneWithRows([]),
+			rolesListCount: 0,
+			rolesList: dsRolesList.cloneWithRows([]),
 			showspinner: false,
-			showspinnertext: 'Loading treatments, please wait'
+			showspinnertext: 'Loading roles, please wait'
 		};
-		this.renderRowTreatments = this.renderRowTreatments.bind(this);
+		this.renderRowRoles = this.renderRowRoles.bind(this);
 		this.companyDatabase = '';
 	}
 
@@ -57,19 +57,34 @@ class TreatmentsManagement extends Component {
 
 	componentWillUnmount() {}
 
-	async getTreatmentsList() {
-		const dsTreatmentsList = new ListView.DataSource({
+	async getRolesList() {
+		const dsRolesList = new ListView.DataSource({
 			rowHasChanged: (r1, r2) => r1 !== r2
 		});
-		this.queryTreatments = { selector: { doctype: 'treatmentlist' }, };
-		const treatmentsList = await DBCompanyConnection.find(this.queryTreatments);
-		if (treatmentsList.docs.length > 0) {
-			treatmentsList.docs = _.sortBy(treatmentsList.docs, ['name']);
-			this.setState({ treatmentsList: dsTreatmentsList.cloneWithRows(treatmentsList.docs), treatmentsListCount: treatmentsList.docs.length});
-		} else {
-			this.setState({ treatmentsList: dsTreatmentsList.cloneWithRows([]), treatmentsListCount: 0 });
+		this.queryRoles = { selector: { doctype: 'role' }, };
+		const rolesList = await DBCompanyConnection.find(this.queryRoles);
+		this.rolesTypesList = [];
+		let rolesListObject = {
+			key: '0',
+			value: 'chief',
+			label: 'Chief'
+		};
+		this.rolesTypesList.push(rolesListObject);
+		if (rolesList.docs.length > 0) {
+			for (let e = 0; e < rolesList.docs.length; e += 1) {
+				rolesListObject = {
+					key: '',
+					value: '',
+					label: ''
+				};
+				rolesListObject.key = rolesList.docs[e]._rev;
+				rolesListObject.value = rolesList.docs[e]._id;
+				rolesListObject.label = rolesList.docs[e].title;
+				this.rolesTypesList.push(rolesListObject);
+			}
 		}
-		this.setState({ showspinner: false });
+		rolesList.docs = _.sortBy(rolesList.docs, ['label']);
+		this.setState({ rolesList: dsRolesList.cloneWithRows(this.rolesTypesList), rolesListCount: this.rolesTypesList.length, showspinner: false });
 	}
 
 	connectCompanyDb(isConnected) {
@@ -80,26 +95,37 @@ class TreatmentsManagement extends Component {
 		// DBCompanyConnection = new PouchDB(companyLocalDatabase);
 		this.companyDBConnected = true;
 		if (isConnected && this.companyDBConnected) {
-			this.getTreatmentsList();
+			this.getRolesList();
 		}
 	}
 
-	createNewTreatment() {
-		Actions.TreatmentInformation({ title: 'Treatment information', treatmentid: '' });
+	createNewRole() {
+		Actions.RoleInformation({ title: 'Role information', roleid: '' });
 	}
 
-	treatmentInfo(treatment) {
-		Actions.TreatmentInformation({ title: 'Treatment information', treatmentid: treatment._id });
+	roleInfo(role) {
+		if (role.value === 'chief') {
+			Alert.alert(
+				'Role error',
+				'This is a role by default in the system and cannot be modified',
+				[
+					{ text: 'OK', onPress: () => console.log('role by default not editable'), style: 'cancel' }
+				],
+				{ cancelable: true }
+			);
+		} else {
+			Actions.RoleInformation({ title: 'Role information', roleid: role.value });
+		}
 	}
 
 	hideKeyboard() {
 		Keyboard.dismiss();
 	}
 
-	renderRowTreatments(treatment) {
-		if (treatment !== null) {
+	renderRowRoles(role) {
+		if (role !== null) {
 			return (
-				<TouchableOpacity style={{ marginTop: 3, marginLeft: 5, marginRight: 5 }} onPress={() => { this.treatmentInfo(treatment); }}>
+				<TouchableOpacity style={{ marginTop: 3, marginLeft: 5, marginRight: 5 }} onPress={() => { this.roleInfo(role); }}>
 					<View
 						style={{
 							flex: 1,
@@ -111,7 +137,7 @@ class TreatmentsManagement extends Component {
 							backgroundColor: 'white'
 						}}
 					>
-						<Text style={{ marginTop: 12.5, marginLeft: 12, flex: 0.8 }}>{treatment.name}</Text>
+						<Text style={{ marginTop: 12.5, marginLeft: 12, flex: 0.8 }}>{role.label}</Text>
 						<MaterialCommunityIcons
 							name="chevron-right"
 							style={{
@@ -158,8 +184,8 @@ class TreatmentsManagement extends Component {
 						<View>
 							<ListView
 								enableEmptySections
-								dataSource={this.state.treatmentsList}
-								renderRow={this.renderRowTreatments}
+								dataSource={this.state.rolesList}
+								renderRow={this.renderRowRoles}
 							/>
 						</View>
 					}
@@ -178,7 +204,7 @@ class TreatmentsManagement extends Component {
 						onPress={() => { this.hideKeyboard(); }}
 						icon={<IconMaterial name="settings" size={28} color="white" />}
 					>
-						<ActionButton.Item buttonColor="steelblue" title="Create treatment" onPress={() => { this.createNewTreatment(); }}>
+						<ActionButton.Item buttonColor="steelblue" title="Create role" onPress={() => { this.createNewRole(); }}>
 							<MaterialCommunityIcons name="plus" size={28} color="white" />
 						</ActionButton.Item>
 					</ActionButton>
@@ -193,4 +219,4 @@ const mapStateToProps = (state) => {
 	return state;
 };
 
-export default connect(mapStateToProps, { })(TreatmentsManagement);
+export default connect(mapStateToProps, { })(RolesManagement);

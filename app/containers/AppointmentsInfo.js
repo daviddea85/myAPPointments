@@ -204,9 +204,9 @@ class AppointmentsInfo extends Component {
 		const newtreatments = this.state.treatments;
 		for (let i = 0; i < newtreatments.length; i += 1) {
 			if (treatmentInfo.treatment_id === newtreatments[i].treatment_id) {
-				if (prop === 'title') {
-					newtreatments[i].title = newValue.label;
-					newtreatments[i].title_id = newValue.value;
+				if (prop === 'nme') {
+					newtreatments[i].name = newValue.label;
+					newtreatments[i].name_id = newValue.value;
 				}
 				if (prop === 'notes') {
 					newtreatments[i].notes = newValue;
@@ -532,8 +532,8 @@ class AppointmentsInfo extends Component {
 	addTreatment() {
 		const treatment = {};
 		treatment.doctype = 'treatment';
-		treatment.title = '';
-		treatment.title_id = '';
+		treatment.name = '';
+		treatment.name_id = '';
 		treatment.notes = '';
 		treatment.appointment_id = this.state.appointmentid;
 		const newHatId = hat();
@@ -547,7 +547,7 @@ class AppointmentsInfo extends Component {
 	deleteTreatmentConfirmationAlert(treatment) {
 		Alert.alert(
 			'Treatment delete',
-			`Are you sure you want to delete the treatment ${treatment.title.toLowerCase()} for the appointment on ${this.state.appointment.date} at ${this.state.appointment.hour}:${this.state.appointment.minute}?`,
+			`Are you sure you want to delete the treatment ${treatment.name.toLowerCase()} for the appointment on ${this.state.appointment.date} at ${this.state.appointment.hour}:${this.state.appointment.minute}?`,
 			[
 				{ text: 'Yes', onPress: () => this.deleteTreatment(treatment), style: 'cancel' },
 				{ text: 'No', onPress: () => console.log('cancel appointment delete'), style: 'cancel' }
@@ -600,8 +600,8 @@ class AppointmentsInfo extends Component {
 				newtreatment.employee_id = this.state.appointment.employee_id;
 				newtreatment.treatment_id = treatment.treatment_id;
 				newtreatment.notes = treatment.notes;
-				newtreatment.title = treatment.title;
-				newtreatment.title_id = treatment.title_id;
+				newtreatment.name = treatment.name;
+				newtreatment.name_id = treatment.name_id;
 				const savedtreatment = await DBCompanyConnection.post(newtreatment);
 				const newrev = savedtreatment.rev;
 				const newid = savedtreatment.id;
@@ -622,7 +622,7 @@ class AppointmentsInfo extends Component {
 	saveTreatmentAlert(saveText, treatment) {
 		Alert.alert(
 			`Treatment ${saveText}`,
-			`The treatment ${treatment.title.toLowerCase()} for ${this.state.appointment.contact_name} on ${this.state.appointment.date} has been ${saveText}`,
+			`The treatment ${treatment.name.toLowerCase()} for ${this.state.appointment.contact_name} on ${this.state.appointment.date} has been ${saveText}`,
 			[
 				{ text: 'OK', onPress: () => console.log('treatment created/updated'), style: 'cancel' }
 			],
@@ -706,7 +706,7 @@ class AppointmentsInfo extends Component {
 	deleteImageTreatmentConfirmationAlert() {
 		Alert.alert(
 			'Image treatment',
-			`The image ${this.state.treatment.title.toLowerCase()} for ${this.state.appointment.contact_name} on ${this.state.appointment.date} has been deleted`,
+			'The image has been deleted',
 			[
 				{ text: 'Ok', onPress: () => console.log('cancel delete appointment'), style: 'cancel' }
 			],
@@ -872,7 +872,7 @@ class AppointmentsInfo extends Component {
 						paddingHorizontal: 12,
 					}}
 				>
-					<ModalPicker data={this.treatmentsList} label="Treatments" initValue={treatment.title} onChange={(option)=>{ this.onChangeTreatmentInfo(option, 'title', treatment); }} />
+					<ModalPicker data={this.treatmentsList} label="Treatments" initValue={treatment.name} onChange={(option)=>{ this.onChangeTreatmentInfo(option, 'name', treatment); }} />
 				</View>
 				<View
 					style={{

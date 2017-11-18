@@ -78,7 +78,20 @@ class More extends Component {
 		}
 	}
 	
-	rolesManagement() {}
+	rolesManagement() {
+		if (this.accessType === 'admin') {
+			Actions.RolesManagement({ title: 'Roles management' });
+		} else {
+			Alert.alert(
+				'User access',
+				`The user ${this.userLoggedEmail} does not have access to the area, please contact your administrator`,
+				[
+					{ text: 'Ok', onPress: () => console.log('permission access to role management denied'), style: 'cancel' },
+				],
+				{ cancelable: false }
+			);
+		}
+	}
 
 	userProfile() {
 		Actions.UserProfileInformation({ title: 'User profile', area: 'profile', userid: this.userLoggedId });

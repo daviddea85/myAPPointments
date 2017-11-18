@@ -9,7 +9,7 @@ import { Col, Row, Grid } from 'react-native-easy-grid';
 import ActionButton from 'react-native-action-button';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { StyleProvider, Body, Container, Content, Header, Item, Input, Label, Title, Button, Text, Spinner } from 'native-base';
-import { FooterMain, PageHeader } from '../containers/common';
+import { FooterMain } from '../containers/common';
 import TextField from '../containers/common/TextField';
 import ModalPicker from './common/ModalPicker';
 import styles from './common/ModalPickerStyle';
@@ -18,13 +18,14 @@ import { InfoRowStacked } from './common/InfoRowStacked';
 PouchDB.plugin(require('pouchdb-find'));
 
 let DBCompanyConnection = null;
+let DBAppointmentsConnection = null;
 
 const fullWidth = Dimensions.get('window').width; // full width
 const fullHeight = Dimensions.get('window').height; // full height
 
 const hat = require('hat');
 
-class TreatmentInformation extends Component {
+class RoleInformation extends Component {
 
 	constructor(props) {
 		super(props);
@@ -33,14 +34,11 @@ class TreatmentInformation extends Component {
 		});
 		this.state = {
 			showspinner: false,
-			showspinnertext: 'Loading treatment info, please wait',
-			treatmentid: this.props.treatmentid || false,
-			treatment: {
-				doctype: 'treatmentlist',
-				name: '',
-				duration: '',
-				price: '',
-				units: ''
+			showspinnertext: 'Loading role info, please wait',
+			roleid: this.props.roleid || false,
+			role: {
+				doctype: 'role',
+				title: '',
 			}
 		};
 		this.companyDatabase = '';
@@ -70,84 +68,84 @@ class TreatmentInformation extends Component {
 		}
 	}
 
-	onChangeText(newValue, prop) {
-		const intreatment = this.state.treatment;
-		intreatment[prop] = newValue;
-		this.setState({ treatment: intreatment });
-	}
-
-	async getTreatmentInfo() {
-		if (!_.isEmpty(this.state.treatmentid)) {
-			const queryTreatment = { selector: { doctype: 'treatmentlist', _id: this.state.treatmentid }, };
-			const treatmentinfo = await DBCompanyConnection.find(queryTreatment);
-			if (treatmentinfo.docs.length > 0) {
-				this.setState({ treatment: treatmentinfo.docs[0], showspinner: false });
+	async getRoleInfo() {
+		if (!_.isEmpty(this.state.roleid)) {
+			const queryRole = { selector: { doctype: 'role', _id: this.state.roleid }, };
+			const roleinfo = await DBCompanyConnection.find(queryRole);
+			if (roleinfo.docs.length > 0) {
+				this.setState({ role: roleinfo.docs[0], showspinner: false });
 			}
 		} else {
-			this.setState({ treatment: this.state.treatment, showspinner: false });
+			this.setState({ role: this.state.role, showspinner: false });
 		}
 	}
 
-	async saveTreatment(action) {
+	onChangeText(newValue, prop) {
+		const inrole = this.state.role;
+		inrole[prop] = newValue;
+		this.setState({ role: inrole });
+	}
+
+	async saveRole(action) {
 		this.hideKeyboard();
-		if (_.isEmpty(this.state.treatment.name) || _.isEmpty(this.state.treatment.price)) {
+		if (_.isEmpty(this.state.role.title)) {
 			Alert.alert(
 				'Validation failed',
-				'Treatment cannot be saved without a valid fieds',
+				'Role cannot be saved without a valid name',
 				[
-					{ text: 'OK', onPress: () => console.log('treatment created/updated') },
+					{ text: 'OK', onPress: () => console.log('role created/updated') },
 				],
 				{ cancelable: true }
 			);
 		} else {
 			if (action === 'updated') {
-				const updatedTreatment = await DBCompanyConnection.put(this.state.treatment);
-				const newrevTreatment = updatedTreatment.rev;
-				this.onChangeText(newrevTreatment, '_rev');
+				const updatedRole = await DBCompanyConnection.put(this.state.role);
+				const newrevRole = updatedRole.rev;
+				this.onChangeText(newrevRole, '_rev');
 			} else {
-				const createdTreatment = await DBCompanyConnection.post(this.state.treatment);
-				const newrevTreatment = createdTreatment.rev;
-				this.onChangeText(newrevTreatment, '_rev');
+				const createdRole = await DBCompanyConnection.post(this.state.role);
+				const newrevRole = createdRole.rev;
+				this.onChangeText(newrevRole, '_rev');
 			}
-			this.saveTreatmentAlert(action);
+			this.saveRoleAlert(action);
 		}
 	}
 
-	async saveTreatmentAlert(actionText) {
+	async saveRoleAlert(actionText) {
 		if (actionText === 'created') {
-			this.setState({ newtreatment: false });
+			this.setState({ newrole: false });
 		}
 		Alert.alert(
-			`Treatment ${actionText}`,
-			`The treatment ${this.state.treatment.name} has been ${actionText}`,
+			`Role ${actionText}`,
+			`The role ${this.state.role.title} has been ${actionText}`,
 			[
-				{ text: 'OK', onPress: () => console.log('treatment created/updated') },
+				{ text: 'OK', onPress: () => console.log('role created/updated') },
 			],
 			{ cancelable: true }
 		);
 	}
 
-	async deleteTreatmentConfirmationAlert() {
+	async deleteRoleConfirmationAlert() {
 		Alert.alert(
-			'Delete treatment',
-			`Are you sure you want to delete the treatment ${this.state.treatment.name}?`,
+			'Delete role',
+			`Are you sure you want to delete the role ${this.state.role.title}?`,
 			[
-				{ text: 'Yes', onPress: () => this.deleteTreatment(), style: 'cancel' },
-				{ text: 'No', onPress: () => console.log('cancel treatment delete'), style: 'cancel' }
+				{ text: 'Yes', onPress: () => this.deleteRole(), style: 'cancel' },
+				{ text: 'No', onPress: () => console.log('cancel role delete'), style: 'cancel' }
 			],
 			{ cancelable: true }
 		);
 	}
 
-	async deleteTreatment() {
-		const treatmentDeleted = await DBCompanyConnection.remove(this.state.treatment);
-		this.deleteTreatmentAlert();
+	async deleteRole() {
+		const roleDeleted = await DBCompanyConnection.remove(this.state.role);
+		this.deleteRoleAlert();
 	}
 
-	async deleteTreatmentAlert() {
+	async deleteRoleAlert() {
 		Alert.alert(
-			'Treatment deleted',
-			'The treatment has been deleted',
+			'Role deleted',
+			'The role has been deleted',
 			[
 				{ text: 'OK', onPress: () => Actions.pop({ refresh: { goBack: true } }) },
 			],
@@ -160,15 +158,15 @@ class TreatmentInformation extends Component {
 		const setsyncURL = `https://deapps2017:davidenguidanos24380850@deapps2017.cloudant.com/${this.companyDatabase.toLowerCase()}`;
 		DBCompanyConnection = new PouchDB(setsyncURL);
 		this.companyDBConnected = true;
-		this.getTreatmentInfo();
+		this.getRoleInfo();
 	}
 
 	hideKeyboard() {
 		Keyboard.dismiss();
 	}
 
-	renderButtonsTreatmentManagement() {
-		if (this.state.newtreatment === true) {
+	renderButtonsRoleManagement() {
+		if (this.state.newrole === true) {
 			return (
 				<ActionButton
 					size={40}
@@ -181,8 +179,8 @@ class TreatmentInformation extends Component {
 					onPress={() => { this.hideKeyboard(); }}
 					icon={<IconMaterial name="settings" size={28} color="white" />}
 				>
-					<ActionButton.Item buttonColor="#8fbc8f" title="Save treatment" >
-						<IconMaterial name="save" size={28} color="white" onPress={() => { this.saveTreatment('created'); }} />
+					<ActionButton.Item buttonColor="#8fbc8f" title="Save role" >
+						<IconMaterial name="save" size={28} color="white" onPress={() => { this.saveRole('created'); }} />
 					</ActionButton.Item>
 				</ActionButton>
 			);
@@ -199,10 +197,10 @@ class TreatmentInformation extends Component {
 				onPress={() => { this.hideKeyboard(); }}
 				icon={<IconMaterial name="settings" size={28} color="white" />}
 			>
-				<ActionButton.Item buttonColor="#8fbc8f" title="Update treatment" onPress={() => { this.saveTreatment('updated'); }} >
+				<ActionButton.Item buttonColor="#8fbc8f" title="Update role" onPress={() => { this.saveRole('updated'); }} >
 					<IconMaterial name="save" size={28} color="white" />
 				</ActionButton.Item>
-				<ActionButton.Item buttonColor="#f08080" title="Delete treatment" onPress={() => { this.deleteTreatmentConfirmationAlert(); }} >
+				<ActionButton.Item buttonColor="#f08080" title="Delete role" onPress={() => { this.deleteRoleConfirmationAlert(); }} >
 					<IconMaterial name="delete" size={28} color="white" />
 				</ActionButton.Item>
 			</ActionButton>
@@ -234,15 +232,12 @@ class TreatmentInformation extends Component {
 					}
 					{this.state.showspinner === false &&
 						<View style={{ padding: 20 }}>
-							<TextField label="Name" value={this.state.treatment.name} onChangeText={value => this.onChangeText(value, 'name')} validate />
-							<TextField label="Duration (min)" value={this.state.treatment.duration} onChangeText={value => this.onChangeText(value, 'duration')} />
-							<TextField label="Price" value={this.state.treatment.price} onChangeText={value => this.onChangeText(value, 'price')} validate />
-							<TextField label="Units" value={this.state.treatment.units} onChangeText={value => this.onChangeText(value, 'units')} />
+							<TextField label="Name" value={this.state.role.title} onChangeText={value => this.onChangeText(value, 'title')} validate />
 						</View>
 					}
 					<View style={{ height: 60 }} />
 				</Content>
-					{this.renderButtonsTreatmentManagement()}
+					{this.renderButtonsRoleManagement()}
 				<FooterMain activeArea="More" />
 			</Container>
 		);
@@ -258,4 +253,4 @@ export default connect(
 			dispatch
 		};
 	}
-)(TreatmentInformation);
+)(RoleInformation);

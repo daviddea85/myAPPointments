@@ -36,6 +36,8 @@ import UsersManagement from './containers/UsersManagement';
 import UserProfileInformation from './containers/UserProfileInformation';
 import TreatmentsManagement from './containers/TreatmentsManagement';
 import TreatmentInformation from './containers/TreatmentInformation';
+import RolesManagement from './containers/RolesManagement';
+import RoleInformation from './containers/RoleInformation';
 
 import FirebaseApp from './lib/firebaseData';
 
@@ -86,6 +88,8 @@ class AppContainer extends Component {
 					<Scene key="UserProfileInformation" component={UserProfileInformation} hideNavBar={false} title="User profile" />
 					<Scene key="TreatmentsManagement" component={TreatmentsManagement} hideNavBar={false} title="Treatments management" />
 					<Scene key="TreatmentInformation" component={TreatmentInformation} hideNavBar={false} title="Treatment information" />
+					<Scene key="RolesManagement" component={RolesManagement} hideNavBar={false} title="Roles management" />
+					<Scene key="RoleInformation" component={RoleInformation} hideNavBar={false} title="Role information" />
 				</Scene>
 			</Router>
 		);
