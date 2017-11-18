@@ -237,7 +237,6 @@ class UserProfile extends Component {
 			'User deleted',
 			'The user has been deleted',
 			[
-				// { text: 'OK', onPress: () => Actions.UsersManagement({ title: 'Users management' }) },
 				{ text: 'OK', onPress: () => Actions.pop({ refresh: { goBack: true } }) },
 			],
 			{ cancelable: true }

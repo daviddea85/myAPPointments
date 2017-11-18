@@ -100,7 +100,20 @@ class More extends Component {
 		
 	}
 
-	treatmentsManagement() {}
+	treatmentsManagement() {
+		if (this.accessType === 'admin') {
+			Actions.TreatmentsManagement({ title: 'Treatments management' });
+		} else {
+			Alert.alert(
+				'User access',
+				`The user ${this.userLoggedEmail} does not have access to the area, please contact your administrator`,
+				[
+					{ text: 'Ok', onPress: () => console.log('permission access to treatments management denied'), style: 'cancel' },
+				],
+				{ cancelable: false }
+			);
+		}
+	}
 
 	reportsList() {}
 

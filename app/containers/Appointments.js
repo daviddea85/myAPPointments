@@ -176,9 +176,9 @@ class Appointments extends Component {
 				appointmentsList.docs[i].treatmentslist = '';
 				for (let t = 0; t < treatmentInfo.docs.length; t += 1) {
 					if (appointmentsList.docs[i].treatmentslist === '') {
-						appointmentsList.docs[i].treatmentslist = `${treatmentInfo.docs[t].title}`;
+						appointmentsList.docs[i].treatmentslist = `${treatmentInfo.docs[t].name}`;
 					} else {
-						appointmentsList.docs[i].treatmentslist = `${appointmentsList.docs[i].treatmentslist}, ${treatmentInfo.docs[t].title}`;
+						appointmentsList.docs[i].treatmentslist = `${appointmentsList.docs[i].treatmentslist}, ${treatmentInfo.docs[t].name}`;
 					}
 				}
 				appointmentsList.docs[i].hour = Math.round(appointmentsList.docs[i].hour * 100) / 100;

@@ -15,22 +15,27 @@ import {
 
 import { modalState, setModalState } from './lib/Utilities';
 import IconMaterial from 'react-native-vector-icons/MaterialIcons';
-import Dashboard from './containers/Dashboard';
-import Appointments from './containers/Appointments';
-import AppointmentsInfo from './containers/AppointmentsInfo';
-import Contacts from './containers/Contacts';
-import ContactInfo from './containers/ContactInfo';
-import Alerts from './containers/Alerts';
-import More from './containers/More';
-import UserProfileInformation from './containers/UserProfileInformation';
-
-import AppointmentsEmployeesList from './containers/AppointmentsEmployeesList';
 
 import LoginForm from './containers/LoginForm';
 import CompanyList from './containers/CompanyList';
 import CreateCompany from './containers/CreateCompany';
 
+import Dashboard from './containers/Dashboard';
+
+import Appointments from './containers/Appointments';
+import AppointmentsEmployeesList from './containers/AppointmentsEmployeesList';
+import AppointmentsInfo from './containers/AppointmentsInfo';
+
+import Contacts from './containers/Contacts';
+import ContactInfo from './containers/ContactInfo';
+
+import Alerts from './containers/Alerts';
+
+import More from './containers/More';
 import UsersManagement from './containers/UsersManagement';
+import UserProfileInformation from './containers/UserProfileInformation';
+import TreatmentsManagement from './containers/TreatmentsManagement';
+import TreatmentInformation from './containers/TreatmentInformation';
 
 import FirebaseApp from './lib/firebaseData';
 
@@ -79,6 +84,8 @@ class AppContainer extends Component {
 					<Scene key="More" component={More} hideNavBar={false} title="More" type={ActionConst.REPLACE} renderBackButton={()=>(null)} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
 					<Scene key="UsersManagement" component={UsersManagement} hideNavBar={false} title="Users management" />
 					<Scene key="UserProfileInformation" component={UserProfileInformation} hideNavBar={false} title="User profile" />
+					<Scene key="TreatmentsManagement" component={TreatmentsManagement} hideNavBar={false} title="Treatments management" />
+					<Scene key="TreatmentInformation" component={TreatmentInformation} hideNavBar={false} title="Treatment information" />
 				</Scene>
 			</Router>
 		);

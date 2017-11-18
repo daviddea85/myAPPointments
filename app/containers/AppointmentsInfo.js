@@ -285,18 +285,18 @@ class AppointmentsInfo extends Component {
 		treatmentsListObject = {
 			key: '0',
 			value: '',
-			label: ''
+			name: ''
 		};
 		if (treatmentInfo.docs.length > 0) {
 			for (let t = 0; t < treatmentInfo.docs.length; t += 1) {
 				treatmentsListObject = {
 					key: treatmentInfo.docs[t]._rev,
 					value: treatmentInfo.docs[t]._id,
-					label: treatmentInfo.docs[t].title
+					label: treatmentInfo.docs[t].name
 				};
 				this.treatmentsList.push(treatmentsListObject);
 			}
-			this.treatmentsList = _.sortBy(this.treatmentsList, ['title']);
+			this.treatmentsList = _.sortBy(this.treatmentsList, ['name']);
 		}
 		let indexHour = 0;
 		this.hoursList = [
@@ -440,14 +440,18 @@ class AppointmentsInfo extends Component {
 						this.setState({ imageslist: dsImages.cloneWithRows([]), images: [] });
 					}
 				}
-				this.setState({
-					appointment: appointmentInfo.docs[0],
-					contact: contactInfo.docs[0],
-					addresseslist: dsAdresses.cloneWithRows(contactInfo.docs[0].postalAddresses),
-					telephoneslist: dsTelephones.cloneWithRows(contactInfo.docs[0].phoneNumbers),
-					emailslist: dsEmails.cloneWithRows(contactInfo.docs[0].emailAddresses),
-				 });
-				this.setState({ showspinner: false });
+				if (contactInfo.docs.length > 0) {
+					this.setState({
+						appointment: appointmentInfo.docs[0],
+						contact: contactInfo.docs[0],
+						addresseslist: dsAdresses.cloneWithRows(contactInfo.docs[0].postalAddresses),
+						telephoneslist: dsTelephones.cloneWithRows(contactInfo.docs[0].phoneNumbers),
+						emailslist: dsEmails.cloneWithRows(contactInfo.docs[0].emailAddresses),
+					});
+					this.setState({ showspinner: false });
+				} else {
+					this.setState({ appointment: appointmentInfo.docs[0], showspinner: false });
+				}
 			}
 			this.setState({ showspinner: false });
 		}
