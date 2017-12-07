@@ -21,6 +21,7 @@ import CompanyList from './containers/CompanyList';
 import CreateCompany from './containers/CreateCompany';
 
 import Dashboard from './containers/Dashboard';
+import AppointmentsTreatmentsList from './containers/AppointmentsTreatmentsList';
 
 import Appointments from './containers/Appointments';
 import AppointmentsEmployeesList from './containers/AppointmentsEmployeesList';
@@ -67,6 +68,18 @@ class AppContainer extends Component {
 		);
 	}
 
+	navBarRightButton() {
+		return (
+			<IconMaterial
+				style={{ position: 'absolute', paddingTop: 3, paddingRight: 10 }}
+				name="toc"
+				size={32}
+				color="black"
+				onPress={() => { this.sideModalControl(); }}
+			/>
+		);
+	}
+
 	render() {
 		return (
 			<Router
@@ -75,15 +88,16 @@ class AppContainer extends Component {
 				<Scene key="root">
 					<Scene key="Login" component={LoginForm} hideNavBar type={ActionConst.REPLACE} />
 					<Scene key="CompanyList" component={CompanyList} hideNavBar={false} title="Company list" />
-					<Scene key="CreateCompany" component={CreateCompany} hideNavBar={false} />
-					<Scene key="Dashboard" component={Dashboard} hideNavBar={false} title="Dashboard" type={ActionConst.REPLACE} renderBackButton={()=>(null)} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
-					<Scene initial key="Appointments" component={Appointments} hideNavBar={false} title="Appointments" type={ActionConst.REPLACE} renderBackButton={()=>(null)} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
+					<Scene key="CreateCompany" component={CreateCompany} hideNavBar={false} title='Company information' />
+					<Scene key="Dashboard" component={Dashboard} hideNavBar={false} title="Dashboard" type={ActionConst.REPLACE} renderBackButton={()=>(null)} renderRightButton={()=>(this.navBarRightButton())} />
+					<Scene key="AppointmentsTreatmentsList" component={AppointmentsTreatmentsList} hideNavBar title="Treatments list" />
+					<Scene initial key="Appointments" component={Appointments} hideNavBar={false} title="Appointments" type={ActionConst.REPLACE} renderBackButton={()=>(null)} renderRightButton={()=>(this.navBarRightButton())} />
 					<Scene key="AppointmentsInfo" component={AppointmentsInfo} hideNavBar={false} title="Appointment Info" />
 					<Scene key="AppointmentsEmployeesList" component={AppointmentsEmployeesList} hideNavBar title="Employees list" />
-					<Scene key="Contacts" component={Contacts} hideNavBar={false} title="Contacts" type={ActionConst.REPLACE} renderBackButton={()=>(null)} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
+					<Scene key="Contacts" component={Contacts} hideNavBar={false} title="Contacts" type={ActionConst.REPLACE} renderBackButton={()=>(null)} renderRightButton={()=>(this.navBarRightButton())} />
 					<Scene key="ContactInfo" component={ContactInfo} hideNavBar={false} title="Contact info" />
-					<Scene key="Alerts" component={Alerts} hideNavBar={false} title="Alerts" type={ActionConst.REPLACE} renderBackButton={()=>(null)} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
-					<Scene key="More" component={More} hideNavBar={false} title="More" type={ActionConst.REPLACE} renderBackButton={()=>(null)} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} />
+					{/* <Scene key="Alerts" component={Alerts} hideNavBar={false} title="Alerts" type={ActionConst.REPLACE} renderBackButton={()=>(null)} rightButtonImage={require('./img/settings.png')} onRight={() => { this.sideModalControl(); }} rightButtonIconStyle={{ width: 25, height: 25 }} /> */}
+					<Scene key="More" component={More} hideNavBar={false} title="More" type={ActionConst.REPLACE} renderBackButton={()=>(null)} renderRightButton={()=>(this.navBarRightButton())} />
 					<Scene key="UsersManagement" component={UsersManagement} hideNavBar={false} title="Users management" />
 					<Scene key="UserProfileInformation" component={UserProfileInformation} hideNavBar={false} title="User profile" />
 					<Scene key="TreatmentsManagement" component={TreatmentsManagement} hideNavBar={false} title="Treatments management" />

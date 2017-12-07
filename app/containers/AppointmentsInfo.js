@@ -95,7 +95,7 @@ class AppointmentsInfo extends Component {
 				phoneNumbers: [],
 				userid: '',
 			},
-			treatmentslist: dsImages.cloneWithRows([]),
+			treatmentslist: dsTreatments.cloneWithRows([]),
 			treatments: [],
 			imageslist: dsImages.cloneWithRows([]),
 			images: [],
@@ -203,19 +203,31 @@ class AppointmentsInfo extends Component {
 		const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 		const newtreatments = this.state.treatments;
 		for (let i = 0; i < newtreatments.length; i += 1) {
-			if (treatmentInfo.treatment_id === newtreatments[i].treatment_id) {
-				if (prop === 'nme') {
-					newtreatments[i].name = newValue.label;
-					newtreatments[i].name_id = newValue.value;
+			if (treatmentInfo._id) {
+				if (treatmentInfo._id === newtreatments[i]._id) {
+					if (prop === 'name') {
+						newtreatments[i].name = newValue.label;
+						newtreatments[i].treatment_id = newValue.value;
+					}
+					if (prop === 'notes') {
+						newtreatments[i].notes = newValue;
+					}
+					if (prop === '_rev') {
+						newtreatments[i]._rev = newValue;
+					}
 				}
-				if (prop === 'notes') {
-					newtreatments[i].notes = newValue;
-				}
-				if (prop === '_rev') {
-					newtreatments[i]._rev = newValue;
-				}
-				if (prop === '_id') {
-					newtreatments[i]._id = newValue;
+			} else {
+				if (JSON.stringify(treatmentInfo) === JSON.stringify(newtreatments[i])) {
+					if (prop === 'name') {
+						newtreatments[i].name = newValue.label;
+						newtreatments[i].treatment_id = newValue.value;
+					}
+					if (prop === 'notes') {
+						newtreatments[i].notes = newValue;
+					}
+					if (prop === '_rev') {
+						newtreatments[i]._rev = newValue;
+					}
 				}
 			}
 		}
@@ -243,15 +255,15 @@ class AppointmentsInfo extends Component {
 		const contactInfo = await DBCompanyConnection.find(this.queryContacts);
 		this.contactsList = [];
 		if (contactInfo.docs.length > 0) {
-			for (let e = 0; e < contactInfo.docs.length; e += 1) {
+			for (let c = 0; c < contactInfo.docs.length; c += 1) {
 				contactsListObject = {
 					key: '',
 					value: '',
 					label: ''
 				};
-				contactsListObject.key = contactInfo.docs[e]._rev;
-				contactsListObject.value = contactInfo.docs[e]._id;
-				contactsListObject.label = contactInfo.docs[e].givenName+' '+contactInfo.docs[e].familyName;
+				contactsListObject.key = contactInfo.docs[c]._rev;
+				contactsListObject.value = contactInfo.docs[c]._id;
+				contactsListObject.label = contactInfo.docs[c].givenName+' '+contactInfo.docs[c].familyName;
 				this.contactsList.push(contactsListObject);
 			}
 			this.contactsList = _.sortBy(this.contactsList, ['label']);
@@ -533,11 +545,11 @@ class AppointmentsInfo extends Component {
 		const treatment = {};
 		treatment.doctype = 'treatment';
 		treatment.name = '';
-		treatment.name_id = '';
+		treatment.treatment_id = '';
 		treatment.notes = '';
 		treatment.appointment_id = this.state.appointmentid;
-		const newHatId = hat();
-		treatment.treatment_id = newHatId;
+		treatment.employee_id = this.state.appointment.employee_id;
+		treatment.contact_id = this.state.appointment.contact_id;
 		const dsTreatments = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 		const newtreatmentlist = this.state.treatments;
 		newtreatmentlist.push(treatment);
@@ -559,7 +571,8 @@ class AppointmentsInfo extends Component {
 	async deleteTreatment(treatment) {
 		const dsTreatments = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 		for (let i = 0; i < this.state.treatments.length; i += 1) {
-			if (this.state.treatments[i].treatment_id === treatment.treatment_id) {
+			// remove treatment_id === treatment_id
+			if (this.state.treatments[i]._id === treatment._id) {
 				const index = this.state.treatments.indexOf(treatment);
 				this.state.treatments.splice(index, 1);
 			}
@@ -598,17 +611,23 @@ class AppointmentsInfo extends Component {
 				newtreatment.appointment_id = this.state.appointmentid;
 				newtreatment.contact_id = this.state.appointment.contact_id;
 				newtreatment.employee_id = this.state.appointment.employee_id;
-				newtreatment.treatment_id = treatment.treatment_id;
 				newtreatment.notes = treatment.notes;
 				newtreatment.name = treatment.name;
-				newtreatment.name_id = treatment.name_id;
+				newtreatment.treatment_id = treatment.treatment_id;
 				const savedtreatment = await DBCompanyConnection.post(newtreatment);
 				const newrev = savedtreatment.rev;
 				const newid = savedtreatment.id;
-				this.onChangeTreatmentInfo(newrev, '_rev', newtreatment);
-				this.onChangeTreatmentInfo(newid, '_id', newtreatment);
+				for (let t = 0; t < this.state.treatments.length; t += 1) {
+					if (this.state.treatments[t].treatment_id === newtreatment.treatment_id) {
+						if (!this.state.treatments[t]._id) {
+							this.state.treatments[t]._id = newid;
+							this.state.treatments[t]._rev = newrev;
+						}
+					}
+				}
+				const dsTreatments = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+				this.setState({ treatmentslist: dsTreatments.cloneWithRows(this.state.treatments), treatments: this.state.treatments, showspinner: false });
 				this.saveTreatmentAlert('created', newtreatment);
-				this.setState({ showspinner: false });
 			} else {
 				const updatedtreatment = await DBCompanyConnection.put(treatment);
 				const newrev = updatedtreatment.rev;
@@ -714,10 +733,6 @@ class AppointmentsInfo extends Component {
 		);
 	}
 
-	hideKeyboard() {
-		Keyboard.dismiss();
-	}
-
 	connectCompanyDb(isConnected) {
 		this.setState({ showspinner: true });
 		const companyDatabase = `https://deapps2017:davidenguidanos24380850@deapps2017.cloudant.com/${this.companyDatabase.toLowerCase()}`;
@@ -741,7 +756,7 @@ class AppointmentsInfo extends Component {
 					ref={(btn) => {
 						this.floatingBtn = btn;
 					}}
-					onPress={() => { this.hideKeyboard(); }}
+					onPress={() => { Keyboard.dismiss(); }}
 					icon={<IconMaterial name="settings" size={28} color="white" />}
 				>
 					<ActionButton.Item buttonColor="#8fbc8f" title="Save appointment" onPress={() => { this.saveAppointment(); }}>
@@ -759,7 +774,7 @@ class AppointmentsInfo extends Component {
 				ref={(btn) => {
 					this.floatingBtn = btn;
 				}}
-				onPress={() => { this.hideKeyboard(); }}
+				onPress={() => { Keyboard.dismiss(); }}
 				icon={<IconMaterial name="settings" size={28} color="white" />}
 			>
 				<ActionButton.Item buttonColor="#8fbc8f" title="Update appointment" onPress={() => { this.saveAppointment(); }}>
@@ -782,7 +797,7 @@ class AppointmentsInfo extends Component {
 				ref={(btn) => {
 					this.floatingBtn = btn;
 				}}
-				onPress={() => { this.hideKeyboard(); }}
+				onPress={() => { Keyboard.dismiss(); }}
 				icon={<IconMaterial name="settings" size={28} color="white" />}
 			>
 				<ActionButton.Item buttonColor="steelblue" title="Add treatment" onPress={() => { this.addTreatment(); }}>
@@ -1266,7 +1281,6 @@ class AppointmentsInfo extends Component {
 						{this.appointmentButtons()}
 					</Tab>
 					<Tab heading={<TabHeading><Text style={{ fontSize: 12 }}>Treatment</Text></TabHeading>}>
-						{this.hideKeyboard()}
 						<View style={{ padding: 10, borderColor: 'steelblue', borderBottomWidth: 2 }}>
 							<Text
 								style={{
@@ -1306,7 +1320,7 @@ class AppointmentsInfo extends Component {
 									renderRow={this.renderRowTreatments.bind(this)}
 								/>
 							}
-						<View style={{ height: 60 }} />
+							<View style={{ height: 40 }} />
 						</Content>
 						{this.treatmentButtons()}
 					</Tab>
@@ -1338,7 +1352,7 @@ class AppointmentsInfo extends Component {
 									renderRow={this.renderRowImages.bind(this)}
 								/>
 							}
-						<View style={{ height: 60 }} />
+							<View style={{ height: 40 }} />
 						</Content>
 						<ActionButton
 							size={40}
@@ -1348,7 +1362,7 @@ class AppointmentsInfo extends Component {
 							ref={(btn) => {
 								this.floatingBtn = btn;
 							}}
-							onPress={() => { this.hideKeyboard(); }}
+							onPress={() => { Keyboard.dismiss(); }}
 							icon={<IconMaterial name="settings" size={28} color="white" />}
 						>
 							<ActionButton.Item buttonColor="#293E6A" title="Choose image from library" onPress={() => { this.choosePhoto(true); }}>
@@ -1481,11 +1495,11 @@ class AppointmentsInfo extends Component {
 									renderRow={this.renderRowEmails.bind(this)}
 								/>
 							</View>
-						<View style={{ height: 60 }} />
+							<View style={{ height: 40 }} />
 						</Content>}
 					</Tab>
 				</Tabs>
-				<FooterMain activeArea="Appointments" />
+				{/* <FooterMain activeArea="Appointments" /> */}
 			</Container>
 		);
 	}

@@ -31,7 +31,7 @@ export default StyleSheet.create({
 	},
 
 	selectStyle: {
-		flex: 1,
+		// flex: 1,
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		borderColor: '#C0C0C0',

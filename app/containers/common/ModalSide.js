@@ -25,6 +25,7 @@ import {
 	Spinner
 } from 'native-base';
 import _ from 'lodash';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import IconMaterial from 'react-native-vector-icons/MaterialIcons';
 import { Actions } from 'react-native-router-flux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -346,22 +347,17 @@ class ModalSide extends Component {
 			<View>
 				<Modal transparent={false} visible={this.props.ModalState.modalConfigShow} onRequestClose={() => { console.log('settings closed'); }} >
 					<Header>
-						<Left />
-						<Body>
-							<Title
-								style={{
-									paddingLeft: (Platform.OS === 'ios') ? 0 : 60,
-									justifyContent: 'center',
-								}}
-							>Settings</Title>
+						<Left>
+							{!this.state.showspinner &&
+								<Button transparent onPress={() => { this.props.setModalState({ prop: 'modalConfigShow', value: false }); }}>
+									<MaterialCommunityIcons size={32} name='chevron-left' />
+								</Button>
+							}
+						</Left>
+						<Body style={{ backgroundColor: 'transparent' }}>
+							<Title style={{ fontWeight: 'normal' }}>Settings</Title>
 						</Body>
-						<Right>
-						{!this.state.showspinner &&
-							<Button transparent onPress={() => { this.props.setModalState({ prop: 'modalConfigShow', value: false }); }}>
-								<Icon name="ios-close-outline" size={22}/>
-							</Button>
-						}
-						</Right>
+						<Right />
 					</Header>
 					{this.state.showspinner &&
 						<View

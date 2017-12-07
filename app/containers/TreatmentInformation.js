@@ -34,7 +34,7 @@ class TreatmentInformation extends Component {
 		this.state = {
 			showspinner: false,
 			showspinnertext: 'Loading treatment info, please wait',
-			treatmentid: this.props.treatmentid || false,
+			treatmentid: this.props.treatmentid || '',
 			treatment: {
 				doctype: 'treatmentlist',
 				name: '',
@@ -106,8 +106,10 @@ class TreatmentInformation extends Component {
 				this.onChangeText(newrevTreatment, '_rev');
 			} else {
 				const createdTreatment = await DBCompanyConnection.post(this.state.treatment);
-				const newrevTreatment = createdTreatment.rev;
-				this.onChangeText(newrevTreatment, '_rev');
+				const newrevtreatment = createdTreatment.rev;
+				const newidtreatment = createdTreatment.id;
+				this.onChangeText(newrevtreatment, '_rev');
+				this.setState({ treatmentid: newidtreatment });
 			}
 			this.saveTreatmentAlert(action);
 		}
@@ -168,13 +170,13 @@ class TreatmentInformation extends Component {
 	}
 
 	renderButtonsTreatmentManagement() {
-		if (this.state.newtreatment === true) {
+		if (this.state.treatmentid === '') {
 			return (
 				<ActionButton
 					size={40}
 					buttonColor="#9DBDF2"
 					offsetX={10}
-					offsetY={65}
+					offsetY={10}
 					ref={(btn) => {
 						this.floatingBtn = btn;
 					}}
@@ -192,7 +194,7 @@ class TreatmentInformation extends Component {
 				size={40}
 				buttonColor="#9DBDF2"
 				offsetX={10}
-				offsetY={65}
+				offsetY={10}
 				ref={(btn) => {
 					this.floatingBtn = btn;
 				}}
@@ -240,10 +242,10 @@ class TreatmentInformation extends Component {
 							<TextField label="Units" value={this.state.treatment.units} onChangeText={value => this.onChangeText(value, 'units')} />
 						</View>
 					}
-					<View style={{ height: 60 }} />
+					<View style={{ height: 40 }} />
 				</Content>
 					{this.renderButtonsTreatmentManagement()}
-				<FooterMain activeArea="More" />
+				{/* <FooterMain activeArea="More" /> */}
 			</Container>
 		);
 	}

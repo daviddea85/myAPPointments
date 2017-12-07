@@ -231,7 +231,7 @@ class Contacts extends Component {
 						size={40}
 						buttonColor="#9DBDF2"
 						offsetX={10}
-						offsetY={65}
+						offsetY={10}
 						ref={(btn) => {
 							this.floatingBtn = btn;
 						}}
@@ -249,7 +249,7 @@ class Contacts extends Component {
 					size={40}
 					buttonColor="#9DBDF2"
 					offsetX={10}
-					offsetY={65}
+					offsetY={10}
 					ref={(btn) => {
 						this.floatingBtn = btn;
 					}}
@@ -1028,12 +1028,12 @@ class Contacts extends Component {
 								/>
 							</View>
 							}
-							<View style={{ height: 70 }} />
+							<View style={{ height: 40 }} />
 						</View>
 					}
 					</Content>
 					{this.contactButtons()}
-				<FooterMain activeArea="Contacts" />
+				{/* <FooterMain activeArea="Contacts" /> */}
 			</Container>
 		);
 	}

@@ -99,7 +99,7 @@ class More extends Component {
 
 	companyInformation() {
 		if (this.accessType === 'admin') {
-			Actions.CreateCompany({ title: this.companyName, companyid: this.companyId });
+			Actions.CreateCompany({ title: 'Company information' , companyid: this.companyId });
 		} else {
 			Alert.alert(
 				'User access',

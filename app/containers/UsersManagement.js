@@ -180,7 +180,7 @@ class UsersManagement extends Component {
 						size={40}
 						buttonColor="#9DBDF2"
 						offsetX={10}
-						offsetY={65}
+						offsetY={10}
 						ref={(btn) => {
 							this.floatingBtn = btn;
 						}}
@@ -192,7 +192,7 @@ class UsersManagement extends Component {
 						</ActionButton.Item>
 					</ActionButton>
 				}
-				<FooterMain activeArea="More" />
+				{/* <FooterMain activeArea="More" /> */}
 			</Container>
 		);
 	}

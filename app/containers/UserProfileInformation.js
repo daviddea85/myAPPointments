@@ -382,7 +382,7 @@ class UserProfile extends Component {
 					size={40}
 					buttonColor="#9DBDF2"
 					offsetX={10}
-					offsetY={65}
+					offsetY={10}
 					ref={(btn) => {
 						this.floatingBtn = btn;
 					}}
@@ -406,7 +406,7 @@ class UserProfile extends Component {
 						size={40}
 						buttonColor="#9DBDF2"
 						offsetX={10}
-						offsetY={65}
+						offsetY={10}
 						ref={(btn) => {
 							this.floatingBtn = btn;
 						}}
@@ -424,7 +424,7 @@ class UserProfile extends Component {
 					size={40}
 					buttonColor="#9DBDF2"
 					offsetX={10}
-					offsetY={65}
+					offsetY={10}
 					ref={(btn) => {
 						this.floatingBtn = btn;
 					}}
@@ -528,11 +528,11 @@ class UserProfile extends Component {
 							}
 						</View>
 					}
-					<View style={{ height: 60 }} />
+					<View style={{ height: 40 }} />
 				</Content>
 					{this.renderButtonsProfile()}
 					{this.renderButtonsUsersManagement()}
-				<FooterMain activeArea="More" />
+				{/* <FooterMain activeArea="More" /> */}
 			</Container>
 		);
 	}

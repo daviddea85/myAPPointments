@@ -172,7 +172,7 @@ class RoleInformation extends Component {
 					size={40}
 					buttonColor="#9DBDF2"
 					offsetX={10}
-					offsetY={65}
+					offsetY={10}
 					ref={(btn) => {
 						this.floatingBtn = btn;
 					}}
@@ -190,7 +190,7 @@ class RoleInformation extends Component {
 				size={40}
 				buttonColor="#9DBDF2"
 				offsetX={10}
-				offsetY={65}
+				offsetY={10}
 				ref={(btn) => {
 					this.floatingBtn = btn;
 				}}
@@ -235,10 +235,10 @@ class RoleInformation extends Component {
 							<TextField label="Name" value={this.state.role.title} onChangeText={value => this.onChangeText(value, 'title')} validate />
 						</View>
 					}
-					<View style={{ height: 60 }} />
+					<View style={{ height: 40 }} />
 				</Content>
 					{this.renderButtonsRoleManagement()}
-				<FooterMain activeArea="More" />
+				{/* <FooterMain activeArea="More" /> */}
 			</Container>
 		);
 	}

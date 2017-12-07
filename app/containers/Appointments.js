@@ -144,16 +144,13 @@ class Appointments extends Component {
 				appointmentsList.docs[i].contact_name = 'Missing contact';
 				if (contactInfo.docs.length > 0) {
 					appointmentsList.docs[i].contact_name = contactInfo.docs[0].givenName +' '+ contactInfo.docs[0].familyName;
+					appointmentsList.docs[i].telephone = '';
 					if (contactInfo.docs[0].phoneNumbers.length > 0) {
-						let contactfound = _.find(contactInfo.docs[0].phoneNumbers, { label : 'mobile' });
-						if (_.isEmpty(contactfound)) {									
+						this.contactfound = _.filter(contactInfo.docs[0].phoneNumbers, { label : 'mobile' });
+						if (this.contactfound.length > 0) {
 							appointmentsList.docs[i].telephone = contactInfo.docs[0].phoneNumbers[0].number;
 						} else {
-							for (let m = 0; m < contactInfo.docs[0].phoneNumbers.length; m += 1) {
-								if (contactInfo.docs[0].phoneNumbers[m].label === 'mobile') {
-									appointmentsList.docs[i].telephone = contactfound.phoneNumbers[m].number;
-								}
-							}
+							appointmentsList.docs[i].telephone = contactInfo.docs[0].phoneNumbers[0].number;
 						}
 					}
 				}
@@ -217,7 +214,8 @@ class Appointments extends Component {
 	showEmployeesList() {
 		Actions.AppointmentsEmployeesList({
 			title: 'Employees list',
-			appointmentsdate: this.state.todaysDate
+			appointmentsdate: this.state.todaysDate,
+			area: 'appointments'
 		});
 	}
 

@@ -164,14 +164,14 @@ class TreatmentsManagement extends Component {
 						</View>
 					}
 					
-					<View style={{ height: 60 }} />
+					<View style={{ height: 40 }} />
 				</Content>
 				{this.state.showspinner === false &&
 					<ActionButton
 						size={40}
 						buttonColor="#9DBDF2"
 						offsetX={10}
-						offsetY={65}
+						offsetY={10}
 						ref={(btn) => {
 							this.floatingBtn = btn;
 						}}
@@ -183,7 +183,7 @@ class TreatmentsManagement extends Component {
 						</ActionButton.Item>
 					</ActionButton>
 				}
-				<FooterMain activeArea="More" />
+				{/* <FooterMain activeArea="More" /> */}
 			</Container>
 		);
 	}

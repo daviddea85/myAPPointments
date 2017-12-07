@@ -24,11 +24,11 @@ const FooterMain = (inbound) => {
 					<Icon name="ios-people-outline" />
 					<Text style={styles.tabText}>Contacts</Text>
 				</Button>
-				<Button active={inbound.activeArea === 'Alerts'} badge vertical onPress={() => { Actions.Alerts(); }}>
+				{/* <Button active={inbound.activeArea === 'Alerts'} badge vertical onPress={() => { Actions.Alerts(); }}>
 				<Badge danger ><Text>2</Text></Badge>
 					<Icon name="ios-megaphone-outline" />
 					<Text style={styles.tabText}>Alerts</Text>
-				</Button>
+				</Button> */}
 				<Button active={inbound.activeArea === 'More'} vertical onPress={() => { Actions.More(); }}>
 					<Icon name="apps" />
 					<Text style={styles.tabText}>More</Text>

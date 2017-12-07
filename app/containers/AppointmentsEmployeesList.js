@@ -7,6 +7,10 @@ import {
 	StyleProvider,
 	Container,
 	Content,
+	Header,
+	Left,
+	Right,
+	Title,
 	Tab,
 	Tabs,
 	Form,
@@ -49,10 +53,17 @@ class EmployeesList extends Component {
 		this.state = {
 			appointmentsdate: this.props.appointmentsdate,
 			employeesList: ds.cloneWithRows([]),
-			employees: [],
+			area: this.props.area || ''
 		};
 		this.renderRow = this.renderRow.bind(this);
 		this.companyDatabase = '';
+		this.employeesSelected = [
+			{
+				key: 'employee',
+				label: 'Employee (time)',
+				value: 'employee',
+			}
+		];
 	}
 
 	componentWillMount() {
@@ -75,12 +86,14 @@ class EmployeesList extends Component {
 		this.employeesList = [];
 		const queryEmployee = { selector: { doctype: 'user' }, };
 		const employeeInfo = await DBCompanyConnection.find(queryEmployee);
-		const employeesListObject = {
-			key: '',
-			value: '',
-			label: 'All employees'
-		};
-		this.employeesList.push(employeesListObject);
+		if (this.state.area === 'appointments') {
+			const employeesListObject = {
+				key: '',
+				value: '',
+				label: 'All employees'
+			};
+			this.employeesList.push(employeesListObject);
+		}
 		if (employeeInfo.docs.length > 0) {
 			for (let e = 0; e < employeeInfo.docs.length; e += 1) {
 				const employeesListObject = {
@@ -116,16 +129,43 @@ class EmployeesList extends Component {
 	}
 
 	selectedRadioButton(employee) {
-		const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
-		for (let i = 0; i < this.employeesList.length; i += 1) {
-			if (this.employeesList[i].value === employee.value) {
-				this.employeesList[i].selected = true;
-				
-			} else {
-				this.employeesList[i].selected = false;
+		if (this.state.area === 'appointments') {
+			const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+			for (let i = 0; i < this.employeesList.length; i += 1) {
+				if (this.employeesList[i].value === employee.value) {
+					this.employeesList[i].selected = true;
+				} else {
+					this.employeesList[i].selected = false;
+				}
 			}
+			this.setState({ employeesList: ds.cloneWithRows(this.employeesList) });
+		} else if (this.state.area === 'dashboard') {
+			const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+			for (let i = 0; i < this.employeesList.length; i += 1) {
+				if (this.employeesList[i].value === employee.value) {
+					if (this.employeesSelected.length < 6) {
+						if (this.employeesList[i].selected === true) {
+							this.employeesList[i].selected = false;
+							const index = this.employeesSelected.indexOf(this.employeesList[i]);
+							this.employeesSelected.splice(index, 1);
+						} else {
+							this.employeesList[i].selected = true;
+							this.employeesSelected.push(this.employeesList[i]);
+						}
+					} else {
+						Alert.alert(
+							'User selected',
+							'Only 7 users can be selected at the same time',
+							[
+								{ text: 'OK', onPress: () => console.log('User selected'), style: 'cancel' }
+							],
+							{ cancelable: true }
+						);
+					}
+				}
+			}
+			this.setState({ employeesList: ds.cloneWithRows(this.employeesList) });
 		}
-		this.setState({ employeesList: ds.cloneWithRows(this.employeesList) });
 	}
 
 	closeEmployeesListModal() {
@@ -139,15 +179,30 @@ class EmployeesList extends Component {
 				};
 			}
 		}
-		if (this.employeeSelected !== '') {
-			Actions.Appointments({ title: 'Appointments', userSelected: this.employeeSelected, appointmentsdate: this.state.appointmentsdate });
-		} else {
-			this.employeeSelected = {
-				key: '',
-				value: '',
-				label: 'All employees'
-			};
-			Actions.Appointments({ title: 'Appointments', userSelected: this.employeeSelected, appointmentsdate: this.state.appointmentsdate });
+		if (this.state.area === 'appointments') {
+			if (this.employeeSelected !== '') {
+				Actions.Appointments({ title: 'Appointments', userSelected: this.employeeSelected, appointmentsdate: this.state.appointmentsdate });
+			} else {
+				this.employeeSelected = {
+					key: '',
+					value: '',
+					label: 'All employees'
+				};
+				Actions.Appointments({ title: 'Appointments', userSelected: this.employeeSelected, appointmentsdate: this.state.appointmentsdate });
+			}
+		} else if (this.state.area === 'dashboard') {
+			if (this.employeeSelected === '') {
+				Alert.alert(
+					'Employees list',
+					'At least one employee needs to be selected',
+					[
+						{ text: 'OK', onPress: () => console.log('employee not selected'), style: 'cancel' }
+					],
+					{ cancelable: true }
+				);
+			} else {
+				Actions.Dashboard({ title: 'Dashboard', employeesSelected: this.employeesSelected, appointmentsdate: this.state.appointmentsdate });
+			}
 		}
 	}
 
@@ -179,44 +234,25 @@ class EmployeesList extends Component {
 
 	render() {
 		return (
-			<Container style={{ paddingTop: (Platform.OS === 'ios') ? 18 : 0 }}>
-				<Tabs
-					ref={(tabView) => {
-						this.mainTabs = tabView;
-					}}
-				>
-					<Tab
-						heading={
-							<TabHeading>
-								<View style={{ flex: 1, flexDirection: 'row', }}>
-									<Text
-										style={{
-											flex: 0.8,
-											alignSelf: 'center',
-											textAlign: 'center',
-											justifyContent: 'center',
-											paddingLeft: 50
-										}}
-									>
-										Employees list
-									</Text>
-									<Button transparent onPress={() => { this.closeEmployeesListModal(); }}>
-										<Icon name="ios-close-outline" size={22}/>
-									</Button>
-								</View>
-							</TabHeading>
-						}
-					>
-					<Content>
-						<ListView
-							dataSource={this.state.employeesList}
-							enableEmptySections
-							renderRow={this.renderRow.bind(this)}
-						/>
-					</Content>
-					</Tab>
-				</Tabs>
-				<FooterMain activeArea="Appointments" />
+			<Container>
+				<Header>
+					<Left>
+					<Button transparent onPress={() => { this.closeEmployeesListModal(); }}>
+						<MaterialCommunityIcons size={32} name='chevron-left' />
+					</Button>
+					</Left>
+					<Body style={{ backgroundColor: 'transparent' }}>
+						<Title style={{ fontWeight: 'normal' }}>Employees list</Title>
+					</Body>
+					<Right />
+				</Header>
+				<Content>
+					<ListView
+						dataSource={this.state.employeesList}
+						enableEmptySections
+						renderRow={this.renderRow.bind(this)}
+					/>
+				</Content>
 			</Container>
 		);
 	}
