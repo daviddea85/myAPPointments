@@ -215,7 +215,8 @@ class Appointments extends Component {
 		Actions.AppointmentsEmployeesList({
 			title: 'Employees list',
 			appointmentsdate: this.state.todaysDate,
-			area: 'appointments'
+			area: 'appointments',
+			tab: ''
 		});
 	}
 
@@ -301,7 +302,7 @@ class Appointments extends Component {
 								this.onChangeAppointmentDate(date, 'date');
 							}}
 						/>
-						<TouchableOpacity onPress={this.showEmployeesList.bind(this)} style={{ height: 40 }}>
+						<TouchableOpacity onPress={this.showEmployeesList.bind(this, '')} style={{ height: 40 }}>
 							<View style={{ flexDirection: 'row', flex: 1, padding: 10, borderColor: '#C0C0C0', borderWidth: 1, borderRadius: 6 }}>
 								{<Text>{this.state.userSelected.label}</Text>}
 								<MaterialCommunityIcons name="arrow-down-drop-circle-outline" size={20} style={{ color: '#CCCCCC' }} />

@@ -53,7 +53,8 @@ class EmployeesList extends Component {
 		this.state = {
 			appointmentsdate: this.props.appointmentsdate,
 			employeesList: ds.cloneWithRows([]),
-			area: this.props.area || ''
+			area: this.props.area || '',
+			tab: this.props.tab || ''
 		};
 		this.renderRow = this.renderRow.bind(this);
 		this.companyDatabase = '';
@@ -140,31 +141,43 @@ class EmployeesList extends Component {
 			}
 			this.setState({ employeesList: ds.cloneWithRows(this.employeesList) });
 		} else if (this.state.area === 'dashboard') {
-			const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
-			for (let i = 0; i < this.employeesList.length; i += 1) {
-				if (this.employeesList[i].value === employee.value) {
-					if (this.employeesSelected.length < 6) {
+			if (this.state.tab === 'daily') {
+				const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+				for (let i = 0; i < this.employeesList.length; i += 1) {
+					if (this.employeesList[i].value === employee.value) {
 						if (this.employeesList[i].selected === true) {
 							this.employeesList[i].selected = false;
 							const index = this.employeesSelected.indexOf(this.employeesList[i]);
 							this.employeesSelected.splice(index, 1);
 						} else {
-							this.employeesList[i].selected = true;
-							this.employeesSelected.push(this.employeesList[i]);
+							if (this.employeesSelected.length < 6) {
+								this.employeesList[i].selected = true;
+								this.employeesSelected.push(this.employeesList[i]);
+							} else {
+								Alert.alert(
+									'User selected',
+									'Only 5 users can be selected at the same time',
+									[
+										{ text: 'OK', onPress: () => console.log('User selected'), style: 'cancel' }
+									],
+									{ cancelable: true }
+								);
+							}
 						}
-					} else {
-						Alert.alert(
-							'User selected',
-							'Only 7 users can be selected at the same time',
-							[
-								{ text: 'OK', onPress: () => console.log('User selected'), style: 'cancel' }
-							],
-							{ cancelable: true }
-						);
 					}
 				}
+				this.setState({ employeesList: ds.cloneWithRows(this.employeesList) });
+			} else {
+				const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+				for (let i = 0; i < this.employeesList.length; i += 1) {
+					if (this.employeesList[i].value === employee.value) {
+						this.employeesList[i].selected = true;
+					} else {
+						this.employeesList[i].selected = false;
+					}
+				}
+				this.setState({ employeesList: ds.cloneWithRows(this.employeesList) });
 			}
-			this.setState({ employeesList: ds.cloneWithRows(this.employeesList) });
 		}
 	}
 
@@ -201,7 +214,11 @@ class EmployeesList extends Component {
 					{ cancelable: true }
 				);
 			} else {
-				Actions.Dashboard({ title: 'Dashboard', employeesSelected: this.employeesSelected, appointmentsdate: this.state.appointmentsdate });
+				if (this.state.tab === 'daily') {
+					Actions.Dashboard({ title: 'Dashboard', employeesSelected: this.employeesSelected, appointmentsdate: this.state.appointmentsdate, tab: 'daily' });
+				} else {
+					Actions.Dashboard({ title: 'Dashboard', weekEmployeeText: this.employeeSelected.label, weekEmployeeSelected: this.employeeSelected, appointmentsdate: this.state.appointmentsdate, tab: 'weekly' });
+				}
 			}
 		}
 	}

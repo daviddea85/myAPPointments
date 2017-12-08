@@ -56,7 +56,10 @@ class Dashboard extends Component {
 			employeesList: [],
 			contactsList: [],
 			employeesListText: 'Select employee(s)',
-			hours: {
+			schedule: {
+				_id: '',
+				doctype: 'schedule',
+				userid: this.userLoggedId,
 				one: false,
 				two: false,
 				three: false,
@@ -80,9 +83,7 @@ class Dashboard extends Component {
 				twentyone: false,
 				twentytwo: false,
 				twentythree: false,
-				twentyfour: false
-			},
-			days: {
+				twentyfour: false,
 				monday: false,
 				tuesday: false,
 				wednesday: false,
@@ -111,6 +112,13 @@ class Dashboard extends Component {
 			notes: ''
 		};
 		this.treatmentslistinfo = [];
+		this.one = [];
+		this.two = [];
+		this.three = [];
+		this.four = [];
+		this.five = [];
+		this.six = [];
+		this.seven = [];
 		this.eight = [];
 		this.nine = [];
 		this.ten = [];
@@ -125,6 +133,9 @@ class Dashboard extends Component {
 		this.nineteen = [];
 		this.twenty = [];
 		this.twentyone = [];
+		this.twentytwo = [];
+		this.twentythree = [];
+		this.twentyfour = [];
 	}
 
 	componentWillMount() {
@@ -190,7 +201,13 @@ class Dashboard extends Component {
 	}
 
 	async showData(dateValue) {
-		
+		this.one = [];
+		this.two = [];
+		this.three = [];
+		this.four = [];
+		this.five = [];
+		this.six = [];
+		this.seven = [];
 		this.eight = [];
 		this.nine = [];
 		this.ten = [];
@@ -205,6 +222,9 @@ class Dashboard extends Component {
 		this.nineteen = [];
 		this.twenty = [];
 		this.twentyone = [];
+		this.twentytwo = [];
+		this.twentythree = [];
+		this.twentyfour = [];
 		if (dateValue) {
 			this.state.todaysDate = dateValue;
 		}
@@ -257,6 +277,62 @@ class Dashboard extends Component {
 				this.employeesList.push(employeesListObject);
 			}
 			this.employeesList = _.sortBy(this.employeesList, ['label']);
+		}
+		this.querySchedule = {
+			'selector': {
+				'doctype': 'schedule',
+				'userid': this.userLoggedId,
+			},
+			'fields': []
+		};
+		this.schedule = '';
+		const scheduleinfo = await DBCompanyConnection.find(this.querySchedule);
+		if (scheduleinfo.docs.length > 0) {
+			this.schedule = scheduleinfo.docs[0];
+			// this.setState({ schedule: scheduleinfo.docs[0] });
+		} else {
+			const schedule = {
+				doctype: 'schedule',
+				userid: this.userLoggedId,
+				one: this.state.schedule.one,
+				two: this.state.schedule.two,
+				three: this.state.schedule.three,
+				four: this.state.schedule.four,
+				five: this.state.schedule.five,
+				six: this.state.schedule.six,
+				seven: this.state.schedule.seven,
+				eight: this.state.schedule.eight,
+				nine: true,
+				ten: true,
+				eleven: true,
+				twelve: true,
+				thirteen: true,
+				fourteen: true,
+				fiveteen: true,
+				sixteen: true,
+				seventeen: true,
+				eighteen: this.state.schedule.eighteen,
+				nineteen: this.state.schedule.nineteen,
+				twenty: this.state.schedule.twenty,
+				twentyone: this.state.schedule.twentyone,
+				twentytwo: this.state.schedule.twentytwo,
+				twentythree: this.state.schedule.twentythree,
+				twentyfour: this.state.schedule.twentyfour,
+				monday: true,
+				tuesday: true,
+				wednesday: true,
+				thursday: true,
+				friday: true,
+				saturday: this.state.schedule.saturday,
+				sunday: this.state.schedule.sunday
+			};
+			const newSchedule = await DBCompanyConnection.post(schedule);
+			newrev = newSchedule.rev;
+			const inschedule = schedule;
+			inschedule['_rev'] = newSchedule.rev;
+			inschedule['_id'] = newSchedule.id;
+			this.schedule = inschedule;
+			// this.setState({ schedule: inschedule });
 		}
 		if (this.state.employeesSelected.length > 0) {
 			this.queryAppointments = {
@@ -357,12 +433,68 @@ class Dashboard extends Component {
 				{ key: indexMinute++, label: '58', value: '58' },
 				{ key: indexMinute++, label: '59', value: '59' },
 			];
+			this.oneObject = {
+				time: true,
+				key: '01:00',
+				label: '01:00',
+				value: '01:00',
+				appointment: []
+			};
+			this.one.push(this.oneObject);
+			this.twoObject = {
+				time: true,
+				key: '02:00',
+				label: '02:00',
+				value: '02:00',
+				appointment: []
+			};
+			this.two.push(this.twoObject);
+			this.threeObject = {
+				time: true,
+				key: '03:00',
+				label: '03:00',
+				value: '03:00',
+				appointment: []
+			};
+			this.three.push(this.threeObject);
+			this.fourObject = {
+				time: true,
+				key: '04:00',
+				label: '04:00',
+				value: '04:00',
+				appointment: []
+			};
+			this.four.push(this.fourObject);
+			this.fiveObject = {
+				time: true,
+				key: '05:00',
+				label: '05:00',
+				value: '05:00',
+				appointment: []
+			};
+			this.five.push(this.fiveObject);
+			this.sixObject = {
+				time: true,
+				key: '06:00',
+				label: '06:00',
+				value: '06:00',
+				appointment: []
+			};
+			this.six.push(this.sixObject);			
+			this.sevenObject = {
+				time: true,
+				key: '07:00',
+				label: '07:00',
+				value: '07:00',
+				appointment: []
+			};
+			this.seven.push(this.sevenObject);
 			this.eightObject = {
 				time: true,
 				key: '08:00',
 				label: '08:00',
 				value: '08:00',
-				appointment: ''
+				appointment: []
 			};
 			this.eight.push(this.eightObject);
 			this.nineObject = {
@@ -370,7 +502,7 @@ class Dashboard extends Component {
 				key: '09:00',
 				label: '09:00',
 				value: '09:00',
-				appointment: ''
+				appointment: []
 			};
 			this.nine.push(this.nineObject);
 			this.tenObject = {
@@ -378,7 +510,7 @@ class Dashboard extends Component {
 				key: '10:00',
 				label: '10:00',
 				value: '10:00',
-				appointment: ''
+				appointment: []
 			};
 			this.ten.push(this.tenObject);
 			this.elevenObject = {
@@ -386,7 +518,7 @@ class Dashboard extends Component {
 				key: '11:00',
 				label: '11:00',
 				value: '11:00',
-				appointment: ''
+				appointment: []
 			};
 			this.eleven.push(this.elevenObject);
 			this.twelveObject = {
@@ -394,7 +526,7 @@ class Dashboard extends Component {
 				key: '12:00',
 				label: '12:00',
 				value: '12:00',
-				appointment: ''
+				appointment: []
 			};
 			this.twelve.push(this.twelveObject);
 			this.thirteenObject = {
@@ -402,7 +534,7 @@ class Dashboard extends Component {
 				key: '13:00',
 				label: '13:00',
 				value: '13:00',
-				appointment: ''
+				appointment: []
 			};
 			this.thirteen.push(this.thirteenObject);
 			this.fourteenObject = {
@@ -410,7 +542,7 @@ class Dashboard extends Component {
 				key: '14:00',
 				label: '14:00',
 				value: '14:00',
-				appointment: ''
+				appointment: []
 			};
 			this.fourteen.push(this.fourteenObject);
 			this.fiveteenObject = {
@@ -418,7 +550,7 @@ class Dashboard extends Component {
 				key: '15:00',
 				label: '15:00',
 				value: '15:00',
-				appointment: ''
+				appointment: []
 			};
 			this.fiveteen.push(this.fiveteenObject);
 			this.sixteenObject = {
@@ -426,7 +558,7 @@ class Dashboard extends Component {
 				key: '16:00',
 				label: '16:00',
 				value: '16:00',
-				appointment: ''
+				appointment: []
 			};
 			this.sixteen.push(this.sixteenObject);
 			this.seventeenObject = {
@@ -434,7 +566,7 @@ class Dashboard extends Component {
 				key: '17:00',
 				label: '17:00',
 				value: '17:00',
-				appointment: ''
+				appointment: []
 			};
 			this.seventeen.push(this.seventeenObject);
 			this.eighteenObject = {
@@ -442,7 +574,7 @@ class Dashboard extends Component {
 				key: '18:00',
 				label: '18:00',
 				value: '18:00',
-				appointment: ''
+				appointment: []
 			};
 			this.eighteen.push(this.eighteenObject);
 			this.nineteenObject = {
@@ -450,7 +582,7 @@ class Dashboard extends Component {
 				key: '19:00',
 				label: '19:00',
 				value: '19:00',
-				appointment: ''
+				appointment: []
 			};
 			this.nineteen.push(this.nineteenObject);
 			this.twentyObject = {
@@ -458,7 +590,7 @@ class Dashboard extends Component {
 				key: '20:00',
 				label: '20:00',
 				value: '20:00',
-				appointment: ''
+				appointment: []
 			};
 			this.twenty.push(this.twentyObject);
 			this.twentyoneObject = {
@@ -466,9 +598,40 @@ class Dashboard extends Component {
 				key: '21:00',
 				label: '21:00',
 				value: '21:00',
-				appointment: ''
+				appointment: []
 			};
 			this.twentyone.push(this.twentyoneObject);
+			this.twentytwoObject = {
+				time: true,
+				key: '22:00',
+				label: '22:00',
+				value: '22:00',
+				appointment: []
+			};
+			this.twentytwo.push(this.twentytwoObject);
+			this.twentythreeObject = {
+				time: true,
+				key: '23:00',
+				label: '23:00',
+				value: '23:00',
+				appointment: []
+			};
+			this.twentythree.push(this.twentythreeObject);
+			this.twentyfourObject = {
+				time: true,
+				key: '24:00',
+				label: '24:00',
+				value: '24:00',
+				appointment: []
+			};
+			this.twentyfour.push(this.twentyfourObject);
+			this.emptyObject = {
+				time: false,
+				key: '',
+				label: '',
+				value: '',
+				appointment: [],
+			};
 			if (appointmentslist.docs.length > 0) {
 				for (let a = 0; a < appointmentslist.docs.length; a += 1) {
 					this.queryContacts = {
@@ -499,6 +662,97 @@ class Dashboard extends Component {
 				if (this.state.employeesSelected.length > 0) {
 					for (let em = 0; em < this.state.employeesSelected.length; em += 1) {
 						if (this.state.employeesSelected[em].key !== 'employee') {
+							this.appointmentsone = _.filter(appointmentslist.docs, { hour: '01', employee_id: this.state.employeesSelected[em].value });
+							if (this.appointmentsone.length > 0) {
+								this.oneObject = {};
+								this.oneObject.time = false,
+								this.oneObject.key = this.state.employeesSelected[em].key;
+								this.oneObject.label = this.appointmentsone[0].contact_name;
+								this.oneObject.value = this.appointmentsone[0]._id;
+								this.oneObject.appointment = [];
+								this.oneObject.appointment.push(this.appointmentsone[0]);
+								this.one.push(this.oneObject);
+							} else {
+								this.one.push(this.emptyObject);
+							}
+							this.appointmentstwo = _.filter(appointmentslist.docs, { hour: '02', employee_id: this.state.employeesSelected[em].value });
+							if (this.appointmentstwo.length > 0) {
+								this.twoObject = {};
+								this.twoObject.time = false,
+								this.twoObject.key = this.state.employeesSelected[em].key;
+								this.twoObject.label = this.appointmentstwo[0].contact_name;
+								this.twoObject.value = this.appointmentstwo[0]._id;
+								this.twoObject.appointment = [];
+								this.twoObject.appointment.push(this.appointmentstwo[0]);
+								this.two.push(this.twoObject);
+							} else {
+								this.two.push(this.emptyObject);
+							}
+							this.appointmentsthree = _.filter(appointmentslist.docs, { hour: '03', employee_id: this.state.employeesSelected[em].value });
+							if (this.appointmentsthree.length > 0) {
+								this.threeObject = {};
+								this.threeObject.time = false,
+								this.threeObject.key = this.state.employeesSelected[em].key;
+								this.threeObject.label = this.appointmentsthree[0].contact_name;
+								this.threeObject.value = this.appointmentsthree[0]._id;
+								this.threeObject.appointment = [];
+								this.threeObject.appointment.push(this.appointmentsthree[0]);
+								this.three.push(this.threeObject);
+							} else {
+								this.three.push(this.emptyObject);
+							}
+							this.appointmentsfour = _.filter(appointmentslist.docs, { hour: '04', employee_id: this.state.employeesSelected[em].value });
+							if (this.appointmentsfour.length > 0) {
+								this.fourObject = {};
+								this.fourObject.time = false,
+								this.fourObject.key = this.state.employeesSelected[em].key;
+								this.fourObject.label = this.appointmentsfour[0].contact_name;
+								this.fourObject.value = this.appointmentsfour[0]._id;
+								this.fourObject.appointment = [];
+								this.fourObject.appointment.push(this.appointmentsfour[0]);
+								this.four.push(this.fourObject);
+							} else {
+								this.four.push(this.emptyObject);
+							}
+							this.appointmentsfive = _.filter(appointmentslist.docs, { hour: '05', employee_id: this.state.employeesSelected[em].value });
+							if (this.appointmentsfive.length > 0) {
+								this.fiveObject = {};
+								this.fiveObject.time = false,
+								this.fiveObject.key = this.state.employeesSelected[em].key;
+								this.fiveObject.label = this.appointmentsfive[0].contact_name;
+								this.fiveObject.value = this.appointmentsfive[0]._id;
+								this.fiveObject.appointment = [];
+								this.fiveObject.appointment.push(this.appointmentsfive[0]);
+								this.five.push(this.fiveObject);
+							} else {
+								this.five.push(this.emptyObject);
+							}
+							this.appointmentssix = _.filter(appointmentslist.docs, { hour: '06', employee_id: this.state.employeesSelected[em].value });
+							if (this.appointmentssix.length > 0) {
+								this.sixObject = {};
+								this.sixObject.time = false,
+								this.sixObject.key = this.state.employeesSelected[em].key;
+								this.sixObject.label = this.appointmentssix[0].contact_name;
+								this.sixObject.value = this.appointmentssix[0]._id;
+								this.sixObject.appointment = [];
+								this.sixObject.appointment.push(this.appointmentssix[0]);
+								this.six.push(this.sixObject);
+							} else {
+								this.six.push(this.emptyObject);
+							}
+							this.appointmentsseven = _.filter(appointmentslist.docs, { hour: '07', employee_id: this.state.employeesSelected[em].value });
+							if (this.appointmentsseven.length > 0) {
+								this.sevenObject = {};
+								this.sevenObject.time = false,
+								this.sevenObject.key = this.state.employeesSelected[em].key;
+								this.sevenObject.label = this.appointmentsseven[0].contact_name;
+								this.sevenObject.value = this.appointmentsseven[0]._id;
+								this.sevenObject.appointment = [];
+								this.sevenObject.appointment.push(this.appointmentsseven[0]);
+								this.seven.push(this.sevenObject);
+							} else {
+								this.seven.push(this.emptyObject);
+							}
 							this.appointmentseight = _.filter(appointmentslist.docs, { hour: '08', employee_id: this.state.employeesSelected[em].value });
 							if (this.appointmentseight.length > 0) {
 								this.eightObject = {};
@@ -510,13 +764,7 @@ class Dashboard extends Component {
 								this.eightObject.appointment.push(this.appointmentseight[0]);
 								this.eight.push(this.eightObject);
 							} else {
-								this.eightObject = {};
-								this.eightObject.time = false,
-								this.eightObject.key = '';
-								this.eightObject.label = '';
-								this.eightObject.value = '';
-								this.eightObject.appointment = [];
-								this.eight.push(this.eightObject);
+								this.eight.push(this.emptyObject);
 							}
 							this.appointmentsnine = _.filter(appointmentslist.docs, { hour: '09', employee_id: this.state.employeesSelected[em].value });
 							if (this.appointmentsnine.length > 0) {
@@ -529,13 +777,7 @@ class Dashboard extends Component {
 								this.nineObject.appointment.push(this.appointmentsnine[0]);
 								this.nine.push(this.nineObject);
 							} else {
-								this.nineObject = {};
-								this.nineObject.time = false,
-								this.nineObject.key = '';
-								this.nineObject.label = '';
-								this.nineObject.value = '';
-								this.nineObject.appointment = [];
-								this.nine.push(this.nineObject);
+								this.nine.push(this.emptyObject);
 							}
 							this.appointmentsten = _.filter(appointmentslist.docs, { hour: '10', employee_id: this.state.employeesSelected[em].value });
 							if (this.appointmentsten.length > 0) {
@@ -548,13 +790,7 @@ class Dashboard extends Component {
 								this.tenObject.appointment.push(this.appointmentsten[0]);
 								this.ten.push(this.tenObject);
 							} else {
-								this.tenObject = {};
-								this.tenObject.time = false,
-								this.tenObject.key = '';
-								this.tenObject.label = '';
-								this.tenObject.value = '';
-								this.tenObject.appointment = [];
-								this.ten.push(this.tenObject);
+								this.ten.push(this.emptyObject);
 							}
 							this.appointmentseleven = _.filter(appointmentslist.docs, { hour: '11', employee_id: this.state.employeesSelected[em].value });
 							if (this.appointmentseleven.length > 0) {
@@ -567,13 +803,7 @@ class Dashboard extends Component {
 								this.elevenObject.appointment.push(this.appointmentseleven[0]);
 								this.eleven.push(this.elevenObject);
 							} else {
-								this.elevenObject = {};
-								this.elevenObject.time = false,
-								this.elevenObject.key = '';
-								this.elevenObject.label = '';
-								this.elevenObject.value = '';
-								this.elevenObject.appointment = [];
-								this.eleven.push(this.elevenObject);
+								this.eleven.push(this.emptyObject);
 							}
 							this.appointmentstwelve = _.filter(appointmentslist.docs, { hour: '12', employee_id: this.state.employeesSelected[em].value });
 							if (this.appointmentstwelve.length > 0) {
@@ -586,13 +816,7 @@ class Dashboard extends Component {
 								this.twelveObject.appointment.push(this.appointmentstwelve[0]);
 								this.twelve.push(this.twelveObject);
 							} else {
-								this.twelveObject = {};
-								this.twelveObject.time = false,
-								this.twelveObject.key = '';
-								this.twelveObject.label = '';
-								this.twelveObject.value = '';
-								this.twelveObject.appointment = [];
-								this.twelve.push(this.twelveObject);
+								this.twelve.push(this.emptyObject);
 							}
 							this.appointmentsthirteen = _.filter(appointmentslist.docs, { hour: '13', employee_id: this.state.employeesSelected[em].value });
 							if (this.appointmentsthirteen.length > 0) {
@@ -605,13 +829,7 @@ class Dashboard extends Component {
 								this.thirteenObject.appointment.push(this.appointmentsthirteen[0]);
 								this.thirteen.push(this.thirteenObject);
 							} else {
-								this.thirteenObject = {};
-								this.thirteenObject.time = false,
-								this.thirteenObject.key = '';
-								this.thirteenObject.label = '';
-								this.thirteenObject.value = '';
-								this.thirteenObject.appointment = [];
-								this.thirteen.push(this.thirteenObject);
+								this.thirteen.push(this.emptyObject);
 							}
 							this.appointmentsfourteen = _.filter(appointmentslist.docs, { hour: '14', employee_id: this.state.employeesSelected[em].value });
 							if (this.appointmentsfourteen.length > 0) {
@@ -624,13 +842,7 @@ class Dashboard extends Component {
 								this.fourteenObject.appointment.push(this.appointmentsfourteen[0]);
 								this.fourteen.push(this.fourteenObject);
 							} else {
-								this.fourteenObject = {};
-								this.fourteenObject.time = false,
-								this.fourteenObject.key = '';
-								this.fourteenObject.label = '';
-								this.fourteenObject.value = '';
-								this.fourteenObject.appointment = [];
-								this.fourteen.push(this.fourteenObject);
+								this.fourteen.push(this.emptyObject);
 							}
 							this.appointmentsfiveteen = _.filter(appointmentslist.docs, { hour: '15', employee_id: this.state.employeesSelected[em].value });
 							if (this.appointmentsfiveteen.length > 0) {
@@ -643,13 +855,7 @@ class Dashboard extends Component {
 								this.fiveteenObject.appointment.push(this.appointmentsfiveteen[0]);
 								this.fiveteen.push(this.fiveteenObject);
 							} else {
-								this.fiveteenObject = {};
-								this.fiveteenObject.time = false,
-								this.fiveteenObject.key = '';
-								this.fiveteenObject.label = '';
-								this.fiveteenObject.value = '';
-								this.fiveteenObject.appointment = [];
-								this.fiveteen.push(this.fiveteenObject);
+								this.fiveteen.push(this.emptyObject);
 							}
 							this.appointmentssixteen = _.filter(appointmentslist.docs, { hour: '16', employee_id: this.state.employeesSelected[em].value });
 							if (this.appointmentssixteen.length > 0) {
@@ -662,13 +868,7 @@ class Dashboard extends Component {
 								this.sixteenObject.appointment.push(this.appointmentssixteen[0]);
 								this.sixteen.push(this.sixteenObject);
 							} else {
-								this.sixteenObject = {};
-								this.sixteenObject.time = false,
-								this.sixteenObject.key = '';
-								this.sixteenObject.label = '';
-								this.sixteenObject.value = '';
-								this.sixteenObject.appointment = [];
-								this.sixteen.push(this.sixteenObject);
+								this.sixteen.push(this.emptyObject);
 							}
 							this.appointmentsseventeen = _.filter(appointmentslist.docs, { hour: '17', employee_id: this.state.employeesSelected[em].value });
 							if (this.appointmentsseventeen.length > 0) {
@@ -681,13 +881,7 @@ class Dashboard extends Component {
 								this.seventeenObject.appointment.push(this.appointmentsseventeen[0]);
 								this.seventeen.push(this.seventeenObject);
 							} else {
-								this.seventeenObject = {};
-								this.seventeenObject.time = false,
-								this.seventeenObject.key = '';
-								this.seventeenObject.label = '';
-								this.seventeenObject.value = '';
-								this.seventeenObject.appointment = [];
-								this.seventeen.push(this.seventeenObject);
+								this.seventeen.push(this.emptyObject);
 							}
 							this.appointmentseighteen = _.filter(appointmentslist.docs, { hour: '18', employee_id: this.state.employeesSelected[em].value });
 							if (this.appointmentseighteen.length > 0) {
@@ -700,13 +894,7 @@ class Dashboard extends Component {
 								this.eighteenObject.appointment.push(this.appointmentseighteen[0]);
 								this.eighteen.push(this.eighteenObject);
 							} else {
-								this.eighteenObject = {};
-								this.eighteenObject.time = false,
-								this.eighteenObject.key = '';
-								this.eighteenObject.label = '';
-								this.eighteenObject.value = '';
-								this.eighteenObject.appointment = [];
-								this.eighteen.push(this.eighteenObject);
+								this.eighteen.push(this.emptyObject);
 							}
 							this.appointmentsnineteen = _.filter(appointmentslist.docs, { hour: '19', employee_id: this.state.employeesSelected[em].value });
 							if (this.appointmentsnineteen.length > 0) {
@@ -719,13 +907,7 @@ class Dashboard extends Component {
 								this.nineteenObject.appointment.push(this.appointmentsnineteen[0]);
 								this.nineteen.push(this.nineteenObject);
 							} else {
-								this.nineteenObject = {};
-								this.nineteenObject.time = false,
-								this.nineteenObject.key = '';
-								this.nineteenObject.label = '';
-								this.nineteenObject.value = '';
-								this.nineteenObject.appointment = [];
-								this.nineteen.push(this.nineteenObject);
+								this.nineteen.push(this.emptyObject);
 							}
 							this.appointmentstwenty = _.filter(appointmentslist.docs, { hour: '20', employee_id: this.state.employeesSelected[em].value });
 							if (this.appointmentstwenty.length > 0) {
@@ -738,13 +920,7 @@ class Dashboard extends Component {
 								this.twentyObject.appointment.push(this.appointmentstwenty[0]);
 								this.twenty.push(this.twentyObject);
 							} else {
-								this.twentyObject = {};
-								this.twentyObject.time = false,
-								this.twentyObject.key = '';
-								this.twentyObject.label = '';
-								this.twentyObject.value = '';
-								this.twentyObject.appointment = [];
-								this.twenty.push(this.twentyObject);
+								this.twenty.push(this.emptyObject);
 							}
 							this.appointmentstwentyone = _.filter(appointmentslist.docs, { hour: '21', employee_id: this.state.employeesSelected[em].value });
 							if (this.appointmentstwentyone.length > 0) {
@@ -757,132 +933,325 @@ class Dashboard extends Component {
 								this.twentyoneObject.appointment.push(this.appointmentstwentyone[0]);
 								this.twentyone.push(this.twentyoneObject);
 							} else {
-								this.twentyoneObject = {};
-								this.twentyoneObject.time = false,
-								this.twentyoneObject.key = '';
-								this.twentyoneObject.label = '';
-								this.twentyoneObject.value = '';
-								this.twentyoneObject.appointment = [];
-								this.twentyone.push(this.twentyoneObject);
+								this.twentyone.push(this.emptyObject);
+							}
+							this.appointmentstwentytwo = _.filter(appointmentslist.docs, { hour: '22', employee_id: this.state.employeesSelected[em].value });
+							if (this.appointmentstwentytwo.length > 0) {
+								this.twentytwoObject = {};
+								this.twentytwoObject.time = false,
+								this.twentytwoObject.key = this.state.employeesSelected[em].key;
+								this.twentytwoObject.label = this.appointmentstwentytwo[0].contact_name;
+								this.twentytwoObject.value = this.appointmentstwentytwo[0]._id;
+								this.twentytwoObject.appointment = [];
+								this.twentytwoObject.appointment.push(this.appointmentstwentytwo[0]);
+								this.twentytwo.push(this.twentytwoObject);
+							} else {
+								this.twentytwo.push(this.emptyObject);
+							}
+							this.appointmentstwentythree = _.filter(appointmentslist.docs, { hour: '23', employee_id: this.state.employeesSelected[em].value });
+							if (this.appointmentstwentythree.length > 0) {
+								this.twentythreeObject = {};
+								this.twentythreeObject.time = false,
+								this.twentythreeObject.key = this.state.employeesSelected[em].key;
+								this.twentythreeObject.label = this.appointmentstwentythree[0].contact_name;
+								this.twentythreeObject.value = this.appointmentstwentythree[0]._id;
+								this.twentythreeObject.appointment = [];
+								this.twentythreeObject.appointment.push(this.appointmentstwentythree[0]);
+								this.twentythree.push(this.twentythreeObject);
+							} else {
+								this.twentythree.push(this.emptyObject);
+							}
+							this.appointmentstwentyfour = _.filter(appointmentslist.docs, { hour: '24', employee_id: this.state.employeesSelected[em].value });
+							if (this.appointmentstwentyfour.length > 0) {
+								this.twentyfourObject = {};
+								this.twentyfourObject.time = false,
+								this.twentyfourObject.key = this.state.employeesSelected[em].key;
+								this.twentyfourObject.label = this.appointmentstwentyfour[0].contact_name;
+								this.twentyfourObject.value = this.appointmentstwentyfour[0]._id;
+								this.twentyfourObject.appointment = [];
+								this.twentyfourObject.appointment.push(this.appointmentstwentyfour[0]);
+								this.twentyfour.push(this.twentyfourObject);
+							} else {
+								this.twentyfour.push(this.emptyObject);
 							}
 						}
 						
 					}
 				}
-				this.setState({ employeesListText: 'Employee(s) selected', showspinner: false, employeesSelectedCount: this.state.employeesSelected.length, employeesSelected: this.state.employeesSelected, contactsList: this.contactsList, employeesList: this.employeesList });
+				this.setState({ schedule: this.schedule, employeesListText: 'Employee(s) selected', showspinner: false, employeesSelectedCount: this.state.employeesSelected.length, employeesSelected: this.state.employeesSelected, contactsList: this.contactsList, employeesList: this.employeesList });
 			} else {
 				if (this.state.employeesSelected.length > 0) {
 					for (let em = 0; em < this.state.employeesSelected.length; em += 1) {
 						if (this.state.employeesSelected[em].key !== 'employee') {
-							this.eightObject = {};
-							this.eightObject.time = false,
-							this.eightObject.key = '';
-							this.eightObject.label = '';
-							this.eightObject.value = '';
-							this.eightObject.appointment = [];
-							this.eight.push(this.eightObject);
-							this.nineObject = {};
-							this.nineObject.time = false,
-							this.nineObject.key = '';
-							this.nineObject.label = '';
-							this.nineObject.value = '';
-							this.nineObject.appointment = [];
-							this.nine.push(this.nineObject);
-							this.tenObject = {};
-							this.tenObject.time = false,
-							this.tenObject.key = '';
-							this.tenObject.label = '';
-							this.tenObject.value = '';
-							this.tenObject.appointment = [];
-							this.ten.push(this.tenObject);
-							this.elevenObject = {};
-							this.elevenObject.time = false,
-							this.elevenObject.key = '';
-							this.elevenObject.label = '';
-							this.elevenObject.value = '';
-							this.elevenObject.appointment = [];
-							this.eleven.push(this.elevenObject);
-							this.twelveObject = {};
-							this.twelveObject.time = false,
-							this.twelveObject.key = '';
-							this.twelveObject.label = '';
-							this.twelveObject.value = '';
-							this.twelveObject.appointment = [];
-							this.twelve.push(this.twelveObject);
-							this.thirteenObject = {};
-							this.thirteenObject.time = false,
-							this.thirteenObject.key = '';
-							this.thirteenObject.label = '';
-							this.thirteenObject.value = '';
-							this.thirteenObject.appointment = [];
-							this.thirteen.push(this.thirteenObject);
-							this.fourteenObject = {};
-							this.fourteenObject.time = false,
-							this.fourteenObject.key = '';
-							this.fourteenObject.label = '';
-							this.fourteenObject.value = '';
-							this.fourteenObject.appointment = [];
-							this.fourteen.push(this.fourteenObject);
-							this.fiveteenObject = {};
-							this.fiveteenObject.time = false,
-							this.fiveteenObject.key = '';
-							this.fiveteenObject.label = '';
-							this.fiveteenObject.value = '';
-							this.fiveteenObject.appointment = [];
-							this.fiveteen.push(this.fiveteenObject);
-							this.sixteenObject = {};
-							this.sixteenObject.time = false,
-							this.sixteenObject.key = '';
-							this.sixteenObject.label = '';
-							this.sixteenObject.value = '';
-							this.sixteenObject.appointment = [];
-							this.sixteen.push(this.sixteenObject);
-							this.seventeenObject = {};
-							this.seventeenObject.time = false,
-							this.seventeenObject.key = '';
-							this.seventeenObject.label = '';
-							this.seventeenObject.value = '';
-							this.seventeenObject.appointment = [];
-							this.seventeen.push(this.seventeenObject);
-							this.eighteenObject = {};
-							this.eighteenObject.time = false,
-							this.eighteenObject.key = '';
-							this.eighteenObject.label = '';
-							this.eighteenObject.value = '';
-							this.eighteenObject.appointment = [];
-							this.eighteen.push(this.eighteenObject);
-							this.nineteenObject = {};
-							this.nineteenObject.time = false,
-							this.nineteenObject.key = '';
-							this.nineteenObject.label = '';
-							this.nineteenObject.value = '';
-							this.nineteenObject.appointment = [];
-							this.nineteen.push(this.nineteenObject);
-							this.twentyObject = {};
-							this.twentyObject.time = false,
-							this.twentyObject.key = '';
-							this.twentyObject.label = '';
-							this.twentyObject.value = '';
-							this.twentyObject.appointment = [];
-							this.twenty.push(this.twentyObject);
-							this.twentyoneObject = {};
-							this.twentyoneObject.time = false,
-							this.twentyoneObject.key = '';
-							this.twentyoneObject.label = '';
-							this.twentyoneObject.value = '';
-							this.twentyoneObject.appointment = [];
-							this.twentyone.push(this.twentyoneObject);
+							this.one.push(this.emptyObject);
+							this.two.push(this.emptyObject);
+							this.three.push(this.emptyObject);
+							this.four.push(this.emptyObject);
+							this.five.push(this.emptyObject);
+							this.six.push(this.emptyObject);
+							this.seven.push(this.emptyObject);
+							this.eight.push(this.emptyObject);
+							this.nine.push(this.emptyObject);
+							this.ten.push(this.emptyObject);
+							this.eleven.push(this.emptyObject);
+							this.twelve.push(this.emptyObject);
+							this.thirteen.push(this.emptyObject);
+							this.fourteen.push(this.emptyObject);
+							this.fiveteen.push(this.emptyObject);
+							this.sixteen.push(this.emptyObject);
+							this.seventeen.push(this.emptyObject);
+							this.eighteen.push(this.emptyObject);
+							this.nineteen.push(this.emptyObject);
+							this.twenty.push(this.emptyObject);
+							this.twentyone.push(this.emptyObject);
+							this.twentytwo.push(this.emptyObject);
+							this.twentythree.push(this.emptyObject);
+							this.twentyfour.push(this.emptyObject);
 						}
 					}
 				}
-				this.setState({ employeesListText: 'Employee(s) selected', showspinner: false, employeesSelectedCount: this.state.employeesSelected.length, employeesSelected: this.state.employeesSelected, contactsList: this.contactsList, employeesList: this.employeesList });
+				this.setState({ schedule: this.schedule, employeesListText: 'Employee(s) selected', showspinner: false, employeesSelectedCount: this.state.employeesSelected.length, employeesSelected: this.state.employeesSelected, contactsList: this.contactsList, employeesList: this.employeesList });
 			}
 		}
 		this.setState({ showspinner: false });
 	}
 
+	async saveSchedule() {
+		const savedSchedule = await DBCompanyConnection.put(this.state.schedule);
+		newrev = savedSchedule.rev;
+		const inschedule = this.state.schedule;
+		inschedule['_rev'] = newrev;
+		this.setState({ schedule: inschedule });
+	}
+
+	onChangeSchedule(newValue, prop) {
+		switch(prop){
+		case 'one':
+			if (this.state.schedule.one === true) {
+				this.state.schedule.one = false;
+			} else {
+				this.state.schedule.one = true;
+			}
+			break;
+		case 'two':
+			if (this.state.schedule.two === true) {
+				this.state.schedule.two = false;
+			} else {
+				this.state.schedule.two = true;
+			}
+			break;
+		case 'three':
+			if (this.state.schedule.three === true) {
+				this.state.schedule.three = false;
+			} else {
+				this.state.schedule.three = true;
+			}
+			break;
+		case 'four':
+			if (this.state.schedule.four === true) {
+				this.state.schedule.four = false;
+			} else {
+				this.state.schedule.four = true;
+			}
+			break;
+		case 'five':
+			if (this.state.schedule.five === true) {
+				this.state.schedule.five = false;
+			} else {
+				this.state.schedule.five = true;
+			}
+			break;
+		case 'six':
+			if (this.state.schedule.six === true) {
+				this.state.schedule.six = false;
+			} else {
+				this.state.schedule.six = true;
+			}
+			break;
+		case 'seven':
+			if (this.state.schedule.seven === true) {
+				this.state.schedule.seven = false;
+			} else {
+				this.state.schedule.seven = true;
+			}
+			break;
+		case 'eight':
+			if (this.state.schedule.eight === true) {
+				this.state.schedule.eight = false;
+			} else {
+				this.state.schedule.eight = true;
+			}
+			break;
+		case 'nine':
+			if (this.state.schedule.nine === true) {
+				this.state.schedule.nine = false;
+			} else {
+				this.state.schedule.nine = true;
+			}
+			break;
+		case 'ten':
+			if (this.state.schedule.ten === true) {
+				this.state.schedule.ten = false;
+			} else {
+				this.state.schedule.ten = true;
+			}
+			break;
+		case 'eleven':
+			if (this.state.schedule.eleven === true) {
+				this.state.schedule.eleven = false;
+			} else {
+				this.state.schedule.eleven = true;
+			}
+			break;
+		case 'twelve':
+			if (this.state.schedule.twelve === true) {
+				this.state.schedule.twelve = false;
+			} else {
+				this.state.schedule.twelve = true;
+			}
+			break;
+		case 'thirteen':
+			if (this.state.schedule.thirteen === true) {
+				this.state.schedule.thirteen = false;
+			} else {
+				this.state.schedule.thirteen = true;
+			}
+			break;
+		case 'fourteen':
+			if (this.state.schedule.fourteen === true) {
+				this.state.schedule.fourteen = false;
+			} else {
+				this.state.schedule.fourteen = true;
+			}
+			break;
+		case 'fiveteen':
+			if (this.state.schedule.fiveteen === true) {
+				this.state.schedule.fiveteen = false;
+			} else {
+				this.state.schedule.fiveteen = true;
+			}
+			break;
+		case 'sixteen':
+			if (this.state.schedule.sixteen === true) {
+				this.state.schedule.sixteen = false;
+			} else {
+				this.state.schedule.sixteen = true;
+			}
+			break;
+		case 'seventeen':
+			if (this.state.schedule.seventeen === true) {
+				this.state.schedule.seventeen = false;
+			} else {
+				this.state.schedule.seventeen = true;
+			}
+			break;
+		case 'eighteen':
+			if (this.state.schedule.eighteen === true) {
+				this.state.schedule.eighteen = false;
+			} else {
+				this.state.schedule.eighteen = true;
+			}
+			break;
+		case 'nineteen':
+			if (this.state.schedule.nineteen === true) {
+				this.state.schedule.nineteen = false;
+			} else {
+				this.state.schedule.nineteen = true;
+			}
+			break;
+		case 'twenty':
+			if (this.state.schedule.twenty === true) {
+				this.state.schedule.twenty = false;
+			} else {
+				this.state.schedule.twenty = true;
+			}
+			break;
+		case 'twentyone':
+			if (this.state.schedule.twentyone === true) {
+				this.state.schedule.twentyone = false;
+			} else {
+				this.state.schedule.twentyone = true;
+			}
+			break;
+		case 'twentytwo':
+			if (this.state.schedule.twentytwo === true) {
+				this.state.schedule.twentytwo = false;
+			} else {
+				this.state.schedule.twentytwo = true;
+			}
+			break;
+		case 'twentythree':
+			if (this.state.schedule.twentythree === true) {
+				this.state.schedule.twentythree = false;
+			} else {
+				this.state.schedule.twentythree = true;
+			}
+			break;
+		case 'twentyfour':
+			if (this.state.schedule.twentyfour === true) {
+				this.state.schedule.twentyfour = false;
+			} else {
+				this.state.schedule.twentyfour = true;
+			}
+			break;
+		case 'monday':
+			if (this.state.schedule.monday === true) {
+				this.state.schedule.monday = false;
+			} else {
+				this.state.schedule.monday = true;
+			}
+			break;
+		case 'tuesday':
+			if (this.state.schedule.tuesday === true) {
+				this.state.schedule.tuesday = false;
+			} else {
+				this.state.schedule.tuesday = true;
+			}
+			break;
+		case 'wednesday':
+			if (this.state.schedule.wednesday === true) {
+				this.state.schedule.wednesday = false;
+			} else {
+				this.state.schedule.wednesday = true;
+			}
+			break;
+		case 'thursday':
+			if (this.state.schedule.thursday === true) {
+				this.state.schedule.thursday = false;
+			} else {
+				this.state.schedule.thursday = true;
+			}
+			break;
+		case 'friday':
+			if (this.state.schedule.friday === true) {
+				this.state.schedule.friday = false;
+			} else {
+				this.state.schedule.friday = true;
+			}
+			break;
+		case 'saturday':
+			if (this.state.schedule.saturday === true) {
+				this.state.schedule.saturday = false;
+			} else {
+				this.state.schedule.saturday = true;
+			}
+			break;
+		case 'sunday':
+			if (this.state.schedule.sunday === true) {
+				this.state.schedule.sunday = false;
+			} else {
+				this.state.schedule.sunday = true;
+			}
+			break;
+		}
+		const inschedule = this.state.schedule;
+		this.setState({ schedule: inschedule });
+		this.saveSchedule();
+	}
+
 	async showScaleAnimationDialog(item) {
 		this.treatmentslist = '';
+		this.treatmentslistinfo = [];
 		if (item.appointment.length === 0) {
 			this.appointmentdetails = {
 				_id: '',
@@ -916,12 +1285,22 @@ class Dashboard extends Component {
 		}
 	}
 	
-	showEmployeesList() {
-		Actions.AppointmentsEmployeesList({
-			title: 'Employees list',
-			appointmentsdate: this.state.todaysDate,
-			area: 'dashboard',
-		});
+	showEmployeesList(dashboardTab) {
+		if (dashboardTab === 'daily') {
+			Actions.AppointmentsEmployeesList({
+				title: 'Employees list',
+				appointmentsdate: this.state.todaysDate,
+				area: 'dashboard',
+				tab: dashboardTab
+			});
+		} else if (dashboardTab === 'weekly') {
+			Actions.AppointmentsEmployeesList({
+				title: 'Employees list',
+				appointmentsdate: this.state.todaysDate,
+				area: 'dashboard',
+				tab: dashboardTab
+			});
+		}
 	}
 
 	onChangeAppointmentsDate(newValue, prop) {
@@ -983,6 +1362,7 @@ class Dashboard extends Component {
 			newappointment.minute = this.state.appointment.minute;
 			newappointment.contact_id = this.state.appointment.contact_id;
 			newappointment.employee_id = this.state.appointment.employee_id;
+			newappointment.employee_alias = this.state.appointment.employee_alias;
 			newappointment.notes = this.state.appointment.notes;
 			const savedappointment = await DBCompanyConnection.post(newappointment);
 			const newid = savedappointment.id;
@@ -1102,235 +1482,6 @@ class Dashboard extends Component {
 		);
 	}
 
-	checkHour(hour) {
-		switch(hour){
-		case 'one':
-			if (this.state.hours.one === true) {
-				this.state.hours.one = false;
-			} else {
-				this.state.hours.one = true;
-			}
-			break;
-		case 'two':
-			if (this.state.hours.two === true) {
-				this.state.hours.two = false;
-			} else {
-				this.state.hours.two = true;
-			}
-			break;
-		case 'three':
-			if (this.state.hours.three === true) {
-				this.state.hours.three = false;
-			} else {
-				this.state.hours.three = true;
-			}
-			break;
-		case 'four':
-			if (this.state.hours.four === true) {
-				this.state.hours.four = false;
-			} else {
-				this.state.hours.four = true;
-			}
-			break;
-		case 'five':
-			if (this.state.hours.five === true) {
-				this.state.hours.five = false;
-			} else {
-				this.state.hours.five = true;
-			}
-			break;
-		case 'six':
-			if (this.state.hours.six === true) {
-				this.state.hours.six = false;
-			} else {
-				this.state.hours.six = true;
-			}
-			break;
-		case 'seven':
-			if (this.state.hours.seven === true) {
-				this.state.hours.seven = false;
-			} else {
-				this.state.hours.seven = true;
-			}
-			break;
-		case 'eight':
-			if (this.state.hours.eight === true) {
-				this.state.hours.eight = false;
-			} else {
-				this.state.hours.eight = true;
-			}
-			break;
-		case 'nine':
-			if (this.state.hours.nine === true) {
-				this.state.hours.nine = false;
-			} else {
-				this.state.hours.nine = true;
-			}
-			break;
-		case 'ten':
-			if (this.state.hours.ten === true) {
-				this.state.hours.ten = false;
-			} else {
-				this.state.hours.ten = true;
-			}
-			break;
-		case 'eleven':
-			if (this.state.hours.eleven === true) {
-				this.state.hours.eleven = false;
-			} else {
-				this.state.hours.eleven = true;
-			}
-			break;
-		case 'twelve':
-			if (this.state.hours.twelve === true) {
-				this.state.hours.twelve = false;
-			} else {
-				this.state.hours.twelve = true;
-			}
-			break;
-		case 'thirteen':
-			if (this.state.hours.thirteen === true) {
-				this.state.hours.thirteen = false;
-			} else {
-				this.state.hours.thirteen = true;
-			}
-			break;
-		case 'fourteen':
-			if (this.state.hours.fourteen === true) {
-				this.state.hours.fourteen = false;
-			} else {
-				this.state.hours.fourteen = true;
-			}
-			break;
-		case 'fiveteen':
-			if (this.state.hours.fiveteen === true) {
-				this.state.hours.fiveteen = false;
-			} else {
-				this.state.hours.fiveteen = true;
-			}
-			break;
-		case 'sixteen':
-			if (this.state.hours.sixteen === true) {
-				this.state.hours.sixteen = false;
-			} else {
-				this.state.hours.sixteen = true;
-			}
-			break;
-		case 'seventeen':
-			if (this.state.hours.seventeen === true) {
-				this.state.hours.seventeen = false;
-			} else {
-				this.state.hours.seventeen = true;
-			}
-			break;
-		case 'eighteen':
-			if (this.state.hours.eighteen === true) {
-				this.state.hours.eighteen = false;
-			} else {
-				this.state.hours.eighteen = true;
-			}
-			break;
-		case 'nineteen':
-			if (this.state.hours.nineteen === true) {
-				this.state.hours.nineteen = false;
-			} else {
-				this.state.hours.nineteen = true;
-			}
-			break;
-		case 'twenty':
-			if (this.state.hours.twenty === true) {
-				this.state.hours.twenty = false;
-			} else {
-				this.state.hours.twenty = true;
-			}
-			break;
-		case 'twentyone':
-			if (this.state.hours.twentyone === true) {
-				this.state.hours.twentyone = false;
-			} else {
-				this.state.hours.twentyone = true;
-			}
-			break;
-		case 'twentytwo':
-			if (this.state.hours.twentytwo === true) {
-				this.state.hours.twentytwo = false;
-			} else {
-				this.state.hours.twentytwo = true;
-			}
-			break;
-		case 'twentythree':
-			if (this.state.hours.twentythree === true) {
-				this.state.hours.twentythree = false;
-			} else {
-				this.state.hours.twentythree = true;
-			}
-			break;
-		case 'twentyfour':
-			if (this.state.hours.twentyfour === true) {
-				this.state.hours.twentyfour = false;
-			} else {
-				this.state.hours.twentyfour = true;
-			}
-			break;
-		}
-		this.setState({ hours: this.state.hours });
-	}
-
-	checkDay(day) {
-		switch(day){
-		case 'monday':
-			if (this.state.days.monday === true) {
-				this.state.days.monday = false;
-			} else {
-				this.state.days.monday = true;
-			}
-			break;
-		case 'tuesday':
-			if (this.state.days.tuesday === true) {
-				this.state.days.tuesday = false;
-			} else {
-				this.state.days.tuesday = true;
-			}
-			break;
-		case 'wednesday':
-			if (this.state.days.wednesday === true) {
-				this.state.days.wednesday = false;
-			} else {
-				this.state.days.wednesday = true;
-			}
-			break;
-		case 'thursday':
-			if (this.state.days.thursday === true) {
-				this.state.days.thursday = false;
-			} else {
-				this.state.days.thursday = true;
-			}
-			break;
-		case 'friday':
-			if (this.state.days.friday === true) {
-				this.state.days.friday = false;
-			} else {
-				this.state.days.friday = true;
-			}
-			break;
-		case 'saturday':
-			if (this.state.days.saturday === true) {
-				this.state.days.saturday = false;
-			} else {
-				this.state.days.saturday = true;
-			}
-			break;
-		case 'sunday':
-			if (this.state.days.sunday === true) {
-				this.state.days.sunday = false;
-			} else {
-				this.state.days.sunday = true;
-			}
-			break;
-		}
-		this.setState({ days: this.state.days });
-	}
-
 	render() {
 		return (
 			<Container style={{ paddingTop: (Platform.OS === 'ios') ? 64 : 54 }}>
@@ -1368,7 +1519,7 @@ class Dashboard extends Component {
 										this.onChangeAppointmentsDate(date, 'date');
 									}}
 								/>
-								<TouchableOpacity onPress={this.showEmployeesList.bind(this)} style={{ height: 40 }}>
+								<TouchableOpacity onPress={this.showEmployeesList.bind(this, 'daily')} style={{ height: 40 }}>
 									<View style={{ flexDirection: 'row', flex: 1, padding: 10, borderColor: '#C0C0C0', borderWidth: 1, borderRadius: 6 }}>
 										<Text>{this.state.employeesListText}</Text>
 										<MaterialCommunityIcons name="arrow-down-drop-circle-outline" size={20} style={{ color: '#CCCCCC' }} />
@@ -1377,7 +1528,7 @@ class Dashboard extends Component {
 							</View>
 						</View>
 						<KeyboardAwareScrollView>
-						<Content>
+						<Content style={{ minHeight: 800 }} >
 							<PopupDialog
 								width={fullWidth - 30}
 								height={fullHeight - 180}
@@ -1579,216 +1730,414 @@ class Dashboard extends Component {
 										keyExtractor={item => item._id}
 										numColumns={this.state.employeesSelectedCount} />
 								</Row>
-								<Row>
-									<FlatList
-										data={this.eight}
-										renderItem={({item}) => (
-											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
-												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
-													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
-														{item.label}
-													</Text>
-												</View>
-											</TouchableOpacity>
-										)}
-										keyExtractor={item => item._id}
-										numColumns={this.state.employeesSelectedCount} />
-								</Row>
-								<Row>
-									<FlatList
-										data={this.nine}
-										renderItem={({item}) => (
-											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
-												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
-													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
-														{item.label}
-													</Text>
-												</View>
-											</TouchableOpacity>
-										)}
-										keyExtractor={item => item._id}
-										numColumns={this.state.employeesSelectedCount} />
-								</Row>
-								<Row>
-									<FlatList
-										data={this.ten}
-										renderItem={({item}) => (
-											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
-												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
-													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
-														{item.label}
-													</Text>
-												</View>
-											</TouchableOpacity>
-										)}
-										keyExtractor={item => item._id}
-										numColumns={this.state.employeesSelectedCount} />
-								</Row>
-								<Row>
-									<FlatList
-										data={this.eleven}
-										renderItem={({item}) => (
-											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
-												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
-													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
-														{item.label}
-													</Text>
-												</View>
-											</TouchableOpacity>
-										)}
-										keyExtractor={item => item._id}
-										numColumns={this.state.employeesSelectedCount} />
-								</Row>
-								<Row>
-									<FlatList
-										data={this.twelve}
-										renderItem={({item}) => (
-											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
-												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
-													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
-														{item.label}
-													</Text>
-												</View>
-											</TouchableOpacity>
-										)}
-										keyExtractor={item => item._id}
-										numColumns={this.state.employeesSelectedCount} />
-								</Row>
-								<Row>
-									<FlatList
-										data={this.thirteen}
-										renderItem={({item}) => (
-											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
-												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
-													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
-														{item.label}
-													</Text>
-												</View>
-											</TouchableOpacity>
-										)}
-										keyExtractor={item => item._id}
-										numColumns={this.state.employeesSelectedCount} />
-								</Row>
-								<Row>
-									<FlatList
-										data={this.fourteen}
-										renderItem={({item}) => (
-											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
-												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
-													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
-														{item.label}
-													</Text>
-												</View>
-											</TouchableOpacity>
-										)}
-										keyExtractor={item => item._id}
-										numColumns={this.state.employeesSelectedCount} />
-								</Row>
-								<Row>
-									<FlatList
-										data={this.fiveteen}
-										renderItem={({item}) => (
-											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
-												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
-													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
-														{item.label}
-													</Text>
-												</View>
-											</TouchableOpacity>
-										)}
-										keyExtractor={item => item._id}
-										numColumns={this.state.employeesSelectedCount} />
-								</Row>
-								<Row>
-									<FlatList
-										data={this.sixteen}
-										renderItem={({item}) => (
-											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
-												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
-													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
-														{item.label}
-													</Text>
-												</View>
-											</TouchableOpacity>
-										)}
-										keyExtractor={item => item._id}
-										numColumns={this.state.employeesSelectedCount} />
-								</Row>
-								<Row>
-									<FlatList
-										data={this.seventeen}
-										renderItem={({item}) => (
-											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
-												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
-													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
-														{item.label}
-													</Text>
-												</View>
-											</TouchableOpacity>
-										)}
-										keyExtractor={item => item._id}
-										numColumns={this.state.employeesSelectedCount} />
-								</Row>
-								<Row>
-									<FlatList
-										data={this.eighteen}
-										renderItem={({item}) => (
-											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
-												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
-													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
-														{item.label}
-													</Text>
-												</View>
-											</TouchableOpacity>
-										)}
-										keyExtractor={item => item._id}
-										numColumns={this.state.employeesSelectedCount} />
-								</Row>
-								<Row>
-									<FlatList
-										data={this.nineteen}
-										renderItem={({item}) => (
-											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
-												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
-													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
-														{item.label}
-													</Text>
-												</View>
-											</TouchableOpacity>
-										)}
-										keyExtractor={item => item._id}
-										numColumns={this.state.employeesSelectedCount} />
-								</Row>
-								<Row>
-									<FlatList
-										data={this.twenty}
-										renderItem={({item}) => (
-											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
-												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
-													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
-														{item.label}
-													</Text>
-												</View>
-											</TouchableOpacity>
-										)}
-										keyExtractor={item => item._id}
-										numColumns={this.state.employeesSelectedCount} />
-								</Row>
-								<Row>
-									<FlatList
-										data={this.twentyone}
-										renderItem={({item}) => (
-											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
-												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
-													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
-														{item.label}
-													</Text>
-												</View>
-											</TouchableOpacity>
-										)}
-										keyExtractor={item => item._id}
-										numColumns={this.state.employeesSelectedCount} />
-								</Row>
+								{this.state.schedule.one === true &&
+									<Row>
+										<FlatList
+											data={this.one}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.two === true &&
+									<Row>
+										<FlatList
+											data={this.two}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.three === true &&
+									<Row>
+										<FlatList
+											data={this.three}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.four === true &&
+									<Row>
+										<FlatList
+											data={this.four}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.five === true &&
+									<Row>
+										<FlatList
+											data={this.five}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.six === true &&
+									<Row>
+										<FlatList
+											data={this.six}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.seven === true &&
+									<Row>
+										<FlatList
+											data={this.seven}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.eight === true &&
+									<Row>
+										<FlatList
+											data={this.eight}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.nine === true &&
+									<Row>
+										<FlatList
+											data={this.nine}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.ten === true &&
+									<Row>
+										<FlatList
+											data={this.ten}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.eleven === true &&
+									<Row>
+										<FlatList
+											data={this.eleven}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.twelve === true &&
+									<Row>
+										<FlatList
+											data={this.twelve}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.thirteen === true &&
+									<Row>
+										<FlatList
+											data={this.thirteen}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.fourteen === true &&
+									<Row>
+										<FlatList
+											data={this.fourteen}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.fiveteen === true &&
+									<Row>
+										<FlatList
+											data={this.fiveteen}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.sixteen === true &&
+									<Row>
+										<FlatList
+											data={this.sixteen}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.seventeen === true &&
+									<Row>
+										<FlatList
+											data={this.seventeen}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.eighteen === true &&
+									<Row>
+										<FlatList
+											data={this.eighteen}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.nineteen === true &&
+									<Row>
+										<FlatList
+											data={this.nineteen}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.twenty === true &&
+									<Row>
+										<FlatList
+											data={this.twenty}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.twentyone === true &&
+									<Row>
+										<FlatList
+											data={this.twentyone}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.twentytwo === true &&
+									<Row>
+										<FlatList
+											data={this.twentytwo}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.twentythree === true &&
+									<Row>
+										<FlatList
+											data={this.twentythree}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
+									{this.state.schedule.twentyfour === true &&
+									<Row>
+										<FlatList
+											data={this.twentyfour}
+											renderItem={({item}) => (
+												<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+													<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeesSelectedCount, backgroundColor: this.backgroundColor }}>
+														<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+															{item.label}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											)}
+											keyExtractor={item => item._id}
+											numColumns={this.state.employeesSelectedCount} />
+									</Row>
+									}
 							</Grid>	
 							}
 							<View style={{ height: 60 }} />
@@ -1796,719 +2145,10 @@ class Dashboard extends Component {
 						</KeyboardAwareScrollView>
 					</Tab>
 					<Tab heading={<TabHeading><Text style={{ fontSize: 12 }}>Weekly</Text></TabHeading>}>
-						{/* <View style={{ borderColor: 'steelblue', borderBottomWidth: 2, height: 54 }}>
-							<View
-								style={{
-									paddingTop: 6,
-									paddingLeft: 10,
-									paddingBottom: 6,
-									flexDirection: 'row', flex: 1
-								}}
-							>
-								<DatePicker
-									date={this.state.weekDate}
-									mode="date"
-									placeholder="20-11-17 / 26-11-17"
-									// format="DD-MM-YYYY"
-									confirmBtnText="Ok"
-									cancelBtnText="Cancel"
-									customStyles={{
-										dateIcon: {
-											alignItems: 'center',
-											alignSelf: 'center',
-										},
-										dateInput: {
-											height: 40,
-											borderColor: '#C0C0C0',
-											borderWidth: 1,
-											borderRadius: 6,
-										}
-									}}
-									onDateChange={(date) => {
-										this.onChangeAppointmentDate(date, 'date');
-									}}
-								/>
-								<TouchableOpacity onPress={this.showEmployeesList.bind(this)} style={{ height: 40 }}>
-									<View style={{ flexDirection: 'row', flex: 1, padding: 10, borderColor: '#C0C0C0', borderWidth: 1, borderRadius: 6 }}>
-										<Text>David DEA</Text>
-										<MaterialCommunityIcons name="arrow-down-drop-circle-outline" size={20} style={{ color: '#CCCCCC' }} />
-									</View>
-								</TouchableOpacity>
-							</View>
-						</View> */}
-						{/* <Content>
-							<View style={{ padding: 2.5 }}>
-								<Grid style={{ borderColor: '#d7d7d6', borderWidth: 0.5 }}>
-									<Col style={{ borderColor: '#d7d7d6', borderWidth: 0.5, backgroundColor: 'steelblue' }}>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 40 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												David DEA
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												8:00
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												9:00
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												10:00
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												11:00
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												12:00
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												13:00
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												14:00
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												15:00
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												16:00
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												17:00
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												18:00
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												19:00
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												20:00
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												21:00
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }} >
-												22:00
-											</Text>
-										</Row>
-									</Col>
-									<Col style={{ borderColor: '#d7d7d6', borderWidth: 0.5 }}>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 40 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'black' }} >
-												Mon
-												20/11/17
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-									</Col>
-									<Col style={{ borderColor: '#d7d7d6', borderWidth: 0.5 }}>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 40 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'black' }} >
-												Tues
-												21/11/17
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-									</Col>
-									<Col style={{ borderColor: '#d7d7d6', borderWidth: 0.5 }}>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 40 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'black' }} >
-												Wednes
-												22/11/17
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												Juan Jota
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												Pepe Palo
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-									</Col>
-									<Col style={{ borderColor: '#d7d7d6', borderWidth: 0.5 }}>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 40 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'black' }} >
-												Thurs
-												23/11/17
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												Steve Stevenson 18:45
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												John Johnason
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												Dan Daniels
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-									</Col>
-									<Col style={{ borderColor: '#d7d7d6', borderWidth: 0.5 }}>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 40 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'black' }} >
-												Fri
-												24/11/17
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												Aaron Aronson
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-									</Col>
-									<Col style={{ borderColor: '#d7d7d6', borderWidth: 0.5 }}>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 40 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'black' }} >
-												Satur
-												25/11/17
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-									</Col>
-									<Col style={{ borderColor: '#d7d7d6', borderWidth: 0.5 }}>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 40 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', color: 'black' }} >
-												Sun
-												26/11/17
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-										<Row style={{ borderColor: '#d7d7d6', borderWidth: 0.5, height: 65 }}>
-											<Text note style={{ fontSize: 10, alignSelf: 'center', alignItems: 'center', }} >
-												
-											</Text>
-										</Row>
-									</Col>
-								</Grid>
-							</View>
-							<View style={{ height: 60 }} />
-						</Content> */}
+						
 					</Tab>
 					<Tab heading={<TabHeading><Text style={{ fontSize: 12 }}>Configuration</Text></TabHeading>}>
-						<View style={{ borderColor: 'steelblue', borderBottomWidth: 2, borderTopWidth: 2, height: 40 }}>
+					<View style={{ borderColor: 'steelblue', borderBottomWidth: 2, borderTopWidth: 2, height: 40 }}>
 							<Text style={{ fontWeight: 'bold', alignSelf: 'center', alignItems: 'center', paddingTop: 8 }}>Hours visible (Daily and weekly)</Text>
 						</View>
 						<Content style={{ borderColor: 'steelblue', borderBottomWidth: 0.25, borderWidth: 0.5 }}>
@@ -2525,8 +2165,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.one}
-									onPress={() => { this.checkHour('one'); }}
+									checked={this.state.schedule.one}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.one, 'one'); }}
 								/>
 								<CheckBox
 									title='02:00'
@@ -2540,8 +2180,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.two}
-									onPress={() => { this.checkHour('two'); }}
+									checked={this.state.schedule.two}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.two, 'two'); }}
 								/>
 								<CheckBox
 									title='03:00'
@@ -2555,8 +2195,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.three}
-									onPress={() => { this.checkHour('three'); }}
+									checked={this.state.schedule.three}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.three, 'three'); }}
 								/>
 								<CheckBox
 									title='04:00'
@@ -2570,8 +2210,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.four}
-									onPress={() => { this.checkHour('four'); }}
+									checked={this.state.schedule.four}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.four, 'four'); }}
 								/>
 							</View>
 							<View style={{ flex: 1, flexDirection: 'row', marginRight: 20 }} >
@@ -2587,8 +2227,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.five}
-									onPress={() => { this.checkHour('five'); }}
+									checked={this.state.schedule.five}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.five, 'five'); }}
 								/>
 								<CheckBox
 									title='06:00'
@@ -2602,8 +2242,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.six}
-									onPress={() => { this.checkHour('six'); }}
+									checked={this.state.schedule.six}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.six, 'six'); }}
 								/>
 								<CheckBox
 									title='07:00'
@@ -2617,8 +2257,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.seven}
-									onPress={() => { this.checkHour('seven'); }}
+									checked={this.state.schedule.seven}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.seven, 'seven'); }}
 								/>
 								<CheckBox
 									title='08:00'
@@ -2632,8 +2272,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.eight}
-									onPress={() => { this.checkHour('eight'); }}
+									checked={this.state.schedule.eight}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.eight, 'eight'); }}
 								/>
 							</View>
 							<View style={{ flex: 1, flexDirection: 'row', marginRight: 20 }} >
@@ -2649,8 +2289,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.nine}
-									onPress={() => { this.checkHour('nine'); }}
+									checked={this.state.schedule.nine}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.nine, 'nine'); }}
 								/>
 								<CheckBox
 									title='10:00'
@@ -2664,8 +2304,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.ten}
-									onPress={() => { this.checkHour('ten'); }}
+									checked={this.state.schedule.ten}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.ten, 'ten'); }}
 								/>
 								<CheckBox
 									title='11:00'
@@ -2679,8 +2319,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.eleven}
-									onPress={() => { this.checkHour('eleven'); }}
+									checked={this.state.schedule.eleven}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.eleven, 'eleven'); }}
 								/>
 								<CheckBox
 									title='12:00'
@@ -2694,8 +2334,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.twelve}
-									onPress={() => { this.checkHour('twelve'); }}
+									checked={this.state.schedule.twelve}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.twelve, 'twelve'); }}
 								/>
 							</View>
 							<View style={{ flex: 1, flexDirection: 'row', marginRight: 20 }} >
@@ -2711,8 +2351,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.thirteen}
-									onPress={() => { this.checkHour('thirteen'); }}
+									checked={this.state.schedule.thirteen}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.thirteen, 'thirteen'); }}
 								/>
 								<CheckBox
 									title='14:00'
@@ -2726,8 +2366,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.fourteen}
-									onPress={() => { this.checkHour('fourteen'); }}
+									checked={this.state.schedule.fourteen}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.fourteen, 'fourteen'); }}
 								/>
 								<CheckBox
 									title='15:00'
@@ -2741,8 +2381,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.fiveteen}
-									onPress={() => { this.checkHour('fiveteen'); }}
+									checked={this.state.schedule.fiveteen}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.fiveteen, 'fiveteen'); }}
 								/>
 								<CheckBox
 									title='16:00'
@@ -2756,8 +2396,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.sixteen}
-									onPress={() => { this.checkHour('sixteen'); }}
+									checked={this.state.schedule.sixteen}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.sixteen, 'sixteen'); }}
 								/>
 							</View>
 							<View style={{ flex: 1, flexDirection: 'row', marginRight: 20 }} >
@@ -2773,8 +2413,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.seventeen}
-									onPress={() => { this.checkHour('seventeen'); }}
+									checked={this.state.schedule.seventeen}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.seventeen, 'seventeen'); }}
 								/>
 								<CheckBox
 									title='18:00'
@@ -2788,8 +2428,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.eighteen}
-									onPress={() => { this.checkHour('eighteen'); }}
+									checked={this.state.schedule.eighteen}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.eighteen, 'eighteen'); }}
 								/>
 								<CheckBox
 									title='19:00'
@@ -2803,8 +2443,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.nineteen}
-									onPress={() => { this.checkHour('nineteen'); }}
+									checked={this.state.schedule.nineteen}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.nineteen, 'nineteen'); }}
 								/>
 								<CheckBox
 									title='20:00'
@@ -2818,8 +2458,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.twenty}
-									onPress={() => { this.checkHour('twenty'); }}
+									checked={this.state.schedule.twenty}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.twenty, 'twenty'); }}
 								/>
 							</View>
 							<View style={{ flex: 1, flexDirection: 'row', marginRight: 20 }} >
@@ -2835,8 +2475,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.twentyone}
-									onPress={() => { this.checkHour('twentyone'); }}
+									checked={this.state.schedule.twentyone}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.twentyone, 'twentyone'); }}
 								/>
 								<CheckBox
 									title='22:00'
@@ -2850,8 +2490,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.twentytwo}
-									onPress={() => { this.checkHour('twentytwo'); }}
+									checked={this.state.schedule.twentytwo}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.twentytwo, 'twentytwo'); }}
 								/>
 								<CheckBox
 									title='23:00'
@@ -2865,8 +2505,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.twentythree}
-									onPress={() => { this.checkHour('twentythree'); }}
+									checked={this.state.schedule.twentythree}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.twentythree, 'twentythree'); }}
 								/>
 								<CheckBox
 									title='24:00'
@@ -2880,8 +2520,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.hours.twentyfour}
-									onPress={() => { this.checkHour('twentyfour'); }}
+									checked={this.state.schedule.twentyfour}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.twentyfour, 'twentyfour'); }}
 								/>
 							</View>
 						<View style={{ borderColor: 'steelblue', borderBottomWidth: 2, borderTopWidth: 2, height: 40 }}>
@@ -2902,8 +2542,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.days.monday}
-									onPress={() => { this.checkDay('monday'); }}
+									checked={this.state.schedule.monday}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.monday, 'monday'); }}
 								/>
 								<CheckBox
 									title='Tuesday'
@@ -2917,8 +2557,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.days.tuesday}
-									onPress={() => { this.checkDay('tuesday'); }}
+									checked={this.state.schedule.tuesday}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.tuesday, 'tuesday'); }}
 								/>
 								<CheckBox
 									title='Wednesday'
@@ -2932,8 +2572,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.days.wednesday}
-									onPress={() => { this.checkDay('wednesday'); }}
+									checked={this.state.schedule.wednesday}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.wednesday, 'wednesday'); }}
 								/>
 							</View>
 							<View style={{ flex: 1, flexDirection: 'row', marginRight: 20 }} >
@@ -2949,8 +2589,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.days.thursday}
-									onPress={() => { this.checkDay('thursday'); }}
+									checked={this.state.schedule.thursday}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.thursday, 'thursday'); }}
 								/>
 								<CheckBox
 									title='Friday'
@@ -2964,8 +2604,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.days.friday}
-									onPress={() => { this.checkDay('friday'); }}
+									checked={this.state.schedule.friday}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.friday, 'friday'); }}
 								/>
 							</View>
 							<View style={{ flex: 1, flexDirection: 'row', marginRight: 20 }} >
@@ -2981,8 +2621,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.days.saturday}
-									onPress={() => { this.checkDay('saturday'); }}
+									checked={this.state.schedule.saturday}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.saturday, 'saturday'); }}
 								/>
 								<CheckBox
 									title='Sunday'
@@ -2996,8 +2636,8 @@ class Dashboard extends Component {
 									checkedIcon='check-box'
 									uncheckedIcon='check-box-outline-blank'
 									checkedColor='steelblue'
-									checked={this.state.days.sunday}
-									onPress={() => { this.checkDay('sunday'); }}
+									checked={this.state.schedule.sunday}
+									onPress={() => { this.onChangeSchedule(this.state.schedule.sunday, 'sunday'); }}
 								/>
 							</View>
 						</View>
