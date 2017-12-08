@@ -26,7 +26,7 @@ class Contacts extends Component {
 		});
 		this.state = {
 			contactsList: dsContacts.cloneWithRows([]),
-			showspinner: false,
+			showspinner: true,
 			showspinnertext: 'Loading contacts, please wait',
 			filtervalue: ''
 		};

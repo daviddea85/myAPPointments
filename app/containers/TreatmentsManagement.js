@@ -26,7 +26,7 @@ class TreatmentsManagement extends Component {
 		this.state = {
 			treatmentsListCount: 0,
 			treatmentsList: dsTreatmentsList.cloneWithRows([]),
-			showspinner: false,
+			showspinner: true,
 			showspinnertext: 'Loading treatments, please wait'
 		};
 		this.renderRowTreatments = this.renderRowTreatments.bind(this);

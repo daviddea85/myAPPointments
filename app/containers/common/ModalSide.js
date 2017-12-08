@@ -45,7 +45,7 @@ class ModalSide extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			showspinner: false,
+			showspinner: true,
 			showspinnertext: '',
 			settings: {
 				_id: '',
@@ -178,7 +178,7 @@ class ModalSide extends Component {
 		const query = { selector: { doctype: 'settings', userid: this.state.settings.userid }, };
 		const settings = await DBCompanyConnection.find(query);
 		if (settings.docs.length > 0) {
-			this.setState({ settings: settings.docs[0] });
+			this.setState({ settings: settings.docs[0], showspinner: false });
 		}
 	}
 
@@ -233,6 +233,7 @@ class ModalSide extends Component {
 	}
 
 	async deleteContactsFromDB() {
+		this.setState({ showspinner: true });
 		const queryContact = { selector: { doctype: 'contact', 'imported': true, 'userid': this.state.settings.userid }, };
 		const contactinfo = await DBCompanyConnection.find(queryContact);
 		if (contactinfo.docs.length > 0) {

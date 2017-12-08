@@ -33,7 +33,7 @@ class UserProfile extends Component {
 			rowHasChanged: (r1, r2) => r1 !== r2
 		});
 		this.state = {
-			showspinner: false,
+			showspinner: true,
 			showspinnertext: 'Loading user information, please wait',
 			newuser: this.props.newuser || false,
 			area: this.props.area || '',

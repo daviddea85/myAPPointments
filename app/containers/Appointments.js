@@ -33,7 +33,7 @@ class Appointments extends Component {
 		this.state = {
 			appointmentsListCount: 0,
 			appointmentsList: dsAppointmentsList.cloneWithRows([]),
-			showspinner: false,
+			showspinner: true,
 			showspinnertext: 'Loading appointments, please wait',
 			todaysDate: this.props.appointmentsdate || '',
 			userSelected: this.props.userSelected || '',
@@ -311,6 +311,9 @@ class Appointments extends Component {
 					</View>
 				</View>
 				<Content>
+					{this.state.appointmentsListCount === 0 && this.state.showspinner === false &&
+						<Text style={{ padding: 40 }}>Appointments not found</Text>
+					}
 					{this.state.showspinner &&
 						<View
 							style={{

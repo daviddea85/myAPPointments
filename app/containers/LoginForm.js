@@ -17,7 +17,7 @@ class LoginForm extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			showspinner: false,
+			showspinner: true,
 			firebaseUser: {
 				firebaseEmail: '',
 				firebasePassword: '',

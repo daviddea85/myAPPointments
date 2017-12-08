@@ -32,7 +32,7 @@ class TreatmentInformation extends Component {
 			rowHasChanged: (r1, r2) => r1 !== r2
 		});
 		this.state = {
-			showspinner: false,
+			showspinner: true,
 			showspinnertext: 'Loading treatment info, please wait',
 			treatmentid: this.props.treatmentid || '',
 			treatment: {

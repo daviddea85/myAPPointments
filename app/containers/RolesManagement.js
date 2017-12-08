@@ -26,7 +26,7 @@ class RolesManagement extends Component {
 		this.state = {
 			rolesListCount: 0,
 			rolesList: dsRolesList.cloneWithRows([]),
-			showspinner: false,
+			showspinner: true,
 			showspinnertext: 'Loading roles, please wait'
 		};
 		this.renderRowRoles = this.renderRowRoles.bind(this);

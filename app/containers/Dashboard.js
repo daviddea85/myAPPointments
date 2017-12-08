@@ -31,15 +31,18 @@ class Dashboard extends Component {
 		super(props);
 		this.mainTabs = null;
 		this.state = {
-			showspinner: false,
+			showspinner: true,
 			showspinnertext: 'Loading appointments, please wait',
-			searchItem: '',
+			tab: this.props.tab || '',
 			todaysDate: this.props.appointmentsdate || '',
 			weekDate: '',
 			// weekDate: '20-11-17 - 26-11-17'
 			dialogShow: false,
 			employeesSelected: this.props.employeesSelected || [],
 			employeesSelectedCount: '0',
+			employeeWeekSelected: this.props.employeeWeekSelected || '',
+			employeeWeekSelectedCount: 0,
+			employeeWeekText: this.props.employeeWeekText || 'Select employee',
 			appointment: {},
 			appointmentinfo: {
 				_id: '',
@@ -112,6 +115,7 @@ class Dashboard extends Component {
 			notes: ''
 		};
 		this.treatmentslistinfo = [];
+		this.headerWeeklyView = [];
 		this.one = [];
 		this.two = [];
 		this.three = [];
@@ -136,6 +140,30 @@ class Dashboard extends Component {
 		this.twentytwo = [];
 		this.twentythree = [];
 		this.twentyfour = [];
+		this.oneWeek = [];
+		this.twoWeek = [];
+		this.threeWeek = [];
+		this.fourWeek = [];
+		this.fiveWeek = [];
+		this.sixWeek = [];
+		this.sevenWeek = [];
+		this.eightWeek = [];
+		this.nineWeek = [];
+		this.tenWeek = [];
+		this.elevenWeek = [];
+		this.twelveWeek = [];
+		this.thirteenWeek = [];
+		this.fourteenWeek = [];
+		this.fiveteenWeek = [];
+		this.sixteenWeek = [];
+		this.seventeenWeek = [];
+		this.eighteenWeek = [];
+		this.nineteenWeek = [];
+		this.twentyWeek = [];
+		this.twentyoneWeek = [];
+		this.twentytwoWeek = [];
+		this.twentythreeWeek = [];
+		this.twentyfourWeek = [];
 	}
 
 	componentWillMount() {
@@ -149,6 +177,11 @@ class Dashboard extends Component {
 							this.setState({ todaysDate: moment().format('DD-MM-YYYY'), userSelected: this.userSelected });
 						} else {
 							this.setState({ todaysDate: this.state.todaysDate, userSelected: this.userSelected });
+						}
+						if (this.state.tab === 'daily') {
+							this._tabs.goToPage(0);
+						} else if (this.state.tab === 'weekly') {
+							this._tabs.goToPage(1);
 						}
 						this.connectCompanyDb(true);
 						// this._tabs.goToPage(this.currentTab);
@@ -225,6 +258,30 @@ class Dashboard extends Component {
 		this.twentytwo = [];
 		this.twentythree = [];
 		this.twentyfour = [];
+		this.oneWeek = [];
+		this.twoWeek = [];
+		this.threeWeek = [];
+		this.fourWeek = [];
+		this.fiveWeek = [];
+		this.sixWeek = [];
+		this.sevenWeek = [];
+		this.eightWeek = [];
+		this.nineWeek = [];
+		this.tenWeek = [];
+		this.elevenWeek = [];
+		this.twelveWeek = [];
+		this.thirteenWeek = [];
+		this.fourteenWeek = [];
+		this.fiveteenWeek = [];
+		this.sixteenWeek = [];
+		this.seventeenWeek = [];
+		this.eighteenWeek = [];
+		this.nineteenWeek = [];
+		this.twentyWeek = [];
+		this.twentyoneWeek = [];
+		this.twentytwoWeek = [];
+		this.twentythreeWeek = [];
+		this.twentyfourWeek = [];
 		if (dateValue) {
 			this.state.todaysDate = dateValue;
 		}
@@ -289,8 +346,34 @@ class Dashboard extends Component {
 		const scheduleinfo = await DBCompanyConnection.find(this.querySchedule);
 		if (scheduleinfo.docs.length > 0) {
 			this.schedule = scheduleinfo.docs[0];
-			// this.setState({ schedule: scheduleinfo.docs[0] });
+			this.state.employeeWeekSelectedCount = 1;
+			if (this.schedule.monday === true) {
+				this.state.employeeWeekSelectedCount++;
+			} 
+			if (this.schedule.tuesday === true) {
+				this.state.employeeWeekSelectedCount++;
+			} 
+			if (this.schedule.wednesday === true) {
+				this.state.employeeWeekSelectedCount++;
+			} 
+			if (this.schedule.thursday === true) {
+				this.state.employeeWeekSelectedCount++;
+			}
+			 if (this.schedule.friday === true) {
+				this.state.employeeWeekSelectedCount++;
+			} 
+			if (this.schedule.saturday === true) {
+				this.state.employeeWeekSelectedCount++;
+			} 
+			if (this.schedule.sunday === true) {
+				this.state.employeeWeekSelectedCount++;
+			}
+			console.log('this.state.employeeWeekSelectedCount');
+			console.log(this.state.employeeWeekSelectedCount);
 		} else {
+			this.state.employeeWeekSelectedCount = 6;
+			console.log('this.state.employeeWeekSelectedCount');
+			console.log(this.state.employeeWeekSelectedCount);
 			const schedule = {
 				doctype: 'schedule',
 				userid: this.userLoggedId,
@@ -332,7 +415,6 @@ class Dashboard extends Component {
 			inschedule['_rev'] = newSchedule.rev;
 			inschedule['_id'] = newSchedule.id;
 			this.schedule = inschedule;
-			// this.setState({ schedule: inschedule });
 		}
 		if (this.state.employeesSelected.length > 0) {
 			this.queryAppointments = {
@@ -1013,7 +1095,774 @@ class Dashboard extends Component {
 				this.setState({ schedule: this.schedule, employeesListText: 'Employee(s) selected', showspinner: false, employeesSelectedCount: this.state.employeesSelected.length, employeesSelected: this.state.employeesSelected, contactsList: this.contactsList, employeesList: this.employeesList });
 			}
 		}
-		this.setState({ showspinner: false });
+		// week information
+		console.log('this.state.employeeWeekSelected');
+		console.log(this.state.employeeWeekSelected);
+		if (!_.isEmpty(this.state.employeeWeekSelected)) {
+			const employeeSelectedHeaderWeeklyView = {
+				day: false,
+				key: 'employeeWeeklyView',
+				value: this.state.employeeWeekSelected.value,
+				label: this.state.employeeWeekSelected.label
+			};
+			this.headerWeeklyView.push(employeeSelectedHeaderWeeklyView);
+			const mondayHeaderWeeklyView = {
+				day: true,
+				key: 'monday',
+				value: '20-11-2017',
+				label: 'Mon 20'
+			};
+			if (this.schedule.monday === true) {
+				this.headerWeeklyView.push(mondayHeaderWeeklyView);
+			}
+			const tuesdayHeaderWeeklyView = {
+				day: true,
+				key: 'tuesday',
+				value: '21-11-2017',
+				label: 'Tue 21'
+			};
+			if (this.schedule.tuesday === true) {
+				this.headerWeeklyView.push(tuesdayHeaderWeeklyView);
+			}
+			const wednesdayHeaderWeeklyView = {
+				day: true,
+				key: 'wednesday',
+				value: '22-11-2017',
+				label: 'Wed 22'
+			};
+			if (this.schedule.wednesday === true) {
+				this.headerWeeklyView.push(wednesdayHeaderWeeklyView);
+			}
+			const thursdayHeaderWeeklyView = {
+				day: true,
+				key: 'thursday',
+				value: '23-11-2017',
+				label: 'Thu 23'
+			};
+			if (this.schedule.thursday === true) {
+				this.headerWeeklyView.push(thursdayHeaderWeeklyView);
+			}
+			const fridayHeaderWeeklyView = {
+				day: true,
+				key: 'friday',
+				value: '24-11-2017',
+				label: 'Fri 24'
+			};
+			if (this.schedule.friday === true) {
+				this.headerWeeklyView.push(fridayHeaderWeeklyView);
+			}
+			const saturdayHeaderWeeklyView = {
+				day: true,
+				key: 'saturday',
+				value: '25-11-2017',
+				label: 'Sat 25'
+			};
+			if (this.schedule.saturday === true) {
+				this.headerWeeklyView.push(saturdayHeaderWeeklyView);
+			}
+			const sundayHeaderWeeklyView = {
+				day: true,
+				key: 'sunday',
+				value: '26-11-2017',
+				label: 'Sun 26'
+			};
+			if (this.schedule.sunday === true) {
+				this.headerWeeklyView.push(sundayHeaderWeeklyView);
+			}
+			let indexHour = 0;
+			this.hoursList = [
+				{ key: indexHour++, label: '01', value: '01' },
+				{ key: indexHour++, label: '02', value: '02' },
+				{ key: indexHour++, label: '03', value: '03' },
+				{ key: indexHour++, label: '04', value: '04' },
+				{ key: indexHour++, label: '05', value: '05' },
+				{ key: indexHour++, label: '06', value: '06' },
+				{ key: indexHour++, label: '07', value: '07' },
+				{ key: indexHour++, label: '08', value: '08' },
+				{ key: indexHour++, label: '09', value: '09' },
+				{ key: indexHour++, label: '10', value: '10' },
+				{ key: indexHour++, label: '11', value: '11' },
+				{ key: indexHour++, label: '12', value: '12' },
+				{ key: indexHour++, label: '13', value: '13' },
+				{ key: indexHour++, label: '14', value: '14' },
+				{ key: indexHour++, label: '15', value: '15' },
+				{ key: indexHour++, label: '16', value: '16' },
+				{ key: indexHour++, label: '17', value: '17' },
+				{ key: indexHour++, label: '18', value: '18' },
+				{ key: indexHour++, label: '19', value: '19' },
+				{ key: indexHour++, label: '20', value: '20' },
+				{ key: indexHour++, label: '21', value: '21' },
+				{ key: indexHour++, label: '22', value: '22' },
+				{ key: indexHour++, label: '23', value: '23' },
+				{ key: indexHour++, label: '24', value: '24' },
+			];
+			let indexMinute = 0;
+			this.minutesList = [
+				{ key: indexMinute++, label: '00', value: '00' },
+				{ key: indexMinute++, label: '01', value: '01' },
+				{ key: indexMinute++, label: '02', value: '02' },
+				{ key: indexMinute++, label: '03', value: '03' },
+				{ key: indexMinute++, label: '04', value: '04' },
+				{ key: indexMinute++, label: '05', value: '05' },
+				{ key: indexMinute++, label: '06', value: '06' },
+				{ key: indexMinute++, label: '07', value: '07' },
+				{ key: indexMinute++, label: '08', value: '08' },
+				{ key: indexMinute++, label: '09', value: '09' },
+				{ key: indexMinute++, label: '10', value: '10' },
+				{ key: indexMinute++, label: '11', value: '11' },
+				{ key: indexMinute++, label: '12', value: '12' },
+				{ key: indexMinute++, label: '13', value: '13' },
+				{ key: indexMinute++, label: '14', value: '14' },
+				{ key: indexMinute++, label: '15', value: '15' },
+				{ key: indexMinute++, label: '16', value: '16' },
+				{ key: indexMinute++, label: '17', value: '17' },
+				{ key: indexMinute++, label: '18', value: '18' },
+				{ key: indexMinute++, label: '19', value: '19' },
+				{ key: indexMinute++, label: '20', value: '20' },
+				{ key: indexMinute++, label: '21', value: '21' },
+				{ key: indexMinute++, label: '22', value: '22' },
+				{ key: indexMinute++, label: '23', value: '23' },
+				{ key: indexMinute++, label: '24', value: '24' },
+				{ key: indexMinute++, label: '25', value: '25' },
+				{ key: indexMinute++, label: '26', value: '26' },
+				{ key: indexMinute++, label: '27', value: '27' },
+				{ key: indexMinute++, label: '28', value: '28' },
+				{ key: indexMinute++, label: '29', value: '29' },
+				{ key: indexMinute++, label: '30', value: '30' },
+				{ key: indexMinute++, label: '31', value: '31' },
+				{ key: indexMinute++, label: '32', value: '32' },
+				{ key: indexMinute++, label: '33', value: '33' },
+				{ key: indexMinute++, label: '34', value: '34' },
+				{ key: indexMinute++, label: '35', value: '35' },
+				{ key: indexMinute++, label: '36', value: '36' },
+				{ key: indexMinute++, label: '37', value: '37' },
+				{ key: indexMinute++, label: '38', value: '38' },
+				{ key: indexMinute++, label: '39', value: '39' },
+				{ key: indexMinute++, label: '40', value: '40' },
+				{ key: indexMinute++, label: '41', value: '41' },
+				{ key: indexMinute++, label: '42', value: '42' },
+				{ key: indexMinute++, label: '43', value: '43' },
+				{ key: indexMinute++, label: '44', value: '44' },
+				{ key: indexMinute++, label: '45', value: '45' },
+				{ key: indexMinute++, label: '46', value: '46' },
+				{ key: indexMinute++, label: '47', value: '47' },
+				{ key: indexMinute++, label: '48', value: '48' },
+				{ key: indexMinute++, label: '49', value: '49' },
+				{ key: indexMinute++, label: '50', value: '50' },
+				{ key: indexMinute++, label: '51', value: '51' },
+				{ key: indexMinute++, label: '52', value: '52' },
+				{ key: indexMinute++, label: '53', value: '53' },
+				{ key: indexMinute++, label: '54', value: '54' },
+				{ key: indexMinute++, label: '55', value: '55' },
+				{ key: indexMinute++, label: '56', value: '56' },
+				{ key: indexMinute++, label: '57', value: '57' },
+				{ key: indexMinute++, label: '58', value: '58' },
+				{ key: indexMinute++, label: '59', value: '59' },
+			];
+			this.oneObject = {
+				time: true,
+				key: '01:00',
+				label: '01:00',
+				value: '01:00',
+				appointment: []
+			};
+			this.oneWeek.push(this.oneObject);
+			this.twoObject = {
+				time: true,
+				key: '02:00',
+				label: '02:00',
+				value: '02:00',
+				appointment: []
+			};
+			this.twoWeek.push(this.twoObject);
+			this.threeObject = {
+				time: true,
+				key: '03:00',
+				label: '03:00',
+				value: '03:00',
+				appointment: []
+			};
+			this.threeWeek.push(this.threeObject);
+			this.fourObject = {
+				time: true,
+				key: '04:00',
+				label: '04:00',
+				value: '04:00',
+				appointment: []
+			};
+			this.fourWeek.push(this.fourObject);
+			this.fiveObject = {
+				time: true,
+				key: '05:00',
+				label: '05:00',
+				value: '05:00',
+				appointment: []
+			};
+			this.fiveWeek.push(this.fiveObject);
+			this.sixObject = {
+				time: true,
+				key: '06:00',
+				label: '06:00',
+				value: '06:00',
+				appointment: []
+			};
+			this.sixWeek.push(this.sixObject);			
+			this.sevenObject = {
+				time: true,
+				key: '07:00',
+				label: '07:00',
+				value: '07:00',
+				appointment: []
+			};
+			this.sevenWeek.push(this.sevenObject);
+			this.eightObject = {
+				time: true,
+				key: '08:00',
+				label: '08:00',
+				value: '08:00',
+				appointment: []
+			};
+			this.eightWeek.push(this.eightObject);
+			this.nineObject = {
+				time: true,
+				key: '09:00',
+				label: '09:00',
+				value: '09:00',
+				appointment: []
+			};
+			this.nineWeek.push(this.nineObject);
+			this.tenObject = {
+				time: true,
+				key: '10:00',
+				label: '10:00',
+				value: '10:00',
+				appointment: []
+			};
+			this.tenWeek.push(this.tenObject);
+			this.elevenObject = {
+				time: true,
+				key: '11:00',
+				label: '11:00',
+				value: '11:00',
+				appointment: []
+			};
+			this.elevenWeek.push(this.elevenObject);
+			this.twelveObject = {
+				time: true,
+				key: '12:00',
+				label: '12:00',
+				value: '12:00',
+				appointment: []
+			};
+			this.twelveWeek.push(this.twelveObject);
+			this.thirteenObject = {
+				time: true,
+				key: '13:00',
+				label: '13:00',
+				value: '13:00',
+				appointment: []
+			};
+			this.thirteenWeek.push(this.thirteenObject);
+			this.fourteenObject = {
+				time: true,
+				key: '14:00',
+				label: '14:00',
+				value: '14:00',
+				appointment: []
+			};
+			this.fourteenWeek.push(this.fourteenObject);
+			this.fiveteenObject = {
+				time: true,
+				key: '15:00',
+				label: '15:00',
+				value: '15:00',
+				appointment: []
+			};
+			this.fiveteenWeek.push(this.fiveteenObject);
+			this.sixteenObject = {
+				time: true,
+				key: '16:00',
+				label: '16:00',
+				value: '16:00',
+				appointment: []
+			};
+			this.sixteenWeek.push(this.sixteenObject);
+			this.seventeenObject = {
+				time: true,
+				key: '17:00',
+				label: '17:00',
+				value: '17:00',
+				appointment: []
+			};
+			this.seventeenWeek.push(this.seventeenObject);
+			this.eighteenObject = {
+				time: true,
+				key: '18:00',
+				label: '18:00',
+				value: '18:00',
+				appointment: []
+			};
+			this.eighteenWeek.push(this.eighteenObject);
+			this.nineteenObject = {
+				time: true,
+				key: '19:00',
+				label: '19:00',
+				value: '19:00',
+				appointment: []
+			};
+			this.nineteenWeek.push(this.nineteenObject);
+			this.twentyObject = {
+				time: true,
+				key: '20:00',
+				label: '20:00',
+				value: '20:00',
+				appointment: []
+			};
+			this.twentyWeek.push(this.twentyObject);
+			this.twentyoneObject = {
+				time: true,
+				key: '21:00',
+				label: '21:00',
+				value: '21:00',
+				appointment: []
+			};
+			this.twentyoneWeek.push(this.twentyoneObject);
+			this.twentytwoObject = {
+				time: true,
+				key: '22:00',
+				label: '22:00',
+				value: '22:00',
+				appointment: []
+			};
+			this.twentytwoWeek.push(this.twentytwoObject);
+			this.twentythreeObject = {
+				time: true,
+				key: '23:00',
+				label: '23:00',
+				value: '23:00',
+				appointment: []
+			};
+			this.twentythreeWeek.push(this.twentythreeObject);
+			this.twentyfourObject = {
+				time: true,
+				key: '24:00',
+				label: '24:00',
+				value: '24:00',
+				appointment: []
+			};
+			this.twentyfourWeek.push(this.twentyfourObject);
+			this.emptyObject = {
+				time: false,
+				key: '',
+				label: '',
+				value: '',
+				appointment: [],
+			};
+			this.queryAppointmentsWeek = {
+				selector: {
+					doctype: 'appointment',
+					date: {
+						$gte: '20-11-2017',
+						$lte: '26-11-2017',
+					},
+					employee_id: this.state.employeeWeekSelected.value
+				},
+				fields: []
+			};
+			this.appointmentslistweek = await DBCompanyConnection.find(this.queryAppointmentsWeek);
+			console.log('this.appointmentslistweek');
+			console.log(this.appointmentslistweek);
+			if (this.appointmentslistweek.docs.length > 0) {
+				for (let a = 0; a < this.appointmentslistweek.docs.length; a += 1) {
+					this.queryContacts = {
+						'selector': {
+							'doctype': 'contact',
+							'_id': this.appointmentslistweek.docs[a].contact_id,
+						},
+						'fields': []
+					};
+					const contactinfo = await DBCompanyConnection.find(this.queryContacts);
+					if (contactinfo.docs.length > 0) {
+						this.appointmentslistweek.docs[a].contact_name = contactinfo.docs[0].givenName + ' ' + contactinfo.docs[0].familyName;
+					}
+					const queryEmployee = { selector: { doctype: 'user', _id: this.appointmentslistweek.docs[a].employee_id }, };
+					const employeeInfo = await DBCompanyConnection.find(queryEmployee);
+					if (employeeInfo.docs.length > 0) {
+						if (_.isEmpty(this.appointmentslistweek.docs[a].employee_alias)) {
+							this.appointmentslistweek.docs[a].employee_alias = employeeInfo.docs[0].alias;
+							if (this.appointmentslistweek.docs[a].alias === '') {
+								this.appointmentslistweek.docs[a].employee_alias = employeeInfo.docs[0].name;
+								if (this.appointmentslistweek.docs[a].name === '') {
+									this.appointmentslistweek.docs[a].employee_alias = employeeInfo.docs[0].email;
+								}
+							}
+						}
+					}
+				}
+				if (!_.isEmpty(this.state.employeeWeekSelected)) {
+					for (let d = 0; d < this.headerWeeklyView.length; d += 1) {
+						console.log('this.headerWeeklyView');
+						console.log(this.headerWeeklyView[d]);
+						if (this.headerWeeklyView[d].day !== false) {
+							this.appointmentsone = _.filter(this.appointmentslistweek.docs, { hour: '01', date: this.headerWeeklyView[d].value });
+							if (this.appointmentsone.length > 0) {
+								this.oneObject = {};
+								this.oneObject.time = false,
+								this.oneObject.key = this.state.employeeWeekSelected.key;
+								this.oneObject.label = this.appointmentsone[0].contact_name;
+								this.oneObject.value = this.appointmentsone[0]._id;
+								this.oneObject.appointment = [];
+								this.oneObject.appointment.push(this.appointmentsone[0]);
+								this.oneWeek.push(this.oneObject);
+							} else {
+								this.oneWeek.push(this.emptyObject);
+							}
+							this.appointmentstwo = _.filter(this.appointmentslistweek.docs, { hour: '02', date: this.headerWeeklyView[d].value });
+							if (this.appointmentstwo.length > 0) {
+								this.twoObject = {};
+								this.twoObject.time = false,
+								this.twoObject.key = this.state.employeeWeekSelected.key;
+								this.twoObject.label = this.appointmentstwo[0].contact_name;
+								this.twoObject.value = this.appointmentstwo[0]._id;
+								this.twoObject.appointment = [];
+								this.twoObject.appointment.push(this.appointmentstwo[0]);
+								this.twoWeek.push(this.twoObject);
+							} else {
+								this.twoWeek.push(this.emptyObject);
+							}
+							this.appointmentsthree = _.filter(this.appointmentslistweek.docs, { hour: '03', date: this.headerWeeklyView[d].value });
+							if (this.appointmentsthree.length > 0) {
+								this.threeObject = {};
+								this.threeObject.time = false,
+								this.threeObject.key = this.state.employeeWeekSelected.key;
+								this.threeObject.label = this.appointmentsthree[0].contact_name;
+								this.threeObject.value = this.appointmentsthree[0]._id;
+								this.threeObject.appointment = [];
+								this.threeObject.appointment.push(this.appointmentsthree[0]);
+								this.threeWeek.push(this.threeObject);
+							} else {
+								this.threeWeek.push(this.emptyObject);
+							}
+							this.appointmentsfour = _.filter(this.appointmentslistweek.docs, { hour: '04', date: this.headerWeeklyView[d].value });
+							if (this.appointmentsfour.length > 0) {
+								this.fourObject = {};
+								this.fourObject.time = false,
+								this.fourObject.key = this.state.employeeWeekSelected.key;
+								this.fourObject.label = this.appointmentsfour[0].contact_name;
+								this.fourObject.value = this.appointmentsfour[0]._id;
+								this.fourObject.appointment = [];
+								this.fourObject.appointment.push(this.appointmentsfour[0]);
+								this.fourWeek.push(this.fourObject);
+							} else {
+								this.fourWeek.push(this.emptyObject);
+							}
+							this.appointmentsfive = _.filter(this.appointmentslistweek.docs, { hour: '05', date: this.headerWeeklyView[d].value });
+							if (this.appointmentsfive.length > 0) {
+								this.fiveObject = {};
+								this.fiveObject.time = false,
+								this.fiveObject.key = this.state.employeeWeekSelected.key;
+								this.fiveObject.label = this.appointmentsfive[0].contact_name;
+								this.fiveObject.value = this.appointmentsfive[0]._id;
+								this.fiveObject.appointment = [];
+								this.fiveObject.appointment.push(this.appointmentsfive[0]);
+								this.fiveWeek.push(this.fiveObject);
+							} else {
+								this.fiveWeek.push(this.emptyObject);
+							}
+							this.appointmentssix = _.filter(this.appointmentslistweek.docs, { hour: '06', date: this.headerWeeklyView[d].value });
+							if (this.appointmentssix.length > 0) {
+								this.sixObject = {};
+								this.sixObject.time = false,
+								this.sixObject.key = this.state.employeeWeekSelected.key;
+								this.sixObject.label = this.appointmentssix[0].contact_name;
+								this.sixObject.value = this.appointmentssix[0]._id;
+								this.sixObject.appointment = [];
+								this.sixObject.appointment.push(this.appointmentssix[0]);
+								this.sixWeek.push(this.sixObject);
+							} else {
+								this.sixWeek.push(this.emptyObject);
+							}
+							this.appointmentsseven = _.filter(this.appointmentslistweek.docs, { hour: '07', date: this.headerWeeklyView[d].value });
+							if (this.appointmentsseven.length > 0) {
+								this.sevenObject = {};
+								this.sevenObject.time = false,
+								this.sevenObject.key = this.state.employeeWeekSelected.key;
+								this.sevenObject.label = this.appointmentsseven[0].contact_name;
+								this.sevenObject.value = this.appointmentsseven[0]._id;
+								this.sevenObject.appointment = [];
+								this.sevenObject.appointment.push(this.appointmentsseven[0]);
+								this.sevenWeek.push(this.sevenObject);
+							} else {
+								this.sevenWeek.push(this.emptyObject);
+							}
+							this.appointmentseight = _.filter(this.appointmentslistweek.docs, { hour: '08', date: this.headerWeeklyView[d].value });
+							if (this.appointmentseight.length > 0) {
+								this.eightObject = {};
+								this.eightObject.time = false,
+								this.eightObject.key = this.state.employeeWeekSelected.key;
+								this.eightObject.label = this.appointmentseight[0].contact_name;
+								this.eightObject.value = this.appointmentseight[0]._id;
+								this.eightObject.appointment = [];
+								this.eightObject.appointment.push(this.appointmentseight[0]);
+								this.eightWeek.push(this.eightObject);
+							} else {
+								this.eightWeek.push(this.emptyObject);
+							}
+							this.appointmentsnine = _.filter(this.appointmentslistweek.docs, { hour: '09', date: this.headerWeeklyView[d].value });
+							if (this.appointmentsnine.length > 0) {
+								this.nineObject = {};
+								this.nineObject.time = false,
+								this.nineObject.key = this.state.employeeWeekSelected.key;
+								this.nineObject.label = this.appointmentsnine[0].contact_name;
+								this.nineObject.value = this.appointmentsnine[0]._id;
+								this.nineObject.appointment = [];
+								this.nineObject.appointment.push(this.appointmentsnine[0]);
+								this.nineWeek.push(this.nineObject);
+							} else {
+								this.nineWeek.push(this.emptyObject);
+							}
+							this.appointmentsten = _.filter(this.appointmentslistweek.docs, { hour: '10', date: this.headerWeeklyView[d].value });
+							if (this.appointmentsten.length > 0) {
+								this.tenObject = {};
+								this.tenObject.time = false,
+								this.tenObject.key = this.state.employeeWeekSelected.key;
+								this.tenObject.label = this.appointmentsten[0].contact_name;
+								this.tenObject.value = this.appointmentsten[0]._id;
+								this.tenObject.appointment = [];
+								this.tenObject.appointment.push(this.appointmentsten[0]);
+								this.tenWeek.push(this.tenObject);
+							} else {
+								this.tenWeek.push(this.emptyObject);
+							}
+							this.appointmentseleven = _.filter(this.appointmentslistweek.docs, { hour: '11', date: this.headerWeeklyView[d].value });
+							if (this.appointmentseleven.length > 0) {
+								this.elevenObject = {};
+								this.elevenObject.time = false,
+								this.elevenObject.key = this.state.employeeWeekSelected.key;
+								this.elevenObject.label = this.appointmentseleven[0].contact_name;
+								this.elevenObject.value = this.appointmentseleven[0]._id;
+								this.elevenObject.appointment = [];
+								this.elevenObject.appointment.push(this.appointmentseleven[0]);
+								this.elevenWeek.push(this.elevenObject);
+							} else {
+								this.elevenWeek.push(this.emptyObject);
+							}
+							this.appointmentstwelve = _.filter(this.appointmentslistweek.docs, { hour: '12', date: this.headerWeeklyView[d].value });
+							if (this.appointmentstwelve.length > 0) {
+								this.twelveObject = {};
+								this.twelveObject.time = false,
+								this.twelveObject.key = this.state.employeeWeekSelected.key;
+								this.twelveObject.label = this.appointmentstwelve[0].contact_name;
+								this.twelveObject.value = this.appointmentstwelve[0]._id;
+								this.twelveObject.appointment = [];
+								this.twelveObject.appointment.push(this.appointmentstwelve[0]);
+								this.twelveWeek.push(this.twelveObject);
+							} else {
+								this.twelveWeek.push(this.emptyObject);
+							}
+							this.appointmentsthirteen = _.filter(this.appointmentslistweek.docs, { hour: '13', date: this.headerWeeklyView[d].value });
+							if (this.appointmentsthirteen.length > 0) {
+								this.thirteenObject = {};
+								this.thirteenObject.time = false,
+								this.thirteenObject.key = this.state.employeeWeekSelected.key;
+								this.thirteenObject.label = this.appointmentsthirteen[0].contact_name;
+								this.thirteenObject.value = this.appointmentsthirteen[0]._id;
+								this.thirteenObject.appointment = [];
+								this.thirteenObject.appointment.push(this.appointmentsthirteen[0]);
+								this.thirteenWeek.push(this.thirteenObject);
+							} else {
+								this.thirteenWeek.push(this.emptyObject);
+							}
+							this.appointmentsfourteen = _.filter(this.appointmentslistweek.docs, { hour: '14', date: this.headerWeeklyView[d].value });
+							if (this.appointmentsfourteen.length > 0) {
+								this.fourteenObject = {};
+								this.fourteenObject.time = false,
+								this.fourteenObject.key = this.state.employeeWeekSelected.key;
+								this.fourteenObject.label = this.appointmentsfourteen[0].contact_name;
+								this.fourteenObject.value = this.appointmentsfourteen[0]._id;
+								this.fourteenObject.appointment = [];
+								this.fourteenObject.appointment.push(this.appointmentsfourteen[0]);
+								this.fourteenWeek.push(this.fourteenObject);
+							} else {
+								this.fourteenWeek.push(this.emptyObject);
+							}
+							this.appointmentsfiveteen = _.filter(this.appointmentslistweek.docs, { hour: '15', date: this.headerWeeklyView[d].value });
+							if (this.appointmentsfiveteen.length > 0) {
+								this.fiveteenObject = {};
+								this.fiveteenObject.time = false,
+								this.fiveteenObject.key = this.state.employeeWeekSelected.key;
+								this.fiveteenObject.label = this.appointmentsfiveteen[0].contact_name;
+								this.fiveteenObject.value = this.appointmentsfiveteen[0]._id;
+								this.fiveteenObject.appointment = [];
+								this.fiveteenObject.appointment.push(this.appointmentsfiveteen[0]);
+								this.fiveteenWeek.push(this.fiveteenObject);
+							} else {
+								this.fiveteenWeek.push(this.emptyObject);
+							}
+							this.appointmentssixteen = _.filter(this.appointmentslistweek.docs, { hour: '16', date: this.headerWeeklyView[d].value });
+							if (this.appointmentssixteen.length > 0) {
+								this.sixteenObject = {};
+								this.sixteenObject.time = false,
+								this.sixteenObject.key = this.state.employeeWeekSelected.key;
+								this.sixteenObject.label = this.appointmentssixteen[0].contact_name;
+								this.sixteenObject.value = this.appointmentssixteen[0]._id;
+								this.sixteenObject.appointment = [];
+								this.sixteenObject.appointment.push(this.appointmentssixteen[0]);
+								this.sixteenWeek.push(this.sixteenObject);
+							} else {
+								this.sixteenWeek.push(this.emptyObject);
+							}
+							this.appointmentsseventeen = _.filter(this.appointmentslistweek.docs, { hour: '17', date: this.headerWeeklyView[d].value });
+							if (this.appointmentsseventeen.length > 0) {
+								this.seventeenObject = {};
+								this.seventeenObject.time = false,
+								this.seventeenObject.key = this.state.employeeWeekSelected.key;
+								this.seventeenObject.label = this.appointmentsseventeen[0].contact_name;
+								this.seventeenObject.value = this.appointmentsseventeen[0]._id;
+								this.seventeenObject.appointment = [];
+								this.seventeenObject.appointment.push(this.appointmentsseventeen[0]);
+								this.seventeenWeek.push(this.seventeenObject);
+							} else {
+								this.seventeenWeek.push(this.emptyObject);
+							}
+							this.appointmentseighteen = _.filter(this.appointmentslistweek.docs, { hour: '18', date: this.headerWeeklyView[d].value });
+							if (this.appointmentseighteen.length > 0) {
+								this.eighteenObject = {};
+								this.eighteenObject.time = false,
+								this.eighteenObject.key = this.state.employeeWeekSelected.key;
+								this.eighteenObject.label = this.appointmentseighteen[0].contact_name;
+								this.eighteenObject.value = this.appointmentseighteen[0]._id;
+								this.eighteenObject.appointment = [];
+								this.eighteenObject.appointment.push(this.appointmentseighteen[0]);
+								this.eighteenWeek.push(this.eighteenObject);
+							} else {
+								this.eighteenWeek.push(this.emptyObject);
+							}
+							this.appointmentsnineteen = _.filter(this.appointmentslistweek.docs, { hour: '19', date: this.headerWeeklyView[d].value });
+							if (this.appointmentsnineteen.length > 0) {
+								this.nineteenObject = {};
+								this.nineteenObject.time = false,
+								this.nineteenObject.key = this.state.employeeWeekSelected.key;
+								this.nineteenObject.label = this.appointmentsnineteen[0].contact_name;
+								this.nineteenObject.value = this.appointmentsnineteen[0]._id;
+								this.nineteenObject.appointment = [];
+								this.nineteenObject.appointment.push(this.appointmentsnineteen[0]);
+								this.nineteenWeek.push(this.nineteenObject);
+							} else {
+								this.nineteenWeek.push(this.emptyObject);
+							}
+							this.appointmentstwenty = _.filter(this.appointmentslistweek.docs, { hour: '20', date: this.headerWeeklyView[d].value });
+							if (this.appointmentstwenty.length > 0) {
+								this.twentyObject = {};
+								this.twentyObject.time = false,
+								this.twentyObject.key = this.state.employeeWeekSelected.key;
+								this.twentyObject.label = this.appointmentstwenty[0].contact_name;
+								this.twentyObject.value = this.appointmentstwenty[0]._id;
+								this.twentyObject.appointment = [];
+								this.twentyObject.appointment.push(this.appointmentstwenty[0]);
+								this.twentyWeek.push(this.twentyObject);
+							} else {
+								this.twentyWeek.push(this.emptyObject);
+							}
+							this.appointmentstwentyone = _.filter(this.appointmentslistweek.docs, { hour: '21', date: this.headerWeeklyView[d].value });
+							if (this.appointmentstwentyone.length > 0) {
+								this.twentyoneObject = {};
+								this.twentyoneObject.time = false,
+								this.twentyoneObject.key = this.state.employeeWeekSelected.key;
+								this.twentyoneObject.label = this.appointmentstwentyone[0].contact_name;
+								this.twentyoneObject.value = this.appointmentstwentyone[0]._id;
+								this.twentyoneObject.appointment = [];
+								this.twentyoneObject.appointment.push(this.appointmentstwentyone[0]);
+								this.twentyoneWeek.push(this.twentyoneObject);
+							} else {
+								this.twentyoneWeek.push(this.emptyObject);
+							}
+							this.appointmentstwentytwo = _.filter(this.appointmentslistweek.docs, { hour: '22', date: this.headerWeeklyView[d].value });
+							if (this.appointmentstwentytwo.length > 0) {
+								this.twentytwoObject = {};
+								this.twentytwoObject.time = false,
+								this.twentytwoObject.key = this.state.employeeWeekSelected.key;
+								this.twentytwoObject.label = this.appointmentstwentytwo[0].contact_name;
+								this.twentytwoObject.value = this.appointmentstwentytwo[0]._id;
+								this.twentytwoObject.appointment = [];
+								this.twentytwoObject.appointment.push(this.appointmentstwentytwo[0]);
+								this.twentytwoWeek.push(this.twentytwoObject);
+							} else {
+								this.twentytwoWeek.push(this.emptyObject);
+							}
+							this.appointmentstwentythree = _.filter(this.appointmentslistweek.docs, { hour: '23', date: this.headerWeeklyView[d].value });
+							if (this.appointmentstwentythree.length > 0) {
+								this.twentythreeObject = {};
+								this.twentythreeObject.time = false,
+								this.twentythreeObject.key = this.state.employeeWeekSelected.key;
+								this.twentythreeObject.label = this.appointmentstwentythree[0].contact_name;
+								this.twentythreeObject.value = this.appointmentstwentythree[0]._id;
+								this.twentythreeObject.appointment = [];
+								this.twentythreeObject.appointment.push(this.appointmentstwentythree[0]);
+								this.twentythreeWeek.push(this.twentythreeObject);
+							} else {
+								this.twentythreeWeek.push(this.emptyObject);
+							}
+							this.appointmentstwentyfour = _.filter(this.appointmentslistweek.docs, { hour: '24', date: this.headerWeeklyView[d].value });
+							if (this.appointmentstwentyfour.length > 0) {
+								this.twentyfourObject = {};
+								this.twentyfourObject.time = false,
+								this.twentyfourObject.key = this.state.employeeWeekSelected.key;
+								this.twentyfourObject.label = this.appointmentstwentyfour[0].contact_name;
+								this.twentyfourObject.value = this.appointmentstwentyfour[0]._id;
+								this.twentyfourObject.appointment = [];
+								this.twentyfourObject.appointment.push(this.appointmentstwentyfour[0]);
+								this.twentyfourWeek.push(this.twentyfourObject);
+							} else {
+								this.twentyfourWeek.push(this.emptyObject);
+							}
+						}
+					}
+				}
+				console.log('this.state.employeeWeekSelectedCount');
+				console.log(this.state.employeeWeekSelectedCount);
+				this.setState({ schedule: this.schedule, employeeWeekText: this.state.employeeWeekSelected.label, showspinner: false, employeeWeekSelectedCount: this.state.employeeWeekSelectedCount, employeeWeekSelected: this.state.employeeWeekSelected, contactsList: this.contactsList, employeesList: this.employeesList });
+			} else {
+				if (this.state.employeeWeekSelected.length > 0) {
+					for (let d = 0; d < this.headerWeeklyView.length; d += 1) {
+						if (this.headerWeeklyView[d].day !== false) {
+							this.oneWeek.push(this.emptyObject);
+							this.twoWeek.push(this.emptyObject);
+							this.threeWeek.push(this.emptyObject);
+							this.fourWeek.push(this.emptyObject);
+							this.fiveWeek.push(this.emptyObject);
+							this.sixWeek.push(this.emptyObject);
+							this.sevenWeek.push(this.emptyObject);
+							this.eightWeek.push(this.emptyObject);
+							this.nineWeek.push(this.emptyObject);
+							this.tenWeek.push(this.emptyObject);
+							this.elevenWeek.push(this.emptyObject);
+							this.twelveWeek.push(this.emptyObject);
+							this.thirteenWeek.push(this.emptyObject);
+							this.fourteenWeek.push(this.emptyObject);
+							this.fiveteenWeek.push(this.emptyObject);
+							this.sixteenWeek.push(this.emptyObject);
+							this.seventeenWeek.push(this.emptyObject);
+							this.eighteenWeek.push(this.emptyObject);
+							this.nineteenWeek.push(this.emptyObject);
+							this.twentyWeek.push(this.emptyObject);
+							this.twentyoneWeek.push(this.emptyObject);
+							this.twentytwoWeek.push(this.emptyObject);
+							this.twentythreeWeek.push(this.emptyObject);
+							this.twentyfourWeek.push(this.emptyObject);
+						}
+					}
+				}
+				console.log('this.state.employeeWeekSelectedCount');
+				console.log(this.state.employeeWeekSelectedCount);
+				this.setState({ schedule: this.schedule, employeeWeekText: this.state.employeeWeekSelected.label, showspinner: false, employeeWeekSelectedCount: this.state.employeeWeekSelectedCount, employeeWeekSelected: this.state.employeeWeekSelected, contactsList: this.contactsList, employeesList: this.employeesList });
+			}
+		}
+		console.log('this.state.employeeWeekSelectedCount');
+		console.log(this.state.employeeWeekSelectedCount);
+		this.setState({ showspinner: false, schedule: this.schedule });
+		console.log('schedule: this.schedule, ');
+		console.log(this.schedule);
 	}
 
 	async saveSchedule() {
@@ -1025,6 +1874,8 @@ class Dashboard extends Component {
 	}
 
 	onChangeSchedule(newValue, prop) {
+		console.log('this.headerWeeklyView');
+		console.log(this.headerWeeklyView);
 		switch(prop){
 		case 'one':
 			if (this.state.schedule.one === true) {
@@ -1195,6 +2046,32 @@ class Dashboard extends Component {
 			}
 			break;
 		case 'monday':
+			this.headerWeeklyView = [];
+			this.setState({ employeeWeekText: 'Select employee', employeeWeekSelected: '' });
+			this.oneWeek = [];
+			this.twoWeek = [];
+			this.threeWeek = [];
+			this.fourWeek = [];
+			this.fiveWeek = [];
+			this.sixWeek = [];
+			this.sevenWeek = [];
+			this.eightWeek = [];
+			this.nineWeek = [];
+			this.tenWeek = [];
+			this.elevenWeek = [];
+			this.twelveWeek = [];
+			this.thirteenWeek = [];
+			this.fourteenWeek = [];
+			this.fiveteenWeek = [];
+			this.sixteenWeek = [];
+			this.seventeenWeek = [];
+			this.eighteenWeek = [];
+			this.nineteenWeek = [];
+			this.twentyWeek = [];
+			this.twentyoneWeek = [];
+			this.twentytwoWeek = [];
+			this.twentythreeWeek = [];
+			this.twentyfourWeek = [];
 			if (this.state.schedule.monday === true) {
 				this.state.schedule.monday = false;
 			} else {
@@ -1202,6 +2079,32 @@ class Dashboard extends Component {
 			}
 			break;
 		case 'tuesday':
+			this.headerWeeklyView = [];
+			this.setState({ employeeWeekText: 'Select employee', employeeWeekSelected: '' });
+			this.oneWeek = [];
+			this.twoWeek = [];
+			this.threeWeek = [];
+			this.fourWeek = [];
+			this.fiveWeek = [];
+			this.sixWeek = [];
+			this.sevenWeek = [];
+			this.eightWeek = [];
+			this.nineWeek = [];
+			this.tenWeek = [];
+			this.elevenWeek = [];
+			this.twelveWeek = [];
+			this.thirteenWeek = [];
+			this.fourteenWeek = [];
+			this.fiveteenWeek = [];
+			this.sixteenWeek = [];
+			this.seventeenWeek = [];
+			this.eighteenWeek = [];
+			this.nineteenWeek = [];
+			this.twentyWeek = [];
+			this.twentyoneWeek = [];
+			this.twentytwoWeek = [];
+			this.twentythreeWeek = [];
+			this.twentyfourWeek = [];
 			if (this.state.schedule.tuesday === true) {
 				this.state.schedule.tuesday = false;
 			} else {
@@ -1209,6 +2112,32 @@ class Dashboard extends Component {
 			}
 			break;
 		case 'wednesday':
+			this.headerWeeklyView = [];
+			this.setState({ employeeWeekText: 'Select employee', employeeWeekSelected: '' });
+			this.oneWeek = [];
+			this.twoWeek = [];
+			this.threeWeek = [];
+			this.fourWeek = [];
+			this.fiveWeek = [];
+			this.sixWeek = [];
+			this.sevenWeek = [];
+			this.eightWeek = [];
+			this.nineWeek = [];
+			this.tenWeek = [];
+			this.elevenWeek = [];
+			this.twelveWeek = [];
+			this.thirteenWeek = [];
+			this.fourteenWeek = [];
+			this.fiveteenWeek = [];
+			this.sixteenWeek = [];
+			this.seventeenWeek = [];
+			this.eighteenWeek = [];
+			this.nineteenWeek = [];
+			this.twentyWeek = [];
+			this.twentyoneWeek = [];
+			this.twentytwoWeek = [];
+			this.twentythreeWeek = [];
+			this.twentyfourWeek = [];
 			if (this.state.schedule.wednesday === true) {
 				this.state.schedule.wednesday = false;
 			} else {
@@ -1216,6 +2145,32 @@ class Dashboard extends Component {
 			}
 			break;
 		case 'thursday':
+			this.headerWeeklyView = [];
+			this.setState({ employeeWeekText: 'Select employee', employeeWeekSelected: '' });
+			this.oneWeek = [];
+			this.twoWeek = [];
+			this.threeWeek = [];
+			this.fourWeek = [];
+			this.fiveWeek = [];
+			this.sixWeek = [];
+			this.sevenWeek = [];
+			this.eightWeek = [];
+			this.nineWeek = [];
+			this.tenWeek = [];
+			this.elevenWeek = [];
+			this.twelveWeek = [];
+			this.thirteenWeek = [];
+			this.fourteenWeek = [];
+			this.fiveteenWeek = [];
+			this.sixteenWeek = [];
+			this.seventeenWeek = [];
+			this.eighteenWeek = [];
+			this.nineteenWeek = [];
+			this.twentyWeek = [];
+			this.twentyoneWeek = [];
+			this.twentytwoWeek = [];
+			this.twentythreeWeek = [];
+			this.twentyfourWeek = [];
 			if (this.state.schedule.thursday === true) {
 				this.state.schedule.thursday = false;
 			} else {
@@ -1223,6 +2178,32 @@ class Dashboard extends Component {
 			}
 			break;
 		case 'friday':
+			this.headerWeeklyView = [];
+			this.setState({ employeeWeekText: 'Select employee', employeeWeekSelected: '' });
+			this.oneWeek = [];
+			this.twoWeek = [];
+			this.threeWeek = [];
+			this.fourWeek = [];
+			this.fiveWeek = [];
+			this.sixWeek = [];
+			this.sevenWeek = [];
+			this.eightWeek = [];
+			this.nineWeek = [];
+			this.tenWeek = [];
+			this.elevenWeek = [];
+			this.twelveWeek = [];
+			this.thirteenWeek = [];
+			this.fourteenWeek = [];
+			this.fiveteenWeek = [];
+			this.sixteenWeek = [];
+			this.seventeenWeek = [];
+			this.eighteenWeek = [];
+			this.nineteenWeek = [];
+			this.twentyWeek = [];
+			this.twentyoneWeek = [];
+			this.twentytwoWeek = [];
+			this.twentythreeWeek = [];
+			this.twentyfourWeek = [];
 			if (this.state.schedule.friday === true) {
 				this.state.schedule.friday = false;
 			} else {
@@ -1230,6 +2211,32 @@ class Dashboard extends Component {
 			}
 			break;
 		case 'saturday':
+			this.headerWeeklyView = [];
+			this.setState({ employeeWeekText: 'Select employee', employeeWeekSelected: '' });
+			this.oneWeek = [];
+			this.twoWeek = [];
+			this.threeWeek = [];
+			this.fourWeek = [];
+			this.fiveWeek = [];
+			this.sixWeek = [];
+			this.sevenWeek = [];
+			this.eightWeek = [];
+			this.nineWeek = [];
+			this.tenWeek = [];
+			this.elevenWeek = [];
+			this.twelveWeek = [];
+			this.thirteenWeek = [];
+			this.fourteenWeek = [];
+			this.fiveteenWeek = [];
+			this.sixteenWeek = [];
+			this.seventeenWeek = [];
+			this.eighteenWeek = [];
+			this.nineteenWeek = [];
+			this.twentyWeek = [];
+			this.twentyoneWeek = [];
+			this.twentytwoWeek = [];
+			this.twentythreeWeek = [];
+			this.twentyfourWeek = [];
 			if (this.state.schedule.saturday === true) {
 				this.state.schedule.saturday = false;
 			} else {
@@ -1237,6 +2244,32 @@ class Dashboard extends Component {
 			}
 			break;
 		case 'sunday':
+			this.headerWeeklyView = [];
+			this.setState({ employeeWeekText: 'Select employee', employeeWeekSelected: '' });
+			this.oneWeek = [];
+			this.twoWeek = [];
+			this.threeWeek = [];
+			this.fourWeek = [];
+			this.fiveWeek = [];
+			this.sixWeek = [];
+			this.sevenWeek = [];
+			this.eightWeek = [];
+			this.nineWeek = [];
+			this.tenWeek = [];
+			this.elevenWeek = [];
+			this.twelveWeek = [];
+			this.thirteenWeek = [];
+			this.fourteenWeek = [];
+			this.fiveteenWeek = [];
+			this.sixteenWeek = [];
+			this.seventeenWeek = [];
+			this.eighteenWeek = [];
+			this.nineteenWeek = [];
+			this.twentyWeek = [];
+			this.twentyoneWeek = [];
+			this.twentytwoWeek = [];
+			this.twentythreeWeek = [];
+			this.twentyfourWeek = [];
 			if (this.state.schedule.sunday === true) {
 				this.state.schedule.sunday = false;
 			} else {
@@ -1691,8 +2724,6 @@ class Dashboard extends Component {
 											value={this.state.appointment.notes}
 										/>
 									</View>
-
-									
 								</View>
 								{this.renderDialogButtons()}
 							</PopupDialog>
@@ -1714,6 +2745,9 @@ class Dashboard extends Component {
 										}}
 									>{this.state.showspinnertext}</Text>
 								</View>
+							}
+							{this.state.employeesListText === 'Select employee(s)' && this.state.showspinner === false &&
+								<Text style={{ padding: 40 }}>Please select employee(s) from the list</Text>
 							}
 							{this.state.employeesSelectedCount > 0 && this.state.showspinner === false &&
 							<Grid style={{ borderColor: '#d7d7d6', borderWidth: 0.5 }}>
@@ -2145,7 +3179,663 @@ class Dashboard extends Component {
 						</KeyboardAwareScrollView>
 					</Tab>
 					<Tab heading={<TabHeading><Text style={{ fontSize: 12 }}>Weekly</Text></TabHeading>}>
-						
+						<View style={{ borderColor: 'steelblue', borderBottomWidth: 2, height: 54 }}>
+							<View
+								style={{
+									paddingTop: 5,
+									paddingLeft: 10,
+									paddingBottom: 6,
+									flexDirection: 'row', flex: 1
+								}}
+							>
+								{/* <DatePicker
+									date={this.state.todaysDate}
+									mode="date"
+									placeholder="Date"
+									format="DD-MM-YYYY"
+									confirmBtnText="Ok"
+									cancelBtnText="Cancel"
+									customStyles={{
+										dateIcon: {
+											alignItems: 'center',
+											alignSelf: 'center',
+										},
+										dateInput: {
+											height: 40,
+											borderColor: '#C0C0C0',
+											borderWidth: 1,
+											borderRadius: 6,
+										}
+									}}
+									onDateChange={(date) => {
+										this.onChangeAppointmentsDate(date, 'date');
+									}}
+								/> */}
+								<TouchableOpacity onPress={this.showEmployeesList.bind(this, 'weekly')} style={{ height: 40 }}>
+									<View style={{ flexDirection: 'row', flex: 1, padding: 10, borderColor: '#C0C0C0', borderWidth: 1, borderRadius: 6 }}>
+										<Text>{this.state.employeeWeekText}</Text>
+										<MaterialCommunityIcons name="arrow-down-drop-circle-outline" size={20} style={{ color: '#CCCCCC' }} />
+									</View>
+								</TouchableOpacity>
+							</View>
+						</View>
+						<KeyboardAwareScrollView>
+						<Content style={{ minHeight: 800 }} >
+							<PopupDialog
+								width={fullWidth - 30}
+								height={fullHeight - 180}
+								ref={(popupDialog) => {
+									this.scaleAnimationDialog = popupDialog;
+								}}
+								dialogTitle={<DialogTitle title="Appointment" />}
+								dialogStyle={{
+									marginBottom: 50
+								}}
+							>
+								<View
+									style={{
+										paddingHorizontal: 20,
+										justifyContent: 'center',
+										alignSelf: 'center',
+										alignItems: 'center'
+									}}
+								>
+									<DatePicker
+										date={this.state.appointment.date}
+										mode="date"
+										placeholder="Select date"
+										format="DD-MM-YYYY"
+										confirmBtnText="Ok"
+										cancelBtnText="Cancel"
+										customStyles={{
+											dateIcon: {
+												alignItems: 'center',
+												alignSelf: 'center'
+											},
+											dateInput: {
+												height: 40,
+												borderColor: 'transparent',
+												backgroundColor: 'white'
+											}
+										}}
+										onDateChange={(date) => {
+											this.onChangeText(date, 'date');
+										}}
+									/>
+									<View
+										style={{
+											flexDirection: 'row',
+											height: 60,
+										}}
+									>
+										<IconMaterial
+											name="access-time"
+											size={20}
+											style={{
+												marginTop: 25,
+											}}
+										/>
+										<Text
+											style={{
+												marginTop: 25,
+												marginLeft: 20,
+												fontWeight: 'bold',
+											}}
+										>
+											Hour
+										</Text>
+										<ModalPicker style={{ marginLeft: 20 }} data={this.hoursList} label="" initValue={this.state.appointment.hour} onChange={(option)=>{ this.onChangeText(option, 'hour'); }} />
+										<Text
+											style={{
+												marginTop: 25,
+												marginLeft: 20,
+												fontWeight: 'bold',
+											}}
+										>
+											Minute
+										</Text>
+										<ModalPicker style={{ marginLeft: 20 }} data={this.minutesList} label="" initValue={this.state.appointment.minute} onChange={(option)=>{ this.onChangeText(option, 'minute'); }} />
+									
+									</View>
+									<View
+										style={{
+											flexDirection: 'row',
+											height: 60,
+										}}
+									>
+										<IconMaterial
+											name="perm-identity"
+											size={20}
+											style={{
+												marginTop: 25,
+											}}
+										/>
+										<Text
+											style={{
+												marginTop: 25,
+												marginLeft: 20,
+												fontWeight: 'bold',
+											}}
+										>Contact</Text>
+										<ModalPicker style={{ marginLeft: 20 }} data={this.contactsList} label="" initValue={this.state.appointment.contact_name} onChange={(option)=>{ this.onChangeText(option, 'contact_id'); }} />
+									</View>
+									<View
+										style={{
+											flexDirection: 'row',
+											height: 60,
+										}}
+									>
+										<IconMaterial
+											name="supervisor-account"
+											size={20}
+											style={{
+												marginTop: 25,
+											}}
+										/>
+										<Text
+											style={{
+												marginTop: 25,
+												marginLeft: 20,
+												fontWeight: 'bold',
+											}}
+										>Employee</Text>
+										<ModalPicker style={{ marginLeft: 20 }} data={this.employeesList} label="" initValue={this.state.appointment.employee_alias} onChange={(option)=>{ this.onChangeText(option, 'employee_id'); }} />
+									</View>
+									<View
+										style={{
+											flexDirection: 'row',
+											height: 20,
+											marginTop: 5,
+											alignSelf: 'flex-start'
+										}}
+									>
+										<Text note style={{ marginRight: 30 }}>Select treatment(s)</Text> 
+										{this.state.appointment._id !== '' &&
+											<ActionButton size={24} icon={<MaterialCommunityIcons name="plus" size={16} color="white" />} buttonColor="#8fbc8f" offsetX={0} offsetY={0} onPress={() => { Actions.AppointmentsTreatmentsList({ title: 'Treatments list', treatmentslistinfo: this.treatmentslistinfo, appointment: this.state.appointment }); }} />
+										}
+									</View>
+									<Text note style={{ marginTop: 5, alignSelf: 'flex-start', paddingTop: 2.5, fontStyle: 'italic', backgroundColor: 'transparent' }}>{this.treatmentslist}</Text>
+									<Text style={{ alignSelf: 'flex-start', fontWeight: 'bold', paddingVertical: 10 }}>General notes</Text>
+									
+									<View
+										style={{
+											flexDirection: 'row',
+											height: 70,
+										}}
+									>
+										<Input
+											underlineColorAndroid={'transparent'}
+											autoCorrect={false}
+											multiline
+											numberOfLines={5}
+											returnKeyType="done"
+											style={{
+												backgroundColor: '#fff',
+												borderColor: '#C0C0C0',
+												borderWidth: 1,
+												borderRadius: 6,
+												color: '#424B4F',
+												width: fullWidth - 80,
+											}}
+											onChangeText={(text) => {
+												this.onChangeText(text, 'notes');
+											}}
+											value={this.state.appointment.notes}
+										/>
+									</View>
+								</View>
+								{this.renderDialogButtons()}
+							</PopupDialog>
+							{this.state.showspinner &&
+								<View
+									style={{
+										backgroundColor: 'white',
+										justifyContent: 'center',
+										marginTop: fullHeight / 4,
+									}}
+								>
+									<Spinner />
+									<Text
+										style={{
+											justifyContent: 'center',
+											alignItems: 'center',
+											alignSelf: 'center',
+											fontWeight: 'bold'
+										}}
+									>{this.state.showspinnertext}</Text>
+								</View>
+							}
+							{this.state.employeeWeekText === 'Select employee' && this.state.showspinner === false &&
+								<Text style={{ padding: 20, borderColor: 'transparent', textAlign: 'justify' }}>Please select one employee from the list</Text>
+							}
+							{this.state.employeesListText !== 'Select employee(s)' && this.state.showspinner === false &&
+							<Grid style={{ borderColor: '#d7d7d6', borderWidth: 0.5 }}>
+								<Row>
+									<FlatList
+										data={this.headerWeeklyView}
+										renderItem={({item}) => (
+											<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: 'steelblue' }}>
+												<Text note style={{ fontSize: 9, textAlign: 'center', color: 'white', fontWeight: 'bold' }} >
+													{item.label}
+												</Text>
+											</View>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+							{this.state.schedule.one === true &&
+								<Row>
+									<FlatList
+										data={this.oneWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.two === true &&
+								<Row>
+									<FlatList
+										data={this.twoWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.three === true &&
+								<Row>
+									<FlatList
+										data={this.threeWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.four === true &&
+								<Row>
+									<FlatList
+										data={this.fourWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.five === true &&
+								<Row>
+									<FlatList
+										data={this.fiveWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.six === true &&
+								<Row>
+									<FlatList
+										data={this.sixWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.seven === true &&
+								<Row>
+									<FlatList
+										data={this.sevenWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.eight === true &&
+								<Row>
+									<FlatList
+										data={this.eightWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.nine === true &&
+								<Row>
+									<FlatList
+										data={this.nineWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.ten === true &&
+								<Row>
+									<FlatList
+										data={this.tenWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.eleven === true &&
+								<Row>
+									<FlatList
+										data={this.elevenWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.twelve === true &&
+								<Row>
+									<FlatList
+										data={this.twelveWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.thirteen === true &&
+								<Row>
+									<FlatList
+										data={this.thirteenWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.fourteen === true &&
+								<Row>
+									<FlatList
+										data={this.fourteenWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.fiveteen === true &&
+								<Row>
+									<FlatList
+										data={this.fiveteenWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.sixteen === true &&
+								<Row>
+									<FlatList
+										data={this.sixteenWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.seventeen === true &&
+								<Row>
+									<FlatList
+										data={this.seventeenWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.eighteen === true &&
+								<Row>
+									<FlatList
+										data={this.eighteenWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.nineteen === true &&
+								<Row>
+									<FlatList
+										data={this.nineteenWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.twenty === true &&
+								<Row>
+									<FlatList
+										data={this.twentyWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.twentyone === true &&
+								<Row>
+									<FlatList
+										data={this.twentyoneWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.twentytwo === true &&
+								<Row>
+									<FlatList
+										data={this.twentytwoWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.twentythree === true &&
+								<Row>
+									<FlatList
+										data={this.twentythreeWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+								{this.state.schedule.twentyfour === true &&
+								<Row>
+									<FlatList
+										data={this.twentyfourWeek}
+										renderItem={({item}) => (
+											<TouchableOpacity onPress={() => this.showScaleAnimationDialog(item) } >
+												<View style={{ justifyContent: 'center', borderColor: '#d7d7d6', borderWidth: 0.5, height: 35, width: fullWidth/this.state.employeeWeekSelectedCount, backgroundColor: this.backgroundColor }}>
+													<Text note style={{ fontSize: 9, textAlign: 'center', fontWeight: 'bold', color: this.textColor }} >
+														{item.label}
+													</Text>
+												</View>
+											</TouchableOpacity>
+										)}
+										keyExtractor={item => item._id}
+										numColumns={this.state.employeeWeekSelectedCount} />
+								</Row>
+								}
+							</Grid>	
+							}
+							<View style={{ height: 60 }} />
+						</Content>
+						</KeyboardAwareScrollView>
 					</Tab>
 					<Tab heading={<TabHeading><Text style={{ fontSize: 12 }}>Configuration</Text></TabHeading>}>
 					<View style={{ borderColor: 'steelblue', borderBottomWidth: 2, borderTopWidth: 2, height: 40 }}>

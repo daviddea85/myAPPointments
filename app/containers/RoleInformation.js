@@ -33,7 +33,7 @@ class RoleInformation extends Component {
 			rowHasChanged: (r1, r2) => r1 !== r2
 		});
 		this.state = {
-			showspinner: false,
+			showspinner: true,
 			showspinnertext: 'Loading role info, please wait',
 			roleid: this.props.roleid || false,
 			role: {

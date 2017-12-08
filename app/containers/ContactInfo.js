@@ -52,7 +52,7 @@ class Contacts extends Component {
 			telephones: [],
 			emailslist: dsEmails.cloneWithRows([]),
 			emails: [],
-			showspinner: false,
+			showspinner: true,
 			showspinnertext: '',
 		};
 		this.companyDatabase = '';

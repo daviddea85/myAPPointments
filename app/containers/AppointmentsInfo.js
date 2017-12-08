@@ -66,7 +66,7 @@ class AppointmentsInfo extends Component {
 			rowHasChanged: (r1, r2) => r1 !== r2
 		});
 		this.state = {
-			showspinner: false,
+			showspinner: true,
 			showspinnertext: 'Loading appointment info, please wait',
 			appointmentid: this.props.appointmentid || '',
 			appointment: {

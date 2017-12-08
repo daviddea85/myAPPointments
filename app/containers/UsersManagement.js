@@ -26,7 +26,7 @@ class UsersManagement extends Component {
 		this.state = {
 			usersListCount: 0,
 			usersList: dsUsersList.cloneWithRows([]),
-			showspinner: false,
+			showspinner: true,
 			showspinnertext: 'Loading users, please wait'
 		};
 		this.renderRowUsers = this.renderRowUsers.bind(this);

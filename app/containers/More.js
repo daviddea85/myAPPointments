@@ -17,7 +17,7 @@ class More extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			showspinner: false,
+			showspinner: true,
 			active: false
 		};
 		this.userLoggedId = '';

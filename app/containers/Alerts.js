@@ -54,7 +54,7 @@ class pageTwo extends Component {
 		const dsAlertsSystem = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 		const dsAlertsUser = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 		this.state = {
-			showspinner: false,
+			showspinner: true,
 			alertsSystem: '',
 			alertsSystemList: dsAlertsSystem.cloneWithRows([]),
 			alertsSystemCount: 0,

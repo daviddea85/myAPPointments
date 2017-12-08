@@ -217,7 +217,7 @@ class EmployeesList extends Component {
 				if (this.state.tab === 'daily') {
 					Actions.Dashboard({ title: 'Dashboard', employeesSelected: this.employeesSelected, appointmentsdate: this.state.appointmentsdate, tab: 'daily' });
 				} else {
-					Actions.Dashboard({ title: 'Dashboard', weekEmployeeText: this.employeeSelected.label, weekEmployeeSelected: this.employeeSelected, appointmentsdate: this.state.appointmentsdate, tab: 'weekly' });
+					Actions.Dashboard({ title: 'Dashboard', employeeWeekText: this.employeeSelected.label, employeeWeekSelected: this.employeeSelected, appointmentsdate: this.state.appointmentsdate, tab: 'weekly' });
 				}
 			}
 		}
