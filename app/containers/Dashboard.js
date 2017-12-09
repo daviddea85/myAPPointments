@@ -3406,9 +3406,9 @@ class Dashboard extends Component {
 								</View>
 							}
 							{this.state.employeeWeekText === 'Select employee' && this.state.showspinner === false &&
-								<Text style={{ padding: 20, borderColor: 'transparent', textAlign: 'justify' }}>Please select one employee from the list</Text>
+								<Text style={{ borderColor: '#d7d7d6', padding: 40 }}>Please select one employee from the list</Text>
 							}
-							{this.state.employeesListText !== 'Select employee(s)' && this.state.showspinner === false &&
+							{this.state.employeeWeekText !== 'Select employee' && this.state.showspinner === false &&
 							<Grid style={{ borderColor: '#d7d7d6', borderWidth: 0.5 }}>
 								<Row>
 									<FlatList
