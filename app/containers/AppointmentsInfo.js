@@ -1224,7 +1224,7 @@ class AppointmentsInfo extends Component {
 											fontWeight: 'bold',
 											width: 110
 										}}
-									>Employee</Label>
+									>Staff</Label>
 									<ModalPicker data={this.employeesList} label="" initValue={this.state.appointment.employee_alias} onChange={(option)=>{ this.onChangeText(option, 'employee_id'); }} />
 								</View>
 								<View

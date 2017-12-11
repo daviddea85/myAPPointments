@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Platform, Dimensions, AsyncStorage, ListView, View, TextInput, Keyboard, TouchableOpacity, Alert, FlatList } from 'react-native';
-import { Container, Content, Text, Card, Header, Body, Button, Title, CardItem, Icon, Fab, Tabs, Tab, TabHeading, Badge, Right, Label, Input, Spinner  } from 'native-base';
+import { Platform, Dimensions, AsyncStorage, ListView, View, TextInput, Keyboard, TouchableOpacity, Alert, FlatList, Image } from 'react-native';
+import { Container, Content, Text, Card, Header, Body, Button, Title, CardItem, Icon, Fab, Tabs, Tab, TabHeading, Badge, Left, Right, Label, Input, Spinner  } from 'native-base';
 import { Actions } from 'react-native-router-flux';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import IconMaterial from 'react-native-vector-icons/MaterialIcons';
@@ -17,6 +17,7 @@ import PopupDialog, { DialogTitle, DialogButton, SlideAnimation, ScaleAnimation,
 import ModalPicker from './common/ModalPicker';
 import moment from 'moment';
 import { CheckBox } from 'react-native-elements';
+import Calendar from 'react-native-calendar';
 
 const fullWidth = Dimensions.get('window').width; // full width
 const fullHeight = Dimensions.get('window').height; // full height
@@ -34,15 +35,20 @@ class Dashboard extends Component {
 			showspinner: true,
 			showspinnertext: 'Loading appointments, please wait',
 			tab: this.props.tab || '',
+			mondayOfWeek: this.props.mondayOfWeek || '',
+			weekdatefrom: this.props.weekdatefrom || '',
+			weekdateto: this.props.weekdateto || '',
 			todaysDate: this.props.appointmentsdate || '',
-			weekDate: '',
-			// weekDate: '20-11-17 - 26-11-17'
+			showWeekCalendar: false,
+			weekSelectedDate: this.props.weekSelectedDate || [],
+			selectedDate: moment().format('YYYY-MM-DD'),
+			weekDate: this.props.weekDate || 'Select week',
 			dialogShow: false,
 			employeesSelected: this.props.employeesSelected || [],
 			employeesSelectedCount: '0',
 			employeeWeekSelected: this.props.employeeWeekSelected || '',
 			employeeWeekSelectedCount: 0,
-			employeeWeekText: this.props.employeeWeekText || 'Select employee',
+			employeeWeekText: this.props.employeeWeekText || 'Select staff',
 			appointment: {},
 			appointmentinfo: {
 				_id: '',
@@ -58,7 +64,7 @@ class Dashboard extends Component {
 			},
 			employeesList: [],
 			contactsList: [],
-			employeesListText: 'Select employee(s)',
+			employeesListText: 'Select staff',
 			schedule: {
 				_id: '',
 				doctype: 'schedule',
@@ -184,7 +190,6 @@ class Dashboard extends Component {
 							this._tabs.goToPage(1);
 						}
 						this.connectCompanyDb(true);
-						// this._tabs.goToPage(this.currentTab);
 					}
 				});
 			}
@@ -368,12 +373,8 @@ class Dashboard extends Component {
 			if (this.schedule.sunday === true) {
 				this.state.employeeWeekSelectedCount++;
 			}
-			console.log('this.state.employeeWeekSelectedCount');
-			console.log(this.state.employeeWeekSelectedCount);
 		} else {
 			this.state.employeeWeekSelectedCount = 6;
-			console.log('this.state.employeeWeekSelectedCount');
-			console.log(this.state.employeeWeekSelectedCount);
 			const schedule = {
 				doctype: 'schedule',
 				userid: this.userLoggedId,
@@ -1060,7 +1061,7 @@ class Dashboard extends Component {
 						
 					}
 				}
-				this.setState({ schedule: this.schedule, employeesListText: 'Employee(s) selected', showspinner: false, employeesSelectedCount: this.state.employeesSelected.length, employeesSelected: this.state.employeesSelected, contactsList: this.contactsList, employeesList: this.employeesList });
+				this.setState({ schedule: this.schedule, employeesListText: 'Staff selected', showspinner: false, employeesSelectedCount: this.state.employeesSelected.length, employeesSelected: this.state.employeesSelected, contactsList: this.contactsList, employeesList: this.employeesList });
 			} else {
 				if (this.state.employeesSelected.length > 0) {
 					for (let em = 0; em < this.state.employeesSelected.length; em += 1) {
@@ -1092,777 +1093,1008 @@ class Dashboard extends Component {
 						}
 					}
 				}
-				this.setState({ schedule: this.schedule, employeesListText: 'Employee(s) selected', showspinner: false, employeesSelectedCount: this.state.employeesSelected.length, employeesSelected: this.state.employeesSelected, contactsList: this.contactsList, employeesList: this.employeesList });
+				this.setState({ schedule: this.schedule, employeesListText: 'Staff selected', showspinner: false, employeesSelectedCount: this.state.employeesSelected.length, employeesSelected: this.state.employeesSelected, contactsList: this.contactsList, employeesList: this.employeesList });
 			}
 		}
-		// week information
-		console.log('this.state.employeeWeekSelected');
-		console.log(this.state.employeeWeekSelected);
-		if (!_.isEmpty(this.state.employeeWeekSelected)) {
-			const employeeSelectedHeaderWeeklyView = {
-				day: false,
-				key: 'employeeWeeklyView',
-				value: this.state.employeeWeekSelected.value,
-				label: this.state.employeeWeekSelected.label
-			};
-			this.headerWeeklyView.push(employeeSelectedHeaderWeeklyView);
-			const mondayHeaderWeeklyView = {
-				day: true,
-				key: 'monday',
-				value: '20-11-2017',
-				label: 'Mon 20'
-			};
-			if (this.schedule.monday === true) {
-				this.headerWeeklyView.push(mondayHeaderWeeklyView);
-			}
-			const tuesdayHeaderWeeklyView = {
-				day: true,
-				key: 'tuesday',
-				value: '21-11-2017',
-				label: 'Tue 21'
-			};
-			if (this.schedule.tuesday === true) {
-				this.headerWeeklyView.push(tuesdayHeaderWeeklyView);
-			}
-			const wednesdayHeaderWeeklyView = {
-				day: true,
-				key: 'wednesday',
-				value: '22-11-2017',
-				label: 'Wed 22'
-			};
-			if (this.schedule.wednesday === true) {
-				this.headerWeeklyView.push(wednesdayHeaderWeeklyView);
-			}
-			const thursdayHeaderWeeklyView = {
-				day: true,
-				key: 'thursday',
-				value: '23-11-2017',
-				label: 'Thu 23'
-			};
-			if (this.schedule.thursday === true) {
-				this.headerWeeklyView.push(thursdayHeaderWeeklyView);
-			}
-			const fridayHeaderWeeklyView = {
-				day: true,
-				key: 'friday',
-				value: '24-11-2017',
-				label: 'Fri 24'
-			};
-			if (this.schedule.friday === true) {
-				this.headerWeeklyView.push(fridayHeaderWeeklyView);
-			}
-			const saturdayHeaderWeeklyView = {
-				day: true,
-				key: 'saturday',
-				value: '25-11-2017',
-				label: 'Sat 25'
-			};
-			if (this.schedule.saturday === true) {
-				this.headerWeeklyView.push(saturdayHeaderWeeklyView);
-			}
-			const sundayHeaderWeeklyView = {
-				day: true,
-				key: 'sunday',
-				value: '26-11-2017',
-				label: 'Sun 26'
-			};
-			if (this.schedule.sunday === true) {
-				this.headerWeeklyView.push(sundayHeaderWeeklyView);
-			}
-			let indexHour = 0;
-			this.hoursList = [
-				{ key: indexHour++, label: '01', value: '01' },
-				{ key: indexHour++, label: '02', value: '02' },
-				{ key: indexHour++, label: '03', value: '03' },
-				{ key: indexHour++, label: '04', value: '04' },
-				{ key: indexHour++, label: '05', value: '05' },
-				{ key: indexHour++, label: '06', value: '06' },
-				{ key: indexHour++, label: '07', value: '07' },
-				{ key: indexHour++, label: '08', value: '08' },
-				{ key: indexHour++, label: '09', value: '09' },
-				{ key: indexHour++, label: '10', value: '10' },
-				{ key: indexHour++, label: '11', value: '11' },
-				{ key: indexHour++, label: '12', value: '12' },
-				{ key: indexHour++, label: '13', value: '13' },
-				{ key: indexHour++, label: '14', value: '14' },
-				{ key: indexHour++, label: '15', value: '15' },
-				{ key: indexHour++, label: '16', value: '16' },
-				{ key: indexHour++, label: '17', value: '17' },
-				{ key: indexHour++, label: '18', value: '18' },
-				{ key: indexHour++, label: '19', value: '19' },
-				{ key: indexHour++, label: '20', value: '20' },
-				{ key: indexHour++, label: '21', value: '21' },
-				{ key: indexHour++, label: '22', value: '22' },
-				{ key: indexHour++, label: '23', value: '23' },
-				{ key: indexHour++, label: '24', value: '24' },
-			];
-			let indexMinute = 0;
-			this.minutesList = [
-				{ key: indexMinute++, label: '00', value: '00' },
-				{ key: indexMinute++, label: '01', value: '01' },
-				{ key: indexMinute++, label: '02', value: '02' },
-				{ key: indexMinute++, label: '03', value: '03' },
-				{ key: indexMinute++, label: '04', value: '04' },
-				{ key: indexMinute++, label: '05', value: '05' },
-				{ key: indexMinute++, label: '06', value: '06' },
-				{ key: indexMinute++, label: '07', value: '07' },
-				{ key: indexMinute++, label: '08', value: '08' },
-				{ key: indexMinute++, label: '09', value: '09' },
-				{ key: indexMinute++, label: '10', value: '10' },
-				{ key: indexMinute++, label: '11', value: '11' },
-				{ key: indexMinute++, label: '12', value: '12' },
-				{ key: indexMinute++, label: '13', value: '13' },
-				{ key: indexMinute++, label: '14', value: '14' },
-				{ key: indexMinute++, label: '15', value: '15' },
-				{ key: indexMinute++, label: '16', value: '16' },
-				{ key: indexMinute++, label: '17', value: '17' },
-				{ key: indexMinute++, label: '18', value: '18' },
-				{ key: indexMinute++, label: '19', value: '19' },
-				{ key: indexMinute++, label: '20', value: '20' },
-				{ key: indexMinute++, label: '21', value: '21' },
-				{ key: indexMinute++, label: '22', value: '22' },
-				{ key: indexMinute++, label: '23', value: '23' },
-				{ key: indexMinute++, label: '24', value: '24' },
-				{ key: indexMinute++, label: '25', value: '25' },
-				{ key: indexMinute++, label: '26', value: '26' },
-				{ key: indexMinute++, label: '27', value: '27' },
-				{ key: indexMinute++, label: '28', value: '28' },
-				{ key: indexMinute++, label: '29', value: '29' },
-				{ key: indexMinute++, label: '30', value: '30' },
-				{ key: indexMinute++, label: '31', value: '31' },
-				{ key: indexMinute++, label: '32', value: '32' },
-				{ key: indexMinute++, label: '33', value: '33' },
-				{ key: indexMinute++, label: '34', value: '34' },
-				{ key: indexMinute++, label: '35', value: '35' },
-				{ key: indexMinute++, label: '36', value: '36' },
-				{ key: indexMinute++, label: '37', value: '37' },
-				{ key: indexMinute++, label: '38', value: '38' },
-				{ key: indexMinute++, label: '39', value: '39' },
-				{ key: indexMinute++, label: '40', value: '40' },
-				{ key: indexMinute++, label: '41', value: '41' },
-				{ key: indexMinute++, label: '42', value: '42' },
-				{ key: indexMinute++, label: '43', value: '43' },
-				{ key: indexMinute++, label: '44', value: '44' },
-				{ key: indexMinute++, label: '45', value: '45' },
-				{ key: indexMinute++, label: '46', value: '46' },
-				{ key: indexMinute++, label: '47', value: '47' },
-				{ key: indexMinute++, label: '48', value: '48' },
-				{ key: indexMinute++, label: '49', value: '49' },
-				{ key: indexMinute++, label: '50', value: '50' },
-				{ key: indexMinute++, label: '51', value: '51' },
-				{ key: indexMinute++, label: '52', value: '52' },
-				{ key: indexMinute++, label: '53', value: '53' },
-				{ key: indexMinute++, label: '54', value: '54' },
-				{ key: indexMinute++, label: '55', value: '55' },
-				{ key: indexMinute++, label: '56', value: '56' },
-				{ key: indexMinute++, label: '57', value: '57' },
-				{ key: indexMinute++, label: '58', value: '58' },
-				{ key: indexMinute++, label: '59', value: '59' },
-			];
-			this.oneObject = {
-				time: true,
-				key: '01:00',
-				label: '01:00',
-				value: '01:00',
-				appointment: []
-			};
-			this.oneWeek.push(this.oneObject);
-			this.twoObject = {
-				time: true,
-				key: '02:00',
-				label: '02:00',
-				value: '02:00',
-				appointment: []
-			};
-			this.twoWeek.push(this.twoObject);
-			this.threeObject = {
-				time: true,
-				key: '03:00',
-				label: '03:00',
-				value: '03:00',
-				appointment: []
-			};
-			this.threeWeek.push(this.threeObject);
-			this.fourObject = {
-				time: true,
-				key: '04:00',
-				label: '04:00',
-				value: '04:00',
-				appointment: []
-			};
-			this.fourWeek.push(this.fourObject);
-			this.fiveObject = {
-				time: true,
-				key: '05:00',
-				label: '05:00',
-				value: '05:00',
-				appointment: []
-			};
-			this.fiveWeek.push(this.fiveObject);
-			this.sixObject = {
-				time: true,
-				key: '06:00',
-				label: '06:00',
-				value: '06:00',
-				appointment: []
-			};
-			this.sixWeek.push(this.sixObject);			
-			this.sevenObject = {
-				time: true,
-				key: '07:00',
-				label: '07:00',
-				value: '07:00',
-				appointment: []
-			};
-			this.sevenWeek.push(this.sevenObject);
-			this.eightObject = {
-				time: true,
-				key: '08:00',
-				label: '08:00',
-				value: '08:00',
-				appointment: []
-			};
-			this.eightWeek.push(this.eightObject);
-			this.nineObject = {
-				time: true,
-				key: '09:00',
-				label: '09:00',
-				value: '09:00',
-				appointment: []
-			};
-			this.nineWeek.push(this.nineObject);
-			this.tenObject = {
-				time: true,
-				key: '10:00',
-				label: '10:00',
-				value: '10:00',
-				appointment: []
-			};
-			this.tenWeek.push(this.tenObject);
-			this.elevenObject = {
-				time: true,
-				key: '11:00',
-				label: '11:00',
-				value: '11:00',
-				appointment: []
-			};
-			this.elevenWeek.push(this.elevenObject);
-			this.twelveObject = {
-				time: true,
-				key: '12:00',
-				label: '12:00',
-				value: '12:00',
-				appointment: []
-			};
-			this.twelveWeek.push(this.twelveObject);
-			this.thirteenObject = {
-				time: true,
-				key: '13:00',
-				label: '13:00',
-				value: '13:00',
-				appointment: []
-			};
-			this.thirteenWeek.push(this.thirteenObject);
-			this.fourteenObject = {
-				time: true,
-				key: '14:00',
-				label: '14:00',
-				value: '14:00',
-				appointment: []
-			};
-			this.fourteenWeek.push(this.fourteenObject);
-			this.fiveteenObject = {
-				time: true,
-				key: '15:00',
-				label: '15:00',
-				value: '15:00',
-				appointment: []
-			};
-			this.fiveteenWeek.push(this.fiveteenObject);
-			this.sixteenObject = {
-				time: true,
-				key: '16:00',
-				label: '16:00',
-				value: '16:00',
-				appointment: []
-			};
-			this.sixteenWeek.push(this.sixteenObject);
-			this.seventeenObject = {
-				time: true,
-				key: '17:00',
-				label: '17:00',
-				value: '17:00',
-				appointment: []
-			};
-			this.seventeenWeek.push(this.seventeenObject);
-			this.eighteenObject = {
-				time: true,
-				key: '18:00',
-				label: '18:00',
-				value: '18:00',
-				appointment: []
-			};
-			this.eighteenWeek.push(this.eighteenObject);
-			this.nineteenObject = {
-				time: true,
-				key: '19:00',
-				label: '19:00',
-				value: '19:00',
-				appointment: []
-			};
-			this.nineteenWeek.push(this.nineteenObject);
-			this.twentyObject = {
-				time: true,
-				key: '20:00',
-				label: '20:00',
-				value: '20:00',
-				appointment: []
-			};
-			this.twentyWeek.push(this.twentyObject);
-			this.twentyoneObject = {
-				time: true,
-				key: '21:00',
-				label: '21:00',
-				value: '21:00',
-				appointment: []
-			};
-			this.twentyoneWeek.push(this.twentyoneObject);
-			this.twentytwoObject = {
-				time: true,
-				key: '22:00',
-				label: '22:00',
-				value: '22:00',
-				appointment: []
-			};
-			this.twentytwoWeek.push(this.twentytwoObject);
-			this.twentythreeObject = {
-				time: true,
-				key: '23:00',
-				label: '23:00',
-				value: '23:00',
-				appointment: []
-			};
-			this.twentythreeWeek.push(this.twentythreeObject);
-			this.twentyfourObject = {
-				time: true,
-				key: '24:00',
-				label: '24:00',
-				value: '24:00',
-				appointment: []
-			};
-			this.twentyfourWeek.push(this.twentyfourObject);
-			this.emptyObject = {
-				time: false,
-				key: '',
-				label: '',
-				value: '',
-				appointment: [],
-			};
-			this.queryAppointmentsWeek = {
-				selector: {
-					doctype: 'appointment',
-					date: {
-						$gte: '20-11-2017',
-						$lte: '26-11-2017',
-					},
-					employee_id: this.state.employeeWeekSelected.value
-				},
-				fields: []
-			};
-			this.appointmentslistweek = await DBCompanyConnection.find(this.queryAppointmentsWeek);
-			console.log('this.appointmentslistweek');
-			console.log(this.appointmentslistweek);
-			if (this.appointmentslistweek.docs.length > 0) {
-				for (let a = 0; a < this.appointmentslistweek.docs.length; a += 1) {
-					this.queryContacts = {
-						'selector': {
-							'doctype': 'contact',
-							'_id': this.appointmentslistweek.docs[a].contact_id,
+		if (!_.isEmpty(this.state.weekdatefrom)) {
+			if (!_.isEmpty(this.state.employeeWeekSelected)) {
+				this.headerWeeklyView = [];
+				const employeeSelectedHeaderWeeklyView = {
+					day: false,
+					key: 'employeeWeeklyView',
+					value: this.state.employeeWeekSelected.value,
+					label: '(Time)'
+				};
+				this.headerWeeklyView.push(employeeSelectedHeaderWeeklyView);
+				const mondayDD = this.state.weekdatefrom.substring(0, 2);;
+				const labelMonday = 'Mon'+' '+mondayDD;
+				const mondayHeaderWeeklyView = {
+					day: true,
+					key: 'monday',
+					value: this.state.weekdatefrom,
+					label: labelMonday
+				};
+				if (this.schedule.monday === true) {
+					this.headerWeeklyView.push(mondayHeaderWeeklyView);
+				}
+				const tuesday = moment(this.state.mondayOfWeek).add(1, 'days').format('DD-MM-YYYY');
+				const tuesdayDD = tuesday.substring(0, 2);;
+				const labelTuesday = 'Tue'+' '+tuesdayDD;
+				const tuesdayHeaderWeeklyView = {
+					day: true,
+					key: 'tuesday',
+					value: tuesday,
+					label: labelTuesday
+				};
+				if (this.schedule.tuesday === true) {
+					this.headerWeeklyView.push(tuesdayHeaderWeeklyView);
+				}
+				const wednesday = moment(this.state.mondayOfWeek).add(2, 'days').format('DD-MM-YYYY');
+				const wednesdayDD = wednesday.substring(0, 2);;
+				const labelWednesday = 'Wed'+' '+wednesdayDD;
+				const wednesdayHeaderWeeklyView = {
+					day: true,
+					key: 'wednesday',
+					value: wednesday,
+					label: labelWednesday
+				};
+				if (this.schedule.wednesday === true) {
+					this.headerWeeklyView.push(wednesdayHeaderWeeklyView);
+				}
+				const thursday = moment(this.state.mondayOfWeek).add(3, 'days').format('DD-MM-YYYY');
+				const thursdayDD = thursday.substring(0, 2);;
+				const labelThursday = 'Thu'+' '+thursdayDD;
+				const thursdayHeaderWeeklyView = {
+					day: true,
+					key: 'thursday',
+					value: thursday,
+					label: labelThursday
+				};
+				if (this.schedule.thursday === true) {
+					this.headerWeeklyView.push(thursdayHeaderWeeklyView);
+				}
+				const friday = moment(this.state.mondayOfWeek).add(4, 'days').format('DD-MM-YYYY');
+				const fridayDD = friday.substring(0, 2);;
+				const labelFriday = 'Fri'+' '+fridayDD;
+				const fridayHeaderWeeklyView = {
+					day: true,
+					key: 'friday',
+					value: friday,
+					label: labelFriday
+				};
+				if (this.schedule.friday === true) {
+					this.headerWeeklyView.push(fridayHeaderWeeklyView);
+				}
+				const saturday = moment(this.state.mondayOfWeek).add(5, 'days').format('DD-MM-YYYY');
+				const saturdayDD = saturday.substring(0, 2);;
+				const labelSaturday = 'Sat'+' '+saturdayDD;
+				const saturdayHeaderWeeklyView = {
+					day: true,
+					key: 'saturday',
+					value: saturday,
+					label: labelSaturday
+				};
+				if (this.schedule.saturday === true) {
+					this.headerWeeklyView.push(saturdayHeaderWeeklyView);
+				}
+				const sunday = moment(this.state.mondayOfWeek).add(6, 'days').format('DD-MM-YYYY');
+				const sundayDD = sunday.substring(0, 2);;
+				const labelSunday = 'Sun'+' '+sundayDD;
+				const sundayHeaderWeeklyView = {
+					day: true,
+					key: 'sunday',
+					value: sunday,
+					label: labelSunday
+				};
+				if (this.schedule.sunday === true) {
+					this.headerWeeklyView.push(sundayHeaderWeeklyView);
+				}
+				let indexHour = 0;
+				this.hoursList = [
+					{ key: indexHour++, label: '01', value: '01' },
+					{ key: indexHour++, label: '02', value: '02' },
+					{ key: indexHour++, label: '03', value: '03' },
+					{ key: indexHour++, label: '04', value: '04' },
+					{ key: indexHour++, label: '05', value: '05' },
+					{ key: indexHour++, label: '06', value: '06' },
+					{ key: indexHour++, label: '07', value: '07' },
+					{ key: indexHour++, label: '08', value: '08' },
+					{ key: indexHour++, label: '09', value: '09' },
+					{ key: indexHour++, label: '10', value: '10' },
+					{ key: indexHour++, label: '11', value: '11' },
+					{ key: indexHour++, label: '12', value: '12' },
+					{ key: indexHour++, label: '13', value: '13' },
+					{ key: indexHour++, label: '14', value: '14' },
+					{ key: indexHour++, label: '15', value: '15' },
+					{ key: indexHour++, label: '16', value: '16' },
+					{ key: indexHour++, label: '17', value: '17' },
+					{ key: indexHour++, label: '18', value: '18' },
+					{ key: indexHour++, label: '19', value: '19' },
+					{ key: indexHour++, label: '20', value: '20' },
+					{ key: indexHour++, label: '21', value: '21' },
+					{ key: indexHour++, label: '22', value: '22' },
+					{ key: indexHour++, label: '23', value: '23' },
+					{ key: indexHour++, label: '24', value: '24' },
+				];
+				let indexMinute = 0;
+				this.minutesList = [
+					{ key: indexMinute++, label: '00', value: '00' },
+					{ key: indexMinute++, label: '01', value: '01' },
+					{ key: indexMinute++, label: '02', value: '02' },
+					{ key: indexMinute++, label: '03', value: '03' },
+					{ key: indexMinute++, label: '04', value: '04' },
+					{ key: indexMinute++, label: '05', value: '05' },
+					{ key: indexMinute++, label: '06', value: '06' },
+					{ key: indexMinute++, label: '07', value: '07' },
+					{ key: indexMinute++, label: '08', value: '08' },
+					{ key: indexMinute++, label: '09', value: '09' },
+					{ key: indexMinute++, label: '10', value: '10' },
+					{ key: indexMinute++, label: '11', value: '11' },
+					{ key: indexMinute++, label: '12', value: '12' },
+					{ key: indexMinute++, label: '13', value: '13' },
+					{ key: indexMinute++, label: '14', value: '14' },
+					{ key: indexMinute++, label: '15', value: '15' },
+					{ key: indexMinute++, label: '16', value: '16' },
+					{ key: indexMinute++, label: '17', value: '17' },
+					{ key: indexMinute++, label: '18', value: '18' },
+					{ key: indexMinute++, label: '19', value: '19' },
+					{ key: indexMinute++, label: '20', value: '20' },
+					{ key: indexMinute++, label: '21', value: '21' },
+					{ key: indexMinute++, label: '22', value: '22' },
+					{ key: indexMinute++, label: '23', value: '23' },
+					{ key: indexMinute++, label: '24', value: '24' },
+					{ key: indexMinute++, label: '25', value: '25' },
+					{ key: indexMinute++, label: '26', value: '26' },
+					{ key: indexMinute++, label: '27', value: '27' },
+					{ key: indexMinute++, label: '28', value: '28' },
+					{ key: indexMinute++, label: '29', value: '29' },
+					{ key: indexMinute++, label: '30', value: '30' },
+					{ key: indexMinute++, label: '31', value: '31' },
+					{ key: indexMinute++, label: '32', value: '32' },
+					{ key: indexMinute++, label: '33', value: '33' },
+					{ key: indexMinute++, label: '34', value: '34' },
+					{ key: indexMinute++, label: '35', value: '35' },
+					{ key: indexMinute++, label: '36', value: '36' },
+					{ key: indexMinute++, label: '37', value: '37' },
+					{ key: indexMinute++, label: '38', value: '38' },
+					{ key: indexMinute++, label: '39', value: '39' },
+					{ key: indexMinute++, label: '40', value: '40' },
+					{ key: indexMinute++, label: '41', value: '41' },
+					{ key: indexMinute++, label: '42', value: '42' },
+					{ key: indexMinute++, label: '43', value: '43' },
+					{ key: indexMinute++, label: '44', value: '44' },
+					{ key: indexMinute++, label: '45', value: '45' },
+					{ key: indexMinute++, label: '46', value: '46' },
+					{ key: indexMinute++, label: '47', value: '47' },
+					{ key: indexMinute++, label: '48', value: '48' },
+					{ key: indexMinute++, label: '49', value: '49' },
+					{ key: indexMinute++, label: '50', value: '50' },
+					{ key: indexMinute++, label: '51', value: '51' },
+					{ key: indexMinute++, label: '52', value: '52' },
+					{ key: indexMinute++, label: '53', value: '53' },
+					{ key: indexMinute++, label: '54', value: '54' },
+					{ key: indexMinute++, label: '55', value: '55' },
+					{ key: indexMinute++, label: '56', value: '56' },
+					{ key: indexMinute++, label: '57', value: '57' },
+					{ key: indexMinute++, label: '58', value: '58' },
+					{ key: indexMinute++, label: '59', value: '59' },
+				];
+				this.oneObject = {
+					time: true,
+					key: '01:00',
+					label: '01:00',
+					value: '01:00',
+					appointment: []
+				};
+				this.oneWeek.push(this.oneObject);
+				this.twoObject = {
+					time: true,
+					key: '02:00',
+					label: '02:00',
+					value: '02:00',
+					appointment: []
+				};
+				this.twoWeek.push(this.twoObject);
+				this.threeObject = {
+					time: true,
+					key: '03:00',
+					label: '03:00',
+					value: '03:00',
+					appointment: []
+				};
+				this.threeWeek.push(this.threeObject);
+				this.fourObject = {
+					time: true,
+					key: '04:00',
+					label: '04:00',
+					value: '04:00',
+					appointment: []
+				};
+				this.fourWeek.push(this.fourObject);
+				this.fiveObject = {
+					time: true,
+					key: '05:00',
+					label: '05:00',
+					value: '05:00',
+					appointment: []
+				};
+				this.fiveWeek.push(this.fiveObject);
+				this.sixObject = {
+					time: true,
+					key: '06:00',
+					label: '06:00',
+					value: '06:00',
+					appointment: []
+				};
+				this.sixWeek.push(this.sixObject);			
+				this.sevenObject = {
+					time: true,
+					key: '07:00',
+					label: '07:00',
+					value: '07:00',
+					appointment: []
+				};
+				this.sevenWeek.push(this.sevenObject);
+				this.eightObject = {
+					time: true,
+					key: '08:00',
+					label: '08:00',
+					value: '08:00',
+					appointment: []
+				};
+				this.eightWeek.push(this.eightObject);
+				this.nineObject = {
+					time: true,
+					key: '09:00',
+					label: '09:00',
+					value: '09:00',
+					appointment: []
+				};
+				this.nineWeek.push(this.nineObject);
+				this.tenObject = {
+					time: true,
+					key: '10:00',
+					label: '10:00',
+					value: '10:00',
+					appointment: []
+				};
+				this.tenWeek.push(this.tenObject);
+				this.elevenObject = {
+					time: true,
+					key: '11:00',
+					label: '11:00',
+					value: '11:00',
+					appointment: []
+				};
+				this.elevenWeek.push(this.elevenObject);
+				this.twelveObject = {
+					time: true,
+					key: '12:00',
+					label: '12:00',
+					value: '12:00',
+					appointment: []
+				};
+				this.twelveWeek.push(this.twelveObject);
+				this.thirteenObject = {
+					time: true,
+					key: '13:00',
+					label: '13:00',
+					value: '13:00',
+					appointment: []
+				};
+				this.thirteenWeek.push(this.thirteenObject);
+				this.fourteenObject = {
+					time: true,
+					key: '14:00',
+					label: '14:00',
+					value: '14:00',
+					appointment: []
+				};
+				this.fourteenWeek.push(this.fourteenObject);
+				this.fiveteenObject = {
+					time: true,
+					key: '15:00',
+					label: '15:00',
+					value: '15:00',
+					appointment: []
+				};
+				this.fiveteenWeek.push(this.fiveteenObject);
+				this.sixteenObject = {
+					time: true,
+					key: '16:00',
+					label: '16:00',
+					value: '16:00',
+					appointment: []
+				};
+				this.sixteenWeek.push(this.sixteenObject);
+				this.seventeenObject = {
+					time: true,
+					key: '17:00',
+					label: '17:00',
+					value: '17:00',
+					appointment: []
+				};
+				this.seventeenWeek.push(this.seventeenObject);
+				this.eighteenObject = {
+					time: true,
+					key: '18:00',
+					label: '18:00',
+					value: '18:00',
+					appointment: []
+				};
+				this.eighteenWeek.push(this.eighteenObject);
+				this.nineteenObject = {
+					time: true,
+					key: '19:00',
+					label: '19:00',
+					value: '19:00',
+					appointment: []
+				};
+				this.nineteenWeek.push(this.nineteenObject);
+				this.twentyObject = {
+					time: true,
+					key: '20:00',
+					label: '20:00',
+					value: '20:00',
+					appointment: []
+				};
+				this.twentyWeek.push(this.twentyObject);
+				this.twentyoneObject = {
+					time: true,
+					key: '21:00',
+					label: '21:00',
+					value: '21:00',
+					appointment: []
+				};
+				this.twentyoneWeek.push(this.twentyoneObject);
+				this.twentytwoObject = {
+					time: true,
+					key: '22:00',
+					label: '22:00',
+					value: '22:00',
+					appointment: []
+				};
+				this.twentytwoWeek.push(this.twentytwoObject);
+				this.twentythreeObject = {
+					time: true,
+					key: '23:00',
+					label: '23:00',
+					value: '23:00',
+					appointment: []
+				};
+				this.twentythreeWeek.push(this.twentythreeObject);
+				this.twentyfourObject = {
+					time: true,
+					key: '24:00',
+					label: '24:00',
+					value: '24:00',
+					appointment: []
+				};
+				this.twentyfourWeek.push(this.twentyfourObject);
+				this.emptyObject = {
+					time: false,
+					key: '',
+					label: '',
+					value: '',
+					appointment: [],
+				};
+				this.queryAppointmentsWeek = {
+					selector: {
+						doctype: 'appointment',
+						date: {
+							$gte: this.state.weekdatefrom,
+							$lte: this.state.weekdateto,
 						},
-						'fields': []
-					};
-					const contactinfo = await DBCompanyConnection.find(this.queryContacts);
-					if (contactinfo.docs.length > 0) {
-						this.appointmentslistweek.docs[a].contact_name = contactinfo.docs[0].givenName + ' ' + contactinfo.docs[0].familyName;
-					}
-					const queryEmployee = { selector: { doctype: 'user', _id: this.appointmentslistweek.docs[a].employee_id }, };
-					const employeeInfo = await DBCompanyConnection.find(queryEmployee);
-					if (employeeInfo.docs.length > 0) {
-						if (_.isEmpty(this.appointmentslistweek.docs[a].employee_alias)) {
-							this.appointmentslistweek.docs[a].employee_alias = employeeInfo.docs[0].alias;
-							if (this.appointmentslistweek.docs[a].alias === '') {
-								this.appointmentslistweek.docs[a].employee_alias = employeeInfo.docs[0].name;
-								if (this.appointmentslistweek.docs[a].name === '') {
-									this.appointmentslistweek.docs[a].employee_alias = employeeInfo.docs[0].email;
+						employee_id: this.state.employeeWeekSelected.value
+					},
+					fields: []
+				};
+				this.appointmentslistweek = await DBCompanyConnection.find(this.queryAppointmentsWeek);
+				if (this.appointmentslistweek.docs.length > 0) {
+					for (let a = 0; a < this.appointmentslistweek.docs.length; a += 1) {
+						this.queryContacts = {
+							'selector': {
+								'doctype': 'contact',
+								'_id': this.appointmentslistweek.docs[a].contact_id,
+							},
+							'fields': []
+						};
+						const contactinfo = await DBCompanyConnection.find(this.queryContacts);
+						if (contactinfo.docs.length > 0) {
+							this.appointmentslistweek.docs[a].contact_name = contactinfo.docs[0].givenName + ' ' + contactinfo.docs[0].familyName;
+						}
+						const queryEmployee = { selector: { doctype: 'user', _id: this.appointmentslistweek.docs[a].employee_id }, };
+						const employeeInfo = await DBCompanyConnection.find(queryEmployee);
+						if (employeeInfo.docs.length > 0) {
+							if (_.isEmpty(this.appointmentslistweek.docs[a].employee_alias)) {
+								this.appointmentslistweek.docs[a].employee_alias = employeeInfo.docs[0].alias;
+								if (this.appointmentslistweek.docs[a].alias === '') {
+									this.appointmentslistweek.docs[a].employee_alias = employeeInfo.docs[0].name;
+									if (this.appointmentslistweek.docs[a].name === '') {
+										this.appointmentslistweek.docs[a].employee_alias = employeeInfo.docs[0].email;
+									}
 								}
 							}
 						}
 					}
-				}
-				if (!_.isEmpty(this.state.employeeWeekSelected)) {
-					for (let d = 0; d < this.headerWeeklyView.length; d += 1) {
-						console.log('this.headerWeeklyView');
-						console.log(this.headerWeeklyView[d]);
-						if (this.headerWeeklyView[d].day !== false) {
-							this.appointmentsone = _.filter(this.appointmentslistweek.docs, { hour: '01', date: this.headerWeeklyView[d].value });
-							if (this.appointmentsone.length > 0) {
-								this.oneObject = {};
-								this.oneObject.time = false,
-								this.oneObject.key = this.state.employeeWeekSelected.key;
-								this.oneObject.label = this.appointmentsone[0].contact_name;
-								this.oneObject.value = this.appointmentsone[0]._id;
-								this.oneObject.appointment = [];
-								this.oneObject.appointment.push(this.appointmentsone[0]);
-								this.oneWeek.push(this.oneObject);
-							} else {
+					if (!_.isEmpty(this.state.employeeWeekSelected)) {
+						for (let d = 0; d < this.headerWeeklyView.length; d += 1) {
+							if (this.headerWeeklyView[d].day !== false) {
+								this.appointmentsone = _.filter(this.appointmentslistweek.docs, { hour: '01', date: this.headerWeeklyView[d].value });
+								if (this.appointmentsone.length > 0) {
+									this.oneObject = {};
+									this.oneObject.time = false,
+									this.oneObject.key = this.state.employeeWeekSelected.key;
+									this.oneObject.label = this.appointmentsone[0].contact_name;
+									this.oneObject.value = this.appointmentsone[0]._id;
+									this.oneObject.appointment = [];
+									this.oneObject.appointment.push(this.appointmentsone[0]);
+									this.oneWeek.push(this.oneObject);
+								} else {
+									this.oneWeek.push(this.emptyObject);
+								}
+								this.appointmentstwo = _.filter(this.appointmentslistweek.docs, { hour: '02', date: this.headerWeeklyView[d].value });
+								if (this.appointmentstwo.length > 0) {
+									this.twoObject = {};
+									this.twoObject.time = false,
+									this.twoObject.key = this.state.employeeWeekSelected.key;
+									this.twoObject.label = this.appointmentstwo[0].contact_name;
+									this.twoObject.value = this.appointmentstwo[0]._id;
+									this.twoObject.appointment = [];
+									this.twoObject.appointment.push(this.appointmentstwo[0]);
+									this.twoWeek.push(this.twoObject);
+								} else {
+									this.twoWeek.push(this.emptyObject);
+								}
+								this.appointmentsthree = _.filter(this.appointmentslistweek.docs, { hour: '03', date: this.headerWeeklyView[d].value });
+								if (this.appointmentsthree.length > 0) {
+									this.threeObject = {};
+									this.threeObject.time = false,
+									this.threeObject.key = this.state.employeeWeekSelected.key;
+									this.threeObject.label = this.appointmentsthree[0].contact_name;
+									this.threeObject.value = this.appointmentsthree[0]._id;
+									this.threeObject.appointment = [];
+									this.threeObject.appointment.push(this.appointmentsthree[0]);
+									this.threeWeek.push(this.threeObject);
+								} else {
+									this.threeWeek.push(this.emptyObject);
+								}
+								this.appointmentsfour = _.filter(this.appointmentslistweek.docs, { hour: '04', date: this.headerWeeklyView[d].value });
+								if (this.appointmentsfour.length > 0) {
+									this.fourObject = {};
+									this.fourObject.time = false,
+									this.fourObject.key = this.state.employeeWeekSelected.key;
+									this.fourObject.label = this.appointmentsfour[0].contact_name;
+									this.fourObject.value = this.appointmentsfour[0]._id;
+									this.fourObject.appointment = [];
+									this.fourObject.appointment.push(this.appointmentsfour[0]);
+									this.fourWeek.push(this.fourObject);
+								} else {
+									this.fourWeek.push(this.emptyObject);
+								}
+								this.appointmentsfive = _.filter(this.appointmentslistweek.docs, { hour: '05', date: this.headerWeeklyView[d].value });
+								if (this.appointmentsfive.length > 0) {
+									this.fiveObject = {};
+									this.fiveObject.time = false,
+									this.fiveObject.key = this.state.employeeWeekSelected.key;
+									this.fiveObject.label = this.appointmentsfive[0].contact_name;
+									this.fiveObject.value = this.appointmentsfive[0]._id;
+									this.fiveObject.appointment = [];
+									this.fiveObject.appointment.push(this.appointmentsfive[0]);
+									this.fiveWeek.push(this.fiveObject);
+								} else {
+									this.fiveWeek.push(this.emptyObject);
+								}
+								this.appointmentssix = _.filter(this.appointmentslistweek.docs, { hour: '06', date: this.headerWeeklyView[d].value });
+								if (this.appointmentssix.length > 0) {
+									this.sixObject = {};
+									this.sixObject.time = false,
+									this.sixObject.key = this.state.employeeWeekSelected.key;
+									this.sixObject.label = this.appointmentssix[0].contact_name;
+									this.sixObject.value = this.appointmentssix[0]._id;
+									this.sixObject.appointment = [];
+									this.sixObject.appointment.push(this.appointmentssix[0]);
+									this.sixWeek.push(this.sixObject);
+								} else {
+									this.sixWeek.push(this.emptyObject);
+								}
+								this.appointmentsseven = _.filter(this.appointmentslistweek.docs, { hour: '07', date: this.headerWeeklyView[d].value });
+								if (this.appointmentsseven.length > 0) {
+									this.sevenObject = {};
+									this.sevenObject.time = false,
+									this.sevenObject.key = this.state.employeeWeekSelected.key;
+									this.sevenObject.label = this.appointmentsseven[0].contact_name;
+									this.sevenObject.value = this.appointmentsseven[0]._id;
+									this.sevenObject.appointment = [];
+									this.sevenObject.appointment.push(this.appointmentsseven[0]);
+									this.sevenWeek.push(this.sevenObject);
+								} else {
+									this.sevenWeek.push(this.emptyObject);
+								}
+								this.appointmentseight = _.filter(this.appointmentslistweek.docs, { hour: '08', date: this.headerWeeklyView[d].value });
+								if (this.appointmentseight.length > 0) {
+									this.eightObject = {};
+									this.eightObject.time = false,
+									this.eightObject.key = this.state.employeeWeekSelected.key;
+									this.eightObject.label = this.appointmentseight[0].contact_name;
+									this.eightObject.value = this.appointmentseight[0]._id;
+									this.eightObject.appointment = [];
+									this.eightObject.appointment.push(this.appointmentseight[0]);
+									this.eightWeek.push(this.eightObject);
+								} else {
+									this.eightWeek.push(this.emptyObject);
+								}
+								this.appointmentsnine = _.filter(this.appointmentslistweek.docs, { hour: '09', date: this.headerWeeklyView[d].value });
+								if (this.appointmentsnine.length > 0) {
+									this.nineObject = {};
+									this.nineObject.time = false,
+									this.nineObject.key = this.state.employeeWeekSelected.key;
+									this.nineObject.label = this.appointmentsnine[0].contact_name;
+									this.nineObject.value = this.appointmentsnine[0]._id;
+									this.nineObject.appointment = [];
+									this.nineObject.appointment.push(this.appointmentsnine[0]);
+									this.nineWeek.push(this.nineObject);
+								} else {
+									this.nineWeek.push(this.emptyObject);
+								}
+								this.appointmentsten = _.filter(this.appointmentslistweek.docs, { hour: '10', date: this.headerWeeklyView[d].value });
+								if (this.appointmentsten.length > 0) {
+									this.tenObject = {};
+									this.tenObject.time = false,
+									this.tenObject.key = this.state.employeeWeekSelected.key;
+									this.tenObject.label = this.appointmentsten[0].contact_name;
+									this.tenObject.value = this.appointmentsten[0]._id;
+									this.tenObject.appointment = [];
+									this.tenObject.appointment.push(this.appointmentsten[0]);
+									this.tenWeek.push(this.tenObject);
+								} else {
+									this.tenWeek.push(this.emptyObject);
+								}
+								this.appointmentseleven = _.filter(this.appointmentslistweek.docs, { hour: '11', date: this.headerWeeklyView[d].value });
+								if (this.appointmentseleven.length > 0) {
+									this.elevenObject = {};
+									this.elevenObject.time = false,
+									this.elevenObject.key = this.state.employeeWeekSelected.key;
+									this.elevenObject.label = this.appointmentseleven[0].contact_name;
+									this.elevenObject.value = this.appointmentseleven[0]._id;
+									this.elevenObject.appointment = [];
+									this.elevenObject.appointment.push(this.appointmentseleven[0]);
+									this.elevenWeek.push(this.elevenObject);
+								} else {
+									this.elevenWeek.push(this.emptyObject);
+								}
+								this.appointmentstwelve = _.filter(this.appointmentslistweek.docs, { hour: '12', date: this.headerWeeklyView[d].value });
+								if (this.appointmentstwelve.length > 0) {
+									this.twelveObject = {};
+									this.twelveObject.time = false,
+									this.twelveObject.key = this.state.employeeWeekSelected.key;
+									this.twelveObject.label = this.appointmentstwelve[0].contact_name;
+									this.twelveObject.value = this.appointmentstwelve[0]._id;
+									this.twelveObject.appointment = [];
+									this.twelveObject.appointment.push(this.appointmentstwelve[0]);
+									this.twelveWeek.push(this.twelveObject);
+								} else {
+									this.twelveWeek.push(this.emptyObject);
+								}
+								this.appointmentsthirteen = _.filter(this.appointmentslistweek.docs, { hour: '13', date: this.headerWeeklyView[d].value });
+								if (this.appointmentsthirteen.length > 0) {
+									this.thirteenObject = {};
+									this.thirteenObject.time = false,
+									this.thirteenObject.key = this.state.employeeWeekSelected.key;
+									this.thirteenObject.label = this.appointmentsthirteen[0].contact_name;
+									this.thirteenObject.value = this.appointmentsthirteen[0]._id;
+									this.thirteenObject.appointment = [];
+									this.thirteenObject.appointment.push(this.appointmentsthirteen[0]);
+									this.thirteenWeek.push(this.thirteenObject);
+								} else {
+									this.thirteenWeek.push(this.emptyObject);
+								}
+								this.appointmentsfourteen = _.filter(this.appointmentslistweek.docs, { hour: '14', date: this.headerWeeklyView[d].value });
+								if (this.appointmentsfourteen.length > 0) {
+									this.fourteenObject = {};
+									this.fourteenObject.time = false,
+									this.fourteenObject.key = this.state.employeeWeekSelected.key;
+									this.fourteenObject.label = this.appointmentsfourteen[0].contact_name;
+									this.fourteenObject.value = this.appointmentsfourteen[0]._id;
+									this.fourteenObject.appointment = [];
+									this.fourteenObject.appointment.push(this.appointmentsfourteen[0]);
+									this.fourteenWeek.push(this.fourteenObject);
+								} else {
+									this.fourteenWeek.push(this.emptyObject);
+								}
+								this.appointmentsfiveteen = _.filter(this.appointmentslistweek.docs, { hour: '15', date: this.headerWeeklyView[d].value });
+								if (this.appointmentsfiveteen.length > 0) {
+									this.fiveteenObject = {};
+									this.fiveteenObject.time = false,
+									this.fiveteenObject.key = this.state.employeeWeekSelected.key;
+									this.fiveteenObject.label = this.appointmentsfiveteen[0].contact_name;
+									this.fiveteenObject.value = this.appointmentsfiveteen[0]._id;
+									this.fiveteenObject.appointment = [];
+									this.fiveteenObject.appointment.push(this.appointmentsfiveteen[0]);
+									this.fiveteenWeek.push(this.fiveteenObject);
+								} else {
+									this.fiveteenWeek.push(this.emptyObject);
+								}
+								this.appointmentssixteen = _.filter(this.appointmentslistweek.docs, { hour: '16', date: this.headerWeeklyView[d].value });
+								if (this.appointmentssixteen.length > 0) {
+									this.sixteenObject = {};
+									this.sixteenObject.time = false,
+									this.sixteenObject.key = this.state.employeeWeekSelected.key;
+									this.sixteenObject.label = this.appointmentssixteen[0].contact_name;
+									this.sixteenObject.value = this.appointmentssixteen[0]._id;
+									this.sixteenObject.appointment = [];
+									this.sixteenObject.appointment.push(this.appointmentssixteen[0]);
+									this.sixteenWeek.push(this.sixteenObject);
+								} else {
+									this.sixteenWeek.push(this.emptyObject);
+								}
+								this.appointmentsseventeen = _.filter(this.appointmentslistweek.docs, { hour: '17', date: this.headerWeeklyView[d].value });
+								if (this.appointmentsseventeen.length > 0) {
+									this.seventeenObject = {};
+									this.seventeenObject.time = false,
+									this.seventeenObject.key = this.state.employeeWeekSelected.key;
+									this.seventeenObject.label = this.appointmentsseventeen[0].contact_name;
+									this.seventeenObject.value = this.appointmentsseventeen[0]._id;
+									this.seventeenObject.appointment = [];
+									this.seventeenObject.appointment.push(this.appointmentsseventeen[0]);
+									this.seventeenWeek.push(this.seventeenObject);
+								} else {
+									this.seventeenWeek.push(this.emptyObject);
+								}
+								this.appointmentseighteen = _.filter(this.appointmentslistweek.docs, { hour: '18', date: this.headerWeeklyView[d].value });
+								if (this.appointmentseighteen.length > 0) {
+									this.eighteenObject = {};
+									this.eighteenObject.time = false,
+									this.eighteenObject.key = this.state.employeeWeekSelected.key;
+									this.eighteenObject.label = this.appointmentseighteen[0].contact_name;
+									this.eighteenObject.value = this.appointmentseighteen[0]._id;
+									this.eighteenObject.appointment = [];
+									this.eighteenObject.appointment.push(this.appointmentseighteen[0]);
+									this.eighteenWeek.push(this.eighteenObject);
+								} else {
+									this.eighteenWeek.push(this.emptyObject);
+								}
+								this.appointmentsnineteen = _.filter(this.appointmentslistweek.docs, { hour: '19', date: this.headerWeeklyView[d].value });
+								if (this.appointmentsnineteen.length > 0) {
+									this.nineteenObject = {};
+									this.nineteenObject.time = false,
+									this.nineteenObject.key = this.state.employeeWeekSelected.key;
+									this.nineteenObject.label = this.appointmentsnineteen[0].contact_name;
+									this.nineteenObject.value = this.appointmentsnineteen[0]._id;
+									this.nineteenObject.appointment = [];
+									this.nineteenObject.appointment.push(this.appointmentsnineteen[0]);
+									this.nineteenWeek.push(this.nineteenObject);
+								} else {
+									this.nineteenWeek.push(this.emptyObject);
+								}
+								this.appointmentstwenty = _.filter(this.appointmentslistweek.docs, { hour: '20', date: this.headerWeeklyView[d].value });
+								if (this.appointmentstwenty.length > 0) {
+									this.twentyObject = {};
+									this.twentyObject.time = false,
+									this.twentyObject.key = this.state.employeeWeekSelected.key;
+									this.twentyObject.label = this.appointmentstwenty[0].contact_name;
+									this.twentyObject.value = this.appointmentstwenty[0]._id;
+									this.twentyObject.appointment = [];
+									this.twentyObject.appointment.push(this.appointmentstwenty[0]);
+									this.twentyWeek.push(this.twentyObject);
+								} else {
+									this.twentyWeek.push(this.emptyObject);
+								}
+								this.appointmentstwentyone = _.filter(this.appointmentslistweek.docs, { hour: '21', date: this.headerWeeklyView[d].value });
+								if (this.appointmentstwentyone.length > 0) {
+									this.twentyoneObject = {};
+									this.twentyoneObject.time = false,
+									this.twentyoneObject.key = this.state.employeeWeekSelected.key;
+									this.twentyoneObject.label = this.appointmentstwentyone[0].contact_name;
+									this.twentyoneObject.value = this.appointmentstwentyone[0]._id;
+									this.twentyoneObject.appointment = [];
+									this.twentyoneObject.appointment.push(this.appointmentstwentyone[0]);
+									this.twentyoneWeek.push(this.twentyoneObject);
+								} else {
+									this.twentyoneWeek.push(this.emptyObject);
+								}
+								this.appointmentstwentytwo = _.filter(this.appointmentslistweek.docs, { hour: '22', date: this.headerWeeklyView[d].value });
+								if (this.appointmentstwentytwo.length > 0) {
+									this.twentytwoObject = {};
+									this.twentytwoObject.time = false,
+									this.twentytwoObject.key = this.state.employeeWeekSelected.key;
+									this.twentytwoObject.label = this.appointmentstwentytwo[0].contact_name;
+									this.twentytwoObject.value = this.appointmentstwentytwo[0]._id;
+									this.twentytwoObject.appointment = [];
+									this.twentytwoObject.appointment.push(this.appointmentstwentytwo[0]);
+									this.twentytwoWeek.push(this.twentytwoObject);
+								} else {
+									this.twentytwoWeek.push(this.emptyObject);
+								}
+								this.appointmentstwentythree = _.filter(this.appointmentslistweek.docs, { hour: '23', date: this.headerWeeklyView[d].value });
+								if (this.appointmentstwentythree.length > 0) {
+									this.twentythreeObject = {};
+									this.twentythreeObject.time = false,
+									this.twentythreeObject.key = this.state.employeeWeekSelected.key;
+									this.twentythreeObject.label = this.appointmentstwentythree[0].contact_name;
+									this.twentythreeObject.value = this.appointmentstwentythree[0]._id;
+									this.twentythreeObject.appointment = [];
+									this.twentythreeObject.appointment.push(this.appointmentstwentythree[0]);
+									this.twentythreeWeek.push(this.twentythreeObject);
+								} else {
+									this.twentythreeWeek.push(this.emptyObject);
+								}
+								this.appointmentstwentyfour = _.filter(this.appointmentslistweek.docs, { hour: '24', date: this.headerWeeklyView[d].value });
+								if (this.appointmentstwentyfour.length > 0) {
+									this.twentyfourObject = {};
+									this.twentyfourObject.time = false,
+									this.twentyfourObject.key = this.state.employeeWeekSelected.key;
+									this.twentyfourObject.label = this.appointmentstwentyfour[0].contact_name;
+									this.twentyfourObject.value = this.appointmentstwentyfour[0]._id;
+									this.twentyfourObject.appointment = [];
+									this.twentyfourObject.appointment.push(this.appointmentstwentyfour[0]);
+									this.twentyfourWeek.push(this.twentyfourObject);
+								} else {
+									this.twentyfourWeek.push(this.emptyObject);
+								}
+							}
+						}
+					}
+					this.setState({ schedule: this.schedule, employeeWeekText: this.state.employeeWeekSelected.label, showspinner: false, employeeWeekSelectedCount: this.state.employeeWeekSelectedCount, employeeWeekSelected: this.state.employeeWeekSelected, contactsList: this.contactsList, employeesList: this.employeesList });
+				} else {
+					this.oneWeek = [];
+					this.twoWeek = [];
+					this.threeWeek = [];
+					this.fourWeek = [];
+					this.fiveWeek = [];
+					this.sixWeek = [];
+					this.sevenWeek = [];
+					this.eightWeek = [];
+					this.nineWeek = [];
+					this.tenWeek = [];
+					this.elevenWeek = [];
+					this.twelveWeek = [];
+					this.thirteenWeek = [];
+					this.fourteenWeek = [];
+					this.fiveteenWeek = [];
+					this.sixteenWeek = [];
+					this.seventeenWeek = [];
+					this.eighteenWeek = [];
+					this.nineteenWeek = [];
+					this.twentyWeek = [];
+					this.twentyoneWeek = [];
+					this.twentytwoWeek = [];
+					this.twentythreeWeek = [];
+					this.twentyfourWeek = [];
+					this.oneObject = {
+						time: true,
+						key: '01:00',
+						label: '01:00',
+						value: '01:00',
+						appointment: []
+					};
+					this.oneWeek.push(this.oneObject);
+					this.twoObject = {
+						time: true,
+						key: '02:00',
+						label: '02:00',
+						value: '02:00',
+						appointment: []
+					};
+					this.twoWeek.push(this.twoObject);
+					this.threeObject = {
+						time: true,
+						key: '03:00',
+						label: '03:00',
+						value: '03:00',
+						appointment: []
+					};
+					this.threeWeek.push(this.threeObject);
+					this.fourObject = {
+						time: true,
+						key: '04:00',
+						label: '04:00',
+						value: '04:00',
+						appointment: []
+					};
+					this.fourWeek.push(this.fourObject);
+					this.fiveObject = {
+						time: true,
+						key: '05:00',
+						label: '05:00',
+						value: '05:00',
+						appointment: []
+					};
+					this.fiveWeek.push(this.fiveObject);
+					this.sixObject = {
+						time: true,
+						key: '06:00',
+						label: '06:00',
+						value: '06:00',
+						appointment: []
+					};
+					this.sixWeek.push(this.sixObject);			
+					this.sevenObject = {
+						time: true,
+						key: '07:00',
+						label: '07:00',
+						value: '07:00',
+						appointment: []
+					};
+					this.sevenWeek.push(this.sevenObject);
+					this.eightObject = {
+						time: true,
+						key: '08:00',
+						label: '08:00',
+						value: '08:00',
+						appointment: []
+					};
+					this.eightWeek.push(this.eightObject);
+					this.nineObject = {
+						time: true,
+						key: '09:00',
+						label: '09:00',
+						value: '09:00',
+						appointment: []
+					};
+					this.nineWeek.push(this.nineObject);
+					this.tenObject = {
+						time: true,
+						key: '10:00',
+						label: '10:00',
+						value: '10:00',
+						appointment: []
+					};
+					this.tenWeek.push(this.tenObject);
+					this.elevenObject = {
+						time: true,
+						key: '11:00',
+						label: '11:00',
+						value: '11:00',
+						appointment: []
+					};
+					this.elevenWeek.push(this.elevenObject);
+					this.twelveObject = {
+						time: true,
+						key: '12:00',
+						label: '12:00',
+						value: '12:00',
+						appointment: []
+					};
+					this.twelveWeek.push(this.twelveObject);
+					this.thirteenObject = {
+						time: true,
+						key: '13:00',
+						label: '13:00',
+						value: '13:00',
+						appointment: []
+					};
+					this.thirteenWeek.push(this.thirteenObject);
+					this.fourteenObject = {
+						time: true,
+						key: '14:00',
+						label: '14:00',
+						value: '14:00',
+						appointment: []
+					};
+					this.fourteenWeek.push(this.fourteenObject);
+					this.fiveteenObject = {
+						time: true,
+						key: '15:00',
+						label: '15:00',
+						value: '15:00',
+						appointment: []
+					};
+					this.fiveteenWeek.push(this.fiveteenObject);
+					this.sixteenObject = {
+						time: true,
+						key: '16:00',
+						label: '16:00',
+						value: '16:00',
+						appointment: []
+					};
+					this.sixteenWeek.push(this.sixteenObject);
+					this.seventeenObject = {
+						time: true,
+						key: '17:00',
+						label: '17:00',
+						value: '17:00',
+						appointment: []
+					};
+					this.seventeenWeek.push(this.seventeenObject);
+					this.eighteenObject = {
+						time: true,
+						key: '18:00',
+						label: '18:00',
+						value: '18:00',
+						appointment: []
+					};
+					this.eighteenWeek.push(this.eighteenObject);
+					this.nineteenObject = {
+						time: true,
+						key: '19:00',
+						label: '19:00',
+						value: '19:00',
+						appointment: []
+					};
+					this.nineteenWeek.push(this.nineteenObject);
+					this.twentyObject = {
+						time: true,
+						key: '20:00',
+						label: '20:00',
+						value: '20:00',
+						appointment: []
+					};
+					this.twentyWeek.push(this.twentyObject);
+					this.twentyoneObject = {
+						time: true,
+						key: '21:00',
+						label: '21:00',
+						value: '21:00',
+						appointment: []
+					};
+					this.twentyoneWeek.push(this.twentyoneObject);
+					this.twentytwoObject = {
+						time: true,
+						key: '22:00',
+						label: '22:00',
+						value: '22:00',
+						appointment: []
+					};
+					this.twentytwoWeek.push(this.twentytwoObject);
+					this.twentythreeObject = {
+						time: true,
+						key: '23:00',
+						label: '23:00',
+						value: '23:00',
+						appointment: []
+					};
+					this.twentythreeWeek.push(this.twentythreeObject);
+					this.twentyfourObject = {
+						time: true,
+						key: '24:00',
+						label: '24:00',
+						value: '24:00',
+						appointment: []
+					};
+					this.twentyfourWeek.push(this.twentyfourObject);
+					this.emptyObject = {
+						time: false,
+						key: '',
+						label: '',
+						value: '',
+						appointment: [],
+					};
+					if (!_.isEmpty(this.state.employeeWeekSelected)) {
+						for (let d = 0; d < this.headerWeeklyView.length; d += 1) {
+							if (this.headerWeeklyView[d].day !== false) {
 								this.oneWeek.push(this.emptyObject);
-							}
-							this.appointmentstwo = _.filter(this.appointmentslistweek.docs, { hour: '02', date: this.headerWeeklyView[d].value });
-							if (this.appointmentstwo.length > 0) {
-								this.twoObject = {};
-								this.twoObject.time = false,
-								this.twoObject.key = this.state.employeeWeekSelected.key;
-								this.twoObject.label = this.appointmentstwo[0].contact_name;
-								this.twoObject.value = this.appointmentstwo[0]._id;
-								this.twoObject.appointment = [];
-								this.twoObject.appointment.push(this.appointmentstwo[0]);
-								this.twoWeek.push(this.twoObject);
-							} else {
 								this.twoWeek.push(this.emptyObject);
-							}
-							this.appointmentsthree = _.filter(this.appointmentslistweek.docs, { hour: '03', date: this.headerWeeklyView[d].value });
-							if (this.appointmentsthree.length > 0) {
-								this.threeObject = {};
-								this.threeObject.time = false,
-								this.threeObject.key = this.state.employeeWeekSelected.key;
-								this.threeObject.label = this.appointmentsthree[0].contact_name;
-								this.threeObject.value = this.appointmentsthree[0]._id;
-								this.threeObject.appointment = [];
-								this.threeObject.appointment.push(this.appointmentsthree[0]);
-								this.threeWeek.push(this.threeObject);
-							} else {
 								this.threeWeek.push(this.emptyObject);
-							}
-							this.appointmentsfour = _.filter(this.appointmentslistweek.docs, { hour: '04', date: this.headerWeeklyView[d].value });
-							if (this.appointmentsfour.length > 0) {
-								this.fourObject = {};
-								this.fourObject.time = false,
-								this.fourObject.key = this.state.employeeWeekSelected.key;
-								this.fourObject.label = this.appointmentsfour[0].contact_name;
-								this.fourObject.value = this.appointmentsfour[0]._id;
-								this.fourObject.appointment = [];
-								this.fourObject.appointment.push(this.appointmentsfour[0]);
-								this.fourWeek.push(this.fourObject);
-							} else {
 								this.fourWeek.push(this.emptyObject);
-							}
-							this.appointmentsfive = _.filter(this.appointmentslistweek.docs, { hour: '05', date: this.headerWeeklyView[d].value });
-							if (this.appointmentsfive.length > 0) {
-								this.fiveObject = {};
-								this.fiveObject.time = false,
-								this.fiveObject.key = this.state.employeeWeekSelected.key;
-								this.fiveObject.label = this.appointmentsfive[0].contact_name;
-								this.fiveObject.value = this.appointmentsfive[0]._id;
-								this.fiveObject.appointment = [];
-								this.fiveObject.appointment.push(this.appointmentsfive[0]);
-								this.fiveWeek.push(this.fiveObject);
-							} else {
 								this.fiveWeek.push(this.emptyObject);
-							}
-							this.appointmentssix = _.filter(this.appointmentslistweek.docs, { hour: '06', date: this.headerWeeklyView[d].value });
-							if (this.appointmentssix.length > 0) {
-								this.sixObject = {};
-								this.sixObject.time = false,
-								this.sixObject.key = this.state.employeeWeekSelected.key;
-								this.sixObject.label = this.appointmentssix[0].contact_name;
-								this.sixObject.value = this.appointmentssix[0]._id;
-								this.sixObject.appointment = [];
-								this.sixObject.appointment.push(this.appointmentssix[0]);
-								this.sixWeek.push(this.sixObject);
-							} else {
 								this.sixWeek.push(this.emptyObject);
-							}
-							this.appointmentsseven = _.filter(this.appointmentslistweek.docs, { hour: '07', date: this.headerWeeklyView[d].value });
-							if (this.appointmentsseven.length > 0) {
-								this.sevenObject = {};
-								this.sevenObject.time = false,
-								this.sevenObject.key = this.state.employeeWeekSelected.key;
-								this.sevenObject.label = this.appointmentsseven[0].contact_name;
-								this.sevenObject.value = this.appointmentsseven[0]._id;
-								this.sevenObject.appointment = [];
-								this.sevenObject.appointment.push(this.appointmentsseven[0]);
-								this.sevenWeek.push(this.sevenObject);
-							} else {
 								this.sevenWeek.push(this.emptyObject);
-							}
-							this.appointmentseight = _.filter(this.appointmentslistweek.docs, { hour: '08', date: this.headerWeeklyView[d].value });
-							if (this.appointmentseight.length > 0) {
-								this.eightObject = {};
-								this.eightObject.time = false,
-								this.eightObject.key = this.state.employeeWeekSelected.key;
-								this.eightObject.label = this.appointmentseight[0].contact_name;
-								this.eightObject.value = this.appointmentseight[0]._id;
-								this.eightObject.appointment = [];
-								this.eightObject.appointment.push(this.appointmentseight[0]);
-								this.eightWeek.push(this.eightObject);
-							} else {
 								this.eightWeek.push(this.emptyObject);
-							}
-							this.appointmentsnine = _.filter(this.appointmentslistweek.docs, { hour: '09', date: this.headerWeeklyView[d].value });
-							if (this.appointmentsnine.length > 0) {
-								this.nineObject = {};
-								this.nineObject.time = false,
-								this.nineObject.key = this.state.employeeWeekSelected.key;
-								this.nineObject.label = this.appointmentsnine[0].contact_name;
-								this.nineObject.value = this.appointmentsnine[0]._id;
-								this.nineObject.appointment = [];
-								this.nineObject.appointment.push(this.appointmentsnine[0]);
-								this.nineWeek.push(this.nineObject);
-							} else {
 								this.nineWeek.push(this.emptyObject);
-							}
-							this.appointmentsten = _.filter(this.appointmentslistweek.docs, { hour: '10', date: this.headerWeeklyView[d].value });
-							if (this.appointmentsten.length > 0) {
-								this.tenObject = {};
-								this.tenObject.time = false,
-								this.tenObject.key = this.state.employeeWeekSelected.key;
-								this.tenObject.label = this.appointmentsten[0].contact_name;
-								this.tenObject.value = this.appointmentsten[0]._id;
-								this.tenObject.appointment = [];
-								this.tenObject.appointment.push(this.appointmentsten[0]);
-								this.tenWeek.push(this.tenObject);
-							} else {
 								this.tenWeek.push(this.emptyObject);
-							}
-							this.appointmentseleven = _.filter(this.appointmentslistweek.docs, { hour: '11', date: this.headerWeeklyView[d].value });
-							if (this.appointmentseleven.length > 0) {
-								this.elevenObject = {};
-								this.elevenObject.time = false,
-								this.elevenObject.key = this.state.employeeWeekSelected.key;
-								this.elevenObject.label = this.appointmentseleven[0].contact_name;
-								this.elevenObject.value = this.appointmentseleven[0]._id;
-								this.elevenObject.appointment = [];
-								this.elevenObject.appointment.push(this.appointmentseleven[0]);
-								this.elevenWeek.push(this.elevenObject);
-							} else {
 								this.elevenWeek.push(this.emptyObject);
-							}
-							this.appointmentstwelve = _.filter(this.appointmentslistweek.docs, { hour: '12', date: this.headerWeeklyView[d].value });
-							if (this.appointmentstwelve.length > 0) {
-								this.twelveObject = {};
-								this.twelveObject.time = false,
-								this.twelveObject.key = this.state.employeeWeekSelected.key;
-								this.twelveObject.label = this.appointmentstwelve[0].contact_name;
-								this.twelveObject.value = this.appointmentstwelve[0]._id;
-								this.twelveObject.appointment = [];
-								this.twelveObject.appointment.push(this.appointmentstwelve[0]);
-								this.twelveWeek.push(this.twelveObject);
-							} else {
 								this.twelveWeek.push(this.emptyObject);
-							}
-							this.appointmentsthirteen = _.filter(this.appointmentslistweek.docs, { hour: '13', date: this.headerWeeklyView[d].value });
-							if (this.appointmentsthirteen.length > 0) {
-								this.thirteenObject = {};
-								this.thirteenObject.time = false,
-								this.thirteenObject.key = this.state.employeeWeekSelected.key;
-								this.thirteenObject.label = this.appointmentsthirteen[0].contact_name;
-								this.thirteenObject.value = this.appointmentsthirteen[0]._id;
-								this.thirteenObject.appointment = [];
-								this.thirteenObject.appointment.push(this.appointmentsthirteen[0]);
-								this.thirteenWeek.push(this.thirteenObject);
-							} else {
 								this.thirteenWeek.push(this.emptyObject);
-							}
-							this.appointmentsfourteen = _.filter(this.appointmentslistweek.docs, { hour: '14', date: this.headerWeeklyView[d].value });
-							if (this.appointmentsfourteen.length > 0) {
-								this.fourteenObject = {};
-								this.fourteenObject.time = false,
-								this.fourteenObject.key = this.state.employeeWeekSelected.key;
-								this.fourteenObject.label = this.appointmentsfourteen[0].contact_name;
-								this.fourteenObject.value = this.appointmentsfourteen[0]._id;
-								this.fourteenObject.appointment = [];
-								this.fourteenObject.appointment.push(this.appointmentsfourteen[0]);
-								this.fourteenWeek.push(this.fourteenObject);
-							} else {
 								this.fourteenWeek.push(this.emptyObject);
-							}
-							this.appointmentsfiveteen = _.filter(this.appointmentslistweek.docs, { hour: '15', date: this.headerWeeklyView[d].value });
-							if (this.appointmentsfiveteen.length > 0) {
-								this.fiveteenObject = {};
-								this.fiveteenObject.time = false,
-								this.fiveteenObject.key = this.state.employeeWeekSelected.key;
-								this.fiveteenObject.label = this.appointmentsfiveteen[0].contact_name;
-								this.fiveteenObject.value = this.appointmentsfiveteen[0]._id;
-								this.fiveteenObject.appointment = [];
-								this.fiveteenObject.appointment.push(this.appointmentsfiveteen[0]);
-								this.fiveteenWeek.push(this.fiveteenObject);
-							} else {
 								this.fiveteenWeek.push(this.emptyObject);
-							}
-							this.appointmentssixteen = _.filter(this.appointmentslistweek.docs, { hour: '16', date: this.headerWeeklyView[d].value });
-							if (this.appointmentssixteen.length > 0) {
-								this.sixteenObject = {};
-								this.sixteenObject.time = false,
-								this.sixteenObject.key = this.state.employeeWeekSelected.key;
-								this.sixteenObject.label = this.appointmentssixteen[0].contact_name;
-								this.sixteenObject.value = this.appointmentssixteen[0]._id;
-								this.sixteenObject.appointment = [];
-								this.sixteenObject.appointment.push(this.appointmentssixteen[0]);
-								this.sixteenWeek.push(this.sixteenObject);
-							} else {
 								this.sixteenWeek.push(this.emptyObject);
-							}
-							this.appointmentsseventeen = _.filter(this.appointmentslistweek.docs, { hour: '17', date: this.headerWeeklyView[d].value });
-							if (this.appointmentsseventeen.length > 0) {
-								this.seventeenObject = {};
-								this.seventeenObject.time = false,
-								this.seventeenObject.key = this.state.employeeWeekSelected.key;
-								this.seventeenObject.label = this.appointmentsseventeen[0].contact_name;
-								this.seventeenObject.value = this.appointmentsseventeen[0]._id;
-								this.seventeenObject.appointment = [];
-								this.seventeenObject.appointment.push(this.appointmentsseventeen[0]);
-								this.seventeenWeek.push(this.seventeenObject);
-							} else {
 								this.seventeenWeek.push(this.emptyObject);
-							}
-							this.appointmentseighteen = _.filter(this.appointmentslistweek.docs, { hour: '18', date: this.headerWeeklyView[d].value });
-							if (this.appointmentseighteen.length > 0) {
-								this.eighteenObject = {};
-								this.eighteenObject.time = false,
-								this.eighteenObject.key = this.state.employeeWeekSelected.key;
-								this.eighteenObject.label = this.appointmentseighteen[0].contact_name;
-								this.eighteenObject.value = this.appointmentseighteen[0]._id;
-								this.eighteenObject.appointment = [];
-								this.eighteenObject.appointment.push(this.appointmentseighteen[0]);
-								this.eighteenWeek.push(this.eighteenObject);
-							} else {
 								this.eighteenWeek.push(this.emptyObject);
-							}
-							this.appointmentsnineteen = _.filter(this.appointmentslistweek.docs, { hour: '19', date: this.headerWeeklyView[d].value });
-							if (this.appointmentsnineteen.length > 0) {
-								this.nineteenObject = {};
-								this.nineteenObject.time = false,
-								this.nineteenObject.key = this.state.employeeWeekSelected.key;
-								this.nineteenObject.label = this.appointmentsnineteen[0].contact_name;
-								this.nineteenObject.value = this.appointmentsnineteen[0]._id;
-								this.nineteenObject.appointment = [];
-								this.nineteenObject.appointment.push(this.appointmentsnineteen[0]);
-								this.nineteenWeek.push(this.nineteenObject);
-							} else {
 								this.nineteenWeek.push(this.emptyObject);
-							}
-							this.appointmentstwenty = _.filter(this.appointmentslistweek.docs, { hour: '20', date: this.headerWeeklyView[d].value });
-							if (this.appointmentstwenty.length > 0) {
-								this.twentyObject = {};
-								this.twentyObject.time = false,
-								this.twentyObject.key = this.state.employeeWeekSelected.key;
-								this.twentyObject.label = this.appointmentstwenty[0].contact_name;
-								this.twentyObject.value = this.appointmentstwenty[0]._id;
-								this.twentyObject.appointment = [];
-								this.twentyObject.appointment.push(this.appointmentstwenty[0]);
-								this.twentyWeek.push(this.twentyObject);
-							} else {
 								this.twentyWeek.push(this.emptyObject);
-							}
-							this.appointmentstwentyone = _.filter(this.appointmentslistweek.docs, { hour: '21', date: this.headerWeeklyView[d].value });
-							if (this.appointmentstwentyone.length > 0) {
-								this.twentyoneObject = {};
-								this.twentyoneObject.time = false,
-								this.twentyoneObject.key = this.state.employeeWeekSelected.key;
-								this.twentyoneObject.label = this.appointmentstwentyone[0].contact_name;
-								this.twentyoneObject.value = this.appointmentstwentyone[0]._id;
-								this.twentyoneObject.appointment = [];
-								this.twentyoneObject.appointment.push(this.appointmentstwentyone[0]);
-								this.twentyoneWeek.push(this.twentyoneObject);
-							} else {
 								this.twentyoneWeek.push(this.emptyObject);
-							}
-							this.appointmentstwentytwo = _.filter(this.appointmentslistweek.docs, { hour: '22', date: this.headerWeeklyView[d].value });
-							if (this.appointmentstwentytwo.length > 0) {
-								this.twentytwoObject = {};
-								this.twentytwoObject.time = false,
-								this.twentytwoObject.key = this.state.employeeWeekSelected.key;
-								this.twentytwoObject.label = this.appointmentstwentytwo[0].contact_name;
-								this.twentytwoObject.value = this.appointmentstwentytwo[0]._id;
-								this.twentytwoObject.appointment = [];
-								this.twentytwoObject.appointment.push(this.appointmentstwentytwo[0]);
-								this.twentytwoWeek.push(this.twentytwoObject);
-							} else {
 								this.twentytwoWeek.push(this.emptyObject);
-							}
-							this.appointmentstwentythree = _.filter(this.appointmentslistweek.docs, { hour: '23', date: this.headerWeeklyView[d].value });
-							if (this.appointmentstwentythree.length > 0) {
-								this.twentythreeObject = {};
-								this.twentythreeObject.time = false,
-								this.twentythreeObject.key = this.state.employeeWeekSelected.key;
-								this.twentythreeObject.label = this.appointmentstwentythree[0].contact_name;
-								this.twentythreeObject.value = this.appointmentstwentythree[0]._id;
-								this.twentythreeObject.appointment = [];
-								this.twentythreeObject.appointment.push(this.appointmentstwentythree[0]);
-								this.twentythreeWeek.push(this.twentythreeObject);
-							} else {
 								this.twentythreeWeek.push(this.emptyObject);
-							}
-							this.appointmentstwentyfour = _.filter(this.appointmentslistweek.docs, { hour: '24', date: this.headerWeeklyView[d].value });
-							if (this.appointmentstwentyfour.length > 0) {
-								this.twentyfourObject = {};
-								this.twentyfourObject.time = false,
-								this.twentyfourObject.key = this.state.employeeWeekSelected.key;
-								this.twentyfourObject.label = this.appointmentstwentyfour[0].contact_name;
-								this.twentyfourObject.value = this.appointmentstwentyfour[0]._id;
-								this.twentyfourObject.appointment = [];
-								this.twentyfourObject.appointment.push(this.appointmentstwentyfour[0]);
-								this.twentyfourWeek.push(this.twentyfourObject);
-							} else {
 								this.twentyfourWeek.push(this.emptyObject);
 							}
 						}
 					}
+					this.setState({ schedule: this.schedule, employeeWeekText: this.state.employeeWeekSelected.label, showspinner: false, employeeWeekSelectedCount: this.state.employeeWeekSelectedCount, employeeWeekSelected: this.state.employeeWeekSelected, contactsList: this.contactsList, employeesList: this.employeesList });
 				}
-				console.log('this.state.employeeWeekSelectedCount');
-				console.log(this.state.employeeWeekSelectedCount);
-				this.setState({ schedule: this.schedule, employeeWeekText: this.state.employeeWeekSelected.label, showspinner: false, employeeWeekSelectedCount: this.state.employeeWeekSelectedCount, employeeWeekSelected: this.state.employeeWeekSelected, contactsList: this.contactsList, employeesList: this.employeesList });
-			} else {
-				if (this.state.employeeWeekSelected.length > 0) {
-					for (let d = 0; d < this.headerWeeklyView.length; d += 1) {
-						if (this.headerWeeklyView[d].day !== false) {
-							this.oneWeek.push(this.emptyObject);
-							this.twoWeek.push(this.emptyObject);
-							this.threeWeek.push(this.emptyObject);
-							this.fourWeek.push(this.emptyObject);
-							this.fiveWeek.push(this.emptyObject);
-							this.sixWeek.push(this.emptyObject);
-							this.sevenWeek.push(this.emptyObject);
-							this.eightWeek.push(this.emptyObject);
-							this.nineWeek.push(this.emptyObject);
-							this.tenWeek.push(this.emptyObject);
-							this.elevenWeek.push(this.emptyObject);
-							this.twelveWeek.push(this.emptyObject);
-							this.thirteenWeek.push(this.emptyObject);
-							this.fourteenWeek.push(this.emptyObject);
-							this.fiveteenWeek.push(this.emptyObject);
-							this.sixteenWeek.push(this.emptyObject);
-							this.seventeenWeek.push(this.emptyObject);
-							this.eighteenWeek.push(this.emptyObject);
-							this.nineteenWeek.push(this.emptyObject);
-							this.twentyWeek.push(this.emptyObject);
-							this.twentyoneWeek.push(this.emptyObject);
-							this.twentytwoWeek.push(this.emptyObject);
-							this.twentythreeWeek.push(this.emptyObject);
-							this.twentyfourWeek.push(this.emptyObject);
-						}
-					}
-				}
-				console.log('this.state.employeeWeekSelectedCount');
-				console.log(this.state.employeeWeekSelectedCount);
-				this.setState({ schedule: this.schedule, employeeWeekText: this.state.employeeWeekSelected.label, showspinner: false, employeeWeekSelectedCount: this.state.employeeWeekSelectedCount, employeeWeekSelected: this.state.employeeWeekSelected, contactsList: this.contactsList, employeesList: this.employeesList });
 			}
 		}
-		console.log('this.state.employeeWeekSelectedCount');
-		console.log(this.state.employeeWeekSelectedCount);
 		this.setState({ showspinner: false, schedule: this.schedule });
-		console.log('schedule: this.schedule, ');
-		console.log(this.schedule);
 	}
 
 	async saveSchedule() {
@@ -1874,8 +2106,6 @@ class Dashboard extends Component {
 	}
 
 	onChangeSchedule(newValue, prop) {
-		console.log('this.headerWeeklyView');
-		console.log(this.headerWeeklyView);
 		switch(prop){
 		case 'one':
 			if (this.state.schedule.one === true) {
@@ -2047,7 +2277,7 @@ class Dashboard extends Component {
 			break;
 		case 'monday':
 			this.headerWeeklyView = [];
-			this.setState({ employeeWeekText: 'Select employee', employeeWeekSelected: '' });
+			this.setState({ employeeWeekText: 'Select staff', employeeWeekSelected: '' });
 			this.oneWeek = [];
 			this.twoWeek = [];
 			this.threeWeek = [];
@@ -2080,7 +2310,7 @@ class Dashboard extends Component {
 			break;
 		case 'tuesday':
 			this.headerWeeklyView = [];
-			this.setState({ employeeWeekText: 'Select employee', employeeWeekSelected: '' });
+			this.setState({ employeeWeekText: 'Select staff', employeeWeekSelected: '' });
 			this.oneWeek = [];
 			this.twoWeek = [];
 			this.threeWeek = [];
@@ -2113,7 +2343,7 @@ class Dashboard extends Component {
 			break;
 		case 'wednesday':
 			this.headerWeeklyView = [];
-			this.setState({ employeeWeekText: 'Select employee', employeeWeekSelected: '' });
+			this.setState({ employeeWeekText: 'Select staff', employeeWeekSelected: '' });
 			this.oneWeek = [];
 			this.twoWeek = [];
 			this.threeWeek = [];
@@ -2146,7 +2376,7 @@ class Dashboard extends Component {
 			break;
 		case 'thursday':
 			this.headerWeeklyView = [];
-			this.setState({ employeeWeekText: 'Select employee', employeeWeekSelected: '' });
+			this.setState({ employeeWeekText: 'Select staff', employeeWeekSelected: '' });
 			this.oneWeek = [];
 			this.twoWeek = [];
 			this.threeWeek = [];
@@ -2179,7 +2409,7 @@ class Dashboard extends Component {
 			break;
 		case 'friday':
 			this.headerWeeklyView = [];
-			this.setState({ employeeWeekText: 'Select employee', employeeWeekSelected: '' });
+			this.setState({ employeeWeekText: 'Select staff', employeeWeekSelected: '' });
 			this.oneWeek = [];
 			this.twoWeek = [];
 			this.threeWeek = [];
@@ -2212,7 +2442,7 @@ class Dashboard extends Component {
 			break;
 		case 'saturday':
 			this.headerWeeklyView = [];
-			this.setState({ employeeWeekText: 'Select employee', employeeWeekSelected: '' });
+			this.setState({ employeeWeekText: 'Select staff', employeeWeekSelected: '' });
 			this.oneWeek = [];
 			this.twoWeek = [];
 			this.threeWeek = [];
@@ -2245,7 +2475,7 @@ class Dashboard extends Component {
 			break;
 		case 'sunday':
 			this.headerWeeklyView = [];
-			this.setState({ employeeWeekText: 'Select employee', employeeWeekSelected: '' });
+			this.setState({ employeeWeekText: 'Select staff', employeeWeekSelected: '' });
 			this.oneWeek = [];
 			this.twoWeek = [];
 			this.threeWeek = [];
@@ -2331,7 +2561,12 @@ class Dashboard extends Component {
 				title: 'Employees list',
 				appointmentsdate: this.state.todaysDate,
 				area: 'dashboard',
-				tab: dashboardTab
+				tab: dashboardTab,
+				mondayOfWeek: this.state.mondayOfWeek,
+				weekdatefrom: this.state.weekdatefrom,
+				weekdateto: this.state.weekdateto,
+				weekSelectedDate: this.state.weekSelectedDate,
+				weekDate: this.state.weekDate
 			});
 		}
 	}
@@ -2468,6 +2703,52 @@ class Dashboard extends Component {
 
 	closePopupDialog() {
 		this.scaleAnimationDialog.dismiss();
+	}
+
+	cancelCalendar() {
+		this.setState({ showWeekCalendar: false, weekDate: 'Select week' });
+	}
+
+	showWeekCalendar(action) {
+		this.setState({ showWeekCalendar: action });
+		if (this.state.weekDate !== 'Select week') {
+			if (_.isEmpty(this.selectedDate)) {
+				this.selectedDate = this.state.weekDate;
+			}
+			this.setState({ showspinner: false });
+			this.setState({ showWeekCalendar: action, weekSelectedDate: this.state.weekSelectedDate, weekDate: this.selectedDate });
+		}
+		if (!_.isEmpty(this.state.weekDate)) {
+			this.showData();
+		}
+		
+	}
+
+	weekDateChange(date) {
+		this.state.weekSelectedDate = [];
+		this.selectedDate = moment(date).format('YYYY-MM-DD');
+		this.mondayOfWeek = moment(this.selectedDate).startOf('isoweek').toDate();
+		this.mondayOfWeekFormated = moment(this.mondayOfWeek).format('YYYY-MM-DD');
+		this.sundayOfWeek = moment(this.selectedDate).endOf('isoweek').toDate();
+		this.sundayOfWeekFormated = moment(this.sundayOfWeek).format('YYYY-MM-DD');
+		this.selectedDate = moment(this.mondayOfWeek).format('DD-MM-YY')+'/'+moment(this.sundayOfWeek).format('DD-MM-YY');
+		this.state.weekSelectedDate.push(this.mondayOfWeekFormated);
+		this.tuesday = moment(this.mondayOfWeek).add(1, 'days').format('YYYY-MM-DD');
+		this.state.weekSelectedDate.push(this.tuesday);
+		this.wednesday = moment(this.mondayOfWeek).add(2, 'days').format('YYYY-MM-DD');
+		this.state.weekSelectedDate.push(this.wednesday);
+		this.thursday = moment(this.mondayOfWeek).add(3, 'days').format('YYYY-MM-DD');
+		this.state.weekSelectedDate.push(this.thursday);
+		this.friday = moment(this.mondayOfWeek).add(4, 'days').format('YYYY-MM-DD');
+		this.state.weekSelectedDate.push(this.friday);
+		this.saturday = moment(this.mondayOfWeek).add(5, 'days').format('YYYY-MM-DD');
+		this.state.weekSelectedDate.push(this.saturday);
+		this.sunday = moment(this.mondayOfWeek).add(6, 'days').format('YYYY-MM-DD');
+		this.state.weekSelectedDate.push(this.sunday);
+		this.weekdatefrom = moment(this.mondayOfWeek).format('DD-MM-YYYY');
+		this.weekdateto = moment(this.sundayOfWeek).format('DD-MM-YYYY');
+		this.setState({ weekDate: this.selectedDate, weekdatefrom: this.weekdatefrom, weekdateto: this.weekdateto, mondayOfWeek: this.mondayOfWeek });
+		this.showWeekCalendar(true);
 	}
 
 	renderDialogButtons() {
@@ -2679,7 +2960,7 @@ class Dashboard extends Component {
 												marginLeft: 20,
 												fontWeight: 'bold',
 											}}
-										>Employee</Text>
+										>Staff</Text>
 										<ModalPicker style={{ marginLeft: 20 }} data={this.employeesList} label="" initValue={this.state.appointment.employee_alias} onChange={(option)=>{ this.onChangeText(option, 'employee_id'); }} />
 									</View>
 									<View
@@ -2746,8 +3027,8 @@ class Dashboard extends Component {
 									>{this.state.showspinnertext}</Text>
 								</View>
 							}
-							{this.state.employeesListText === 'Select employee(s)' && this.state.showspinner === false &&
-								<Text style={{ padding: 40 }}>Please select employee(s) from the list</Text>
+							{this.state.employeesListText === 'Select staff' && this.state.showspinner === false &&
+								<Text style={{ padding: 40 }}>Please select staff from the list</Text>
 							}
 							{this.state.employeesSelectedCount > 0 && this.state.showspinner === false &&
 							<Grid style={{ borderColor: '#d7d7d6', borderWidth: 0.5 }}>
@@ -3184,35 +3465,43 @@ class Dashboard extends Component {
 								style={{
 									paddingTop: 5,
 									paddingLeft: 10,
+									paddingRight: 10,
 									paddingBottom: 6,
-									flexDirection: 'row', flex: 1
+									flexDirection: 'row',
 								}}
 							>
-								{/* <DatePicker
-									date={this.state.todaysDate}
-									mode="date"
-									placeholder="Date"
-									format="DD-MM-YYYY"
-									confirmBtnText="Ok"
-									cancelBtnText="Cancel"
-									customStyles={{
-										dateIcon: {
-											alignItems: 'center',
-											alignSelf: 'center',
-										},
-										dateInput: {
-											height: 40,
-											borderColor: '#C0C0C0',
-											borderWidth: 1,
-											borderRadius: 6,
-										}
-									}}
-									onDateChange={(date) => {
-										this.onChangeAppointmentsDate(date, 'date');
-									}}
-								/> */}
+								<TouchableOpacity onPress={this.showWeekCalendar.bind(this, true)} style={{ height: 40 }}>
+									<View
+										style={{
+											flexDirection: 'row',
+										}}
+									>
+										<Text
+											style={{
+												flexDirection: 'row',
+												padding: 10,
+												height: 40,
+												borderColor: '#C0C0C0',
+												borderWidth: 1,
+												borderRadius: 6
+											}}
+										>
+											{this.state.weekDate}
+										</Text>
+										<Image
+											style={{
+												marginTop: 2.5,
+												marginLeft: 5,
+												marginRight: 5,
+												width: 33,
+												height: 33,
+											}}
+											source={require('../img/dateicon.png')}
+										/>
+									</View>
+								</TouchableOpacity>
 								<TouchableOpacity onPress={this.showEmployeesList.bind(this, 'weekly')} style={{ height: 40 }}>
-									<View style={{ flexDirection: 'row', flex: 1, padding: 10, borderColor: '#C0C0C0', borderWidth: 1, borderRadius: 6 }}>
+									<View style={{ flexDirection: 'row', flex: 0.4, padding: 10, borderColor: '#C0C0C0', borderWidth: 1, borderRadius: 6 }}>
 										<Text>{this.state.employeeWeekText}</Text>
 										<MaterialCommunityIcons name="arrow-down-drop-circle-outline" size={20} style={{ color: '#CCCCCC' }} />
 									</View>
@@ -3221,6 +3510,45 @@ class Dashboard extends Component {
 						</View>
 						<KeyboardAwareScrollView>
 						<Content style={{ minHeight: 800 }} >
+							{this.state.showWeekCalendar === true &&
+								<View style={{ borderWidth: 1, borderColor: '#C0C0C0', borderRadius: 6 }}>
+									<Calendar
+										showEventIndicators
+										customStyle={{
+											hasEventCircle: {
+												backgroundColor: '#9DBDF2',
+											},
+											weekendDayText: {
+												color: 'black',
+											},
+											hasEventDaySelectedCircle: {
+												backgroundColor: 'red',
+											}
+										}}
+										ref="calendar"
+										scrollEnabled
+										showControls={true}
+										prevButtonText={'Prev'}
+										nextButtonText={'Next'}
+										eventDates={this.state.weekSelectedDate}
+										onDateSelect={(date) => this.weekDateChange(date)}
+										onDateLongPress={(date) => this.setState({ selectedDate: date })}
+										onTouchPrev={(e) => console.log('onTouchPrev: ', e)}
+										onTouchNext={(e) => console.log('onTouchNext: ', e)}
+										onSwipePrev={(e) => console.log('onSwipePrev: ', e)}
+										onSwipeNext={(e) => console.log('onSwipeNext', e)}
+										selectedDate={this.state.selectedDate}
+									/>
+									<View style={{ flexDirection: 'row', flex: 1, marginHorizontal: 20, marginVertical: 10 }}>
+										<Left>
+											<Text style={{ fontSize: 16, color: '#666' }} onPress={this.cancelCalendar.bind(this)} >Cancel</Text>
+										</Left>
+										<Right>
+											<Text style={{ fontSize: 16, color: '#46cf98' }} onPress={this.showWeekCalendar.bind(this, false)} >Ok</Text>
+										</Right>
+									</View>
+								</View>
+							}
 							<PopupDialog
 								width={fullWidth - 30}
 								height={fullHeight - 180}
@@ -3241,7 +3569,7 @@ class Dashboard extends Component {
 									}}
 								>
 									<DatePicker
-										date={this.state.appointment.date}
+										date={this.state.weekdatefrom}
 										mode="date"
 										placeholder="Select date"
 										format="DD-MM-YYYY"
@@ -3338,7 +3666,7 @@ class Dashboard extends Component {
 												marginLeft: 20,
 												fontWeight: 'bold',
 											}}
-										>Employee</Text>
+										>Staff</Text>
 										<ModalPicker style={{ marginLeft: 20 }} data={this.employeesList} label="" initValue={this.state.appointment.employee_alias} onChange={(option)=>{ this.onChangeText(option, 'employee_id'); }} />
 									</View>
 									<View
@@ -3405,10 +3733,16 @@ class Dashboard extends Component {
 									>{this.state.showspinnertext}</Text>
 								</View>
 							}
-							{this.state.employeeWeekText === 'Select employee' && this.state.showspinner === false &&
-								<Text style={{ borderColor: '#d7d7d6', padding: 40 }}>Please select one employee from the list</Text>
+							{this.state.employeeWeekText === 'Select staff' && this.state.weekDate === 'Select week' && this.state.showspinner === false && this.state.showWeekCalendar === false &&
+								<Text style={{ borderColor: '#d7d7d6', padding: 40 }}>Please select one staff from the list and one week from the calendar</Text>
 							}
-							{this.state.employeeWeekText !== 'Select employee' && this.state.showspinner === false &&
+							{this.state.employeeWeekText === 'Select staff' && this.state.weekDate !== 'Select week' && this.state.showspinner === false && this.state.showWeekCalendar === false &&
+								<Text style={{ borderColor: '#d7d7d6', padding: 40 }}>Please select one staff from the list</Text>
+							}
+							{this.state.employeeWeekText !== 'Select staff' && this.state.weekDate === 'Select week' && this.state.showspinner === false && this.state.showWeekCalendar === false &&
+								<Text style={{ borderColor: '#d7d7d6', padding: 40 }}>Please select one week from the calendar</Text>
+							}
+							{this.state.employeeWeekText !== 'Select staff' && this.state.weekDate !== 'Select week' && this.state.showspinner === false && this.state.showWeekCalendar === false &&
 							<Grid style={{ borderColor: '#d7d7d6', borderWidth: 0.5 }}>
 								<Row>
 									<FlatList

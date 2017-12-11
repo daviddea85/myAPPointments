@@ -54,14 +54,19 @@ class EmployeesList extends Component {
 			appointmentsdate: this.props.appointmentsdate,
 			employeesList: ds.cloneWithRows([]),
 			area: this.props.area || '',
-			tab: this.props.tab || ''
+			tab: this.props.tab || '',
+			mondayOfWeek: this.props.mondayOfWeek || '',
+			weekdatefrom: this.props.weekdatefrom || '',
+			weekdateto: this.props.weekdateto || '',
+			weekSelectedDate: this.props.weekSelectedDate || '',
+			weekDate: this.props.weekDate || ''
 		};
 		this.renderRow = this.renderRow.bind(this);
 		this.companyDatabase = '';
 		this.employeesSelected = [
 			{
 				key: 'employee',
-				label: 'Employee (time)',
+				label: 'Staff (time)',
 				value: 'employee',
 			}
 		];
@@ -91,7 +96,7 @@ class EmployeesList extends Component {
 			const employeesListObject = {
 				key: '',
 				value: '',
-				label: 'All employees'
+				label: 'All staff'
 			};
 			this.employeesList.push(employeesListObject);
 		}
@@ -199,17 +204,17 @@ class EmployeesList extends Component {
 				this.employeeSelected = {
 					key: '',
 					value: '',
-					label: 'All employees'
+					label: 'All staff'
 				};
 				Actions.Appointments({ title: 'Appointments', userSelected: this.employeeSelected, appointmentsdate: this.state.appointmentsdate });
 			}
 		} else if (this.state.area === 'dashboard') {
 			if (this.employeeSelected === '') {
 				Alert.alert(
-					'Employees list',
-					'At least one employee needs to be selected',
+					'Staff list',
+					'At least one staff needs to be selected',
 					[
-						{ text: 'OK', onPress: () => console.log('employee not selected'), style: 'cancel' }
+						{ text: 'OK', onPress: () => console.log('staff not selected'), style: 'cancel' }
 					],
 					{ cancelable: true }
 				);
@@ -217,7 +222,18 @@ class EmployeesList extends Component {
 				if (this.state.tab === 'daily') {
 					Actions.Dashboard({ title: 'Dashboard', employeesSelected: this.employeesSelected, appointmentsdate: this.state.appointmentsdate, tab: 'daily' });
 				} else {
-					Actions.Dashboard({ title: 'Dashboard', employeeWeekText: this.employeeSelected.label, employeeWeekSelected: this.employeeSelected, appointmentsdate: this.state.appointmentsdate, tab: 'weekly' });
+					Actions.Dashboard({
+						title: 'Dashboard',
+						employeeWeekText: this.employeeSelected.label,
+						employeeWeekSelected: this.employeeSelected,
+						appointmentsdate: this.state.appointmentsdate,
+						tab: 'weekly',
+						mondayOfWeek: this.state.mondayOfWeek,
+						weekdatefrom: this.state.weekdatefrom,
+						weekdateto: this.state.weekdateto,
+						weekSelectedDate: this.state.weekSelectedDate,
+						weekDate: this.state.weekDate
+					});
 				}
 			}
 		}
@@ -259,7 +275,7 @@ class EmployeesList extends Component {
 					</Button>
 					</Left>
 					<Body style={{ backgroundColor: 'transparent' }}>
-						<Title style={{ fontWeight: 'normal' }}>Employees list</Title>
+						<Title style={{ fontWeight: 'normal' }}>Staff list</Title>
 					</Body>
 					<Right />
 				</Header>

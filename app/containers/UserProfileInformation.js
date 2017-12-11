@@ -309,7 +309,7 @@ class UserProfile extends Component {
 				{
 					key: '1',
 					value: 'employee',
-					label: 'Employee',
+					label: 'Staff',
 				}
 			];
 		}

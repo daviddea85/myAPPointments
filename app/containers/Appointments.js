@@ -53,7 +53,7 @@ class Appointments extends Component {
 							this.userSelected = {
 								key: '',
 								value: '',
-								label: 'All employees'
+								label: 'All staff'
 							};
 						} else {
 							this.userSelected = this.props.userSelected;
@@ -78,7 +78,7 @@ class Appointments extends Component {
 				this.userSelected = {
 					key: '',
 					value: '',
-					label: 'All employees'
+					label: 'All staff'
 				};
 			} else {
 				this.userSelected = this.props.userSelected;
@@ -96,7 +96,7 @@ class Appointments extends Component {
 							this.userSelected = {
 								key: '',
 								value: '',
-								label: 'All employees'
+								label: 'All staff'
 							};
 						} else {
 							this.userSelected = this.props.userSelected;
@@ -213,7 +213,7 @@ class Appointments extends Component {
 
 	showEmployeesList() {
 		Actions.AppointmentsEmployeesList({
-			title: 'Employees list',
+			title: 'Staff list',
 			appointmentsdate: this.state.todaysDate,
 			area: 'appointments',
 			tab: ''
