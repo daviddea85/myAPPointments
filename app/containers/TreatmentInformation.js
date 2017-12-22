@@ -38,7 +38,7 @@ class TreatmentInformation extends Component {
 			treatment: {
 				doctype: 'treatmentlist',
 				name: '',
-				duration: '',
+				duration: '60',
 				price: '',
 				units: ''
 			}
@@ -244,8 +244,7 @@ class TreatmentInformation extends Component {
 					}
 					<View style={{ height: 40 }} />
 				</Content>
-					{this.renderButtonsTreatmentManagement()}
-				{/* <FooterMain activeArea="More" /> */}
+				{this.renderButtonsTreatmentManagement()}
 			</Container>
 		);
 	}

@@ -49,7 +49,8 @@ class Dashboard extends Component {
 			employeeWeekSelected: this.props.employeeWeekSelected || '',
 			employeeWeekSelectedCount: 0,
 			employeeWeekText: this.props.employeeWeekText || 'Select staff',
-			appointment: {},
+			appointment: this.props.appointment || {},
+			mainappointment: {},
 			appointmentinfo: {
 				_id: '',
 				doctype: 'appointment',
@@ -234,8 +235,13 @@ class Dashboard extends Component {
 				this.treatmentslist = `${this.treatmentslist}, ${treatmentInfo.docs[t].name}`;
 			}
 		}
+		this.appointment_treatment = _.filter(treatmentInfo.docs, { treatment_id: this.state.appointment.treatment_id });
+		if (_.isEmpty(this.appointment_treatment)) {
+			this.closePopupDialog();
+		}
 		this.treatmentslistinfo = treatmentInfo.docs;
 		this.setState({ appointment: this.state.appointment });
+		this.connectCompanyDb(true);
 	}
 
 	async showData(dateValue) {
@@ -420,8 +426,11 @@ class Dashboard extends Component {
 		if (this.state.employeesSelected.length > 0) {
 			this.queryAppointments = {
 				'selector': {
-					'doctype': 'appointment',
 					'date': this.state.todaysDate,
+					'$or': [
+						{ 'doctype': { '$eq': 'appointment' }},
+						{ 'doctype': { '$eq': 'appointmentamended' }},
+					]
 				},
 				'fields': []
 			};
@@ -1479,15 +1488,17 @@ class Dashboard extends Component {
 					appointment: [],
 				};
 				this.queryAppointmentsWeek = {
-					selector: {
-						doctype: 'appointment',
+					'selector': {
 						date: {
 							$gte: this.state.weekdatefrom,
 							$lte: this.state.weekdateto,
 						},
-						employee_id: this.state.employeeWeekSelected.value
+						'$or': [
+							{ 'doctype': { '$eq': 'appointment' }},
+							{ 'doctype': { '$eq': 'appointmentamended' }},
+						]
 					},
-					fields: []
+					'fields': []
 				};
 				this.appointmentslistweek = await DBCompanyConnection.find(this.queryAppointmentsWeek);
 				if (this.appointmentslistweek.docs.length > 0) {
@@ -2530,18 +2541,58 @@ class Dashboard extends Component {
 			};
 			this.setState({ appointment: this.appointmentdetails });
 		} else if (item.appointment.length > 0) {
-			this.treatmentslist = '';
-			const queryTreatmentsAppointment = { selector: { doctype: 'treatment', appointment_id: item.appointment[0]._id }, };
-			const treatmentInfo = await DBCompanyConnection.find(queryTreatmentsAppointment);
-			for (let t = 0; t < treatmentInfo.docs.length; t += 1) {
-				if (this.treatmentslist === '') {
-					this.treatmentslist = `${treatmentInfo.docs[t].name}`;
-				} else {
-					this.treatmentslist = `${this.treatmentslist}, ${treatmentInfo.docs[t].name}`;
+			if (item.appointment[0].doctype === 'appointmentamended') {
+				const queryAppointment = { selector: { doctype: 'appointment', _id: item.appointment[0].appointment_id }, };
+				const appointmentInfo = await DBCompanyConnection.find(queryAppointment);
+				this.appointmentInfo = {};
+				this.appointmentInfo.hour = appointmentInfo.docs[0].hour;
+				this.appointmentInfo.minute = appointmentInfo.docs[0].minute;
+				const contactinfo = await DBCompanyConnection.find(this.queryContacts);
+				if (contactinfo.docs.length > 0) {
+					appointmentInfo.docs[0].contact_name = contactinfo.docs[0].givenName + ' ' + contactinfo.docs[0].familyName;
 				}
+				const queryEmployee = { selector: { doctype: 'user', _id: appointmentInfo.docs[0].employee_id }, };
+				const employeeInfo = await DBCompanyConnection.find(queryEmployee);
+				if (employeeInfo.docs.length > 0) {
+					if (_.isEmpty(appointmentInfo.docs[0].employee_alias)) {
+						appointmentInfo.docs[0].employee_alias = employeeInfo.docs[0].alias;
+						if (appointmentInfo.docs[0].alias === '') {
+							appointmentInfo.docs[0].employee_alias = employeeInfo.docs[0].name;
+							if (appointmentInfo.docs[0].name === '') {
+								appointmentInfo.docs[0].employee_alias = employeeInfo.docs[0].email;
+							}
+						}
+					}
+				}
+				appointmentInfo.docs[0].hour = item.appointment[0].hour;
+				appointmentInfo.docs[0].minute = item.appointment[0].minute;
+				this.treatmentslist = '';
+				const queryTreatmentsAppointment = { selector: { doctype: 'treatment', _id: item.appointment[0].treatment_id }, };
+				const treatmentInfo = await DBCompanyConnection.find(queryTreatmentsAppointment);
+				for (let t = 0; t < treatmentInfo.docs.length; t += 1) {
+					if (this.treatmentslist === '') {
+						this.treatmentslist = `${treatmentInfo.docs[t].name}`;
+					} else {
+						this.treatmentslist = `${this.treatmentslist}, ${treatmentInfo.docs[t].name}`;
+					}
+				}
+				appointmentInfo.docs[0].doctype = 'appointmentamended';
+				this.treatmentslistinfo = treatmentInfo.docs;
+				this.setState({ appointment: appointmentInfo.docs[0], mainappointment: this.appointmentInfo });
+			} else {
+				this.treatmentslist = '';
+				const queryTreatmentsAppointment = { selector: { doctype: 'treatment', appointment_id: item.appointment[0]._id }, };
+				const treatmentInfo = await DBCompanyConnection.find(queryTreatmentsAppointment);
+				for (let t = 0; t < treatmentInfo.docs.length; t += 1) {
+					if (this.treatmentslist === '') {
+						this.treatmentslist = `${treatmentInfo.docs[t].name}`;
+					} else {
+						this.treatmentslist = `${this.treatmentslist}, ${treatmentInfo.docs[t].name}`;
+					}
+				}
+				this.treatmentslistinfo = treatmentInfo.docs;
+				this.setState({ appointment: item.appointment[0] });
 			}
-			this.treatmentslistinfo = treatmentInfo.docs;
-			this.setState({ appointment: item.appointment[0] });
 		}
 		if (item.time === false) {
 			this.scaleAnimationDialog.show();
@@ -2671,19 +2722,69 @@ class Dashboard extends Component {
 	}
 
 	async deleteAppointment() {
-		const appointmentDeleted = await DBCompanyConnection.remove(this.state.appointment);
-		const queryTreatmentsAppointment = { selector: { doctype: 'treatment', appointment_id: this.state.appointment._id }, };
-		const treatmentInfo = await DBCompanyConnection.find(queryTreatmentsAppointment);
-		if (treatmentInfo.docs.length > 0) {
-			for (let t = 0; t < treatmentInfo.docs.length; t += 1) {
-				const treatmentDeleted = await DBCompanyConnection.remove(treatmentInfo.docs[t]);
+		if (this.state.appointment.doctype === 'appointment') {
+			const appointmentDeleted = await DBCompanyConnection.remove(this.state.appointment);
+			this.queryTreatmentAppointment = { selector: { doctype: 'treatment', appointment_id: this.state.appointment._id, treatment_id: this.state.appointment.treatment_id }, };
+			const appointmentTreatment = await DBCompanyConnection.find(this.queryTreatmentAppointment);
+			if (appointmentTreatment.docs.length > 0) {
+				for (let t = 0; t < appointmentTreatment.docs.length; t += 1) {
+					const appointmentTreatmentDeleted = await DBCompanyConnection.remove(appointmentTreatment.docs[t]);
+				}
 			}
-		}
-		const queryAppointmentImages = { selector: { doctype: 'images', area: 'appointment', owner: this.state.appointment._id }, };
-		const appointmentimages = await DBCompanyConnection.find(queryAppointmentImages);
-		if (appointmentimages.docs.length > 0) {
-			for (let i = 0; i < appointmentimages.docs.length; i += 1) {
-				const imageDeleted = await DBCompanyConnection.remove(appointmentimages.docs[i]);
+			const queryappointmentsamended = { selector: { doctype: 'appointmentamended', appointment_id: this.state.appointment._id }, };
+			const appointmentsamendedinfo = await DBCompanyConnection.find(queryappointmentsamended);
+			if (appointmentsamendedinfo.docs.length > 0) {
+				for (let a = 0; a < appointmentsamendedinfo.docs.length; a += 1) {
+					appointmentsamendedinfo.docs[a].hour = Math.round(appointmentsamendedinfo.docs[a].hour * 100) / 100;
+					if (parseInt(appointmentsamendedinfo.docs[a].minute < 10)) {
+						appointmentsamendedinfo.docs[a].minute = Math.round(appointmentsamendedinfo.docs[a].minute * 100) / 100;
+					}
+				}
+			}
+			appointmentsamendedinfo.docs = _.sortBy(appointmentsamendedinfo.docs, ['hour', 'minute']);
+			if (!_.isEmpty(appointmentsamendedinfo.docs[0])) {
+				appointmentsamendedinfo.docs[0] = _.omit(appointmentsamendedinfo.docs[0], ['appointment_id']);								
+				appointmentsamendedinfo.docs[0].doctype = 'appointment';
+				this.newhour = parseInt(appointmentsamendedinfo.docs[0].hour);
+				this.newminutes = parseInt(appointmentsamendedinfo.docs[0].minute);
+				if (this.newhour < 10) {
+					this.newhour = String('0'+this.newhour);
+				} else {
+					this.newhour = String(this.newhour);
+				}
+				if (this.newminutes < 10) {
+					this.newminutes = String('0'+this.newminutes);
+				} else {
+					this.newminutes = String(this.newminutes);
+				}
+				appointmentsamendedinfo.docs[0].hour = this.newhour;
+				appointmentsamendedinfo.docs[0].minute = this.newminutes;
+				const updatedappointment = await DBCompanyConnection.put(appointmentsamendedinfo.docs[0]);
+				this.queryTreatmentsAppointment = { selector: { doctype: 'treatment', appointment_id: this.state.appointment._id }, };
+				const appointmentTreatments = await DBCompanyConnection.find(this.queryTreatmentsAppointment);
+				if (appointmentTreatments.docs.length > 0) {
+					for (let t = 0; t < appointmentTreatments.docs.length; t += 1) {
+						appointmentTreatments.docs[t].appointment_id = appointmentsamendedinfo.docs[0]._id;
+						const treatmentUpdated = await DBCompanyConnection.put(appointmentTreatments.docs[t]);
+					}
+				}
+				const queryAppointmentImages = { selector: { doctype: 'images', area: 'appointment', owner: this.state.appointment._id }, };
+				const appointmentimages = await DBCompanyConnection.find(queryAppointmentImages);
+				if (appointmentimages.docs.length > 0) {
+					for (let i = 0; i < appointmentimages.docs.length; i += 1) {
+						appointmentimages.docs[i].owner = appointmentsamendedinfo.docs[0]._id;
+						const imageUpdated = await DBCompanyConnection.put(appointmentimages.docs[i]);
+					}
+				}
+			}
+		} else {
+			const appointmentDeleted = await DBCompanyConnection.remove(this.state.appointment);
+			this.queryTreatmentAppointment = { selector: { doctype: 'treatment', appointment_id: this.state.appointment.appointment_id, treatment_id: this.state.appointment.treatment_id }, };
+			const appointmentTreatment = await DBCompanyConnection.find(this.queryTreatmentAppointment);
+			if (appointmentTreatment.docs.length > 0) {
+				for (let t = 0; t < appointmentTreatment.docs.length; t += 1) {
+					const appointmentTreatmentDeleted = await DBCompanyConnection.remove(appointmentTreatment.docs[t]);
+				}
 			}
 		}
 		this.deleteAppointmentAlert();
@@ -2752,7 +2853,7 @@ class Dashboard extends Component {
 	}
 
 	renderDialogButtons() {
-		if (this.state.appointment._id === '') {
+		if (this.state.appointment.doctype === 'appointmentamended') {
 			return (
 				<ActionButton
 					size={40}
@@ -2765,34 +2866,397 @@ class Dashboard extends Component {
 					onPress={() => { Keyboard.dismiss(); }}
 					icon={<IconMaterial name="settings" size={28} color="white" />}
 				>
-					<ActionButton.Item buttonColor="#8fbc8f" title="Save appointment" onPress={() => { this.saveAppointment(); }}>
+					<ActionButton.Item buttonColor="steelblue" title="View details" onPress={() => { Actions.AppointmentsInfo({ appointmentid: this.state.appointment._id, title: 'Appointment', appointmentdate: this.state.todaysDate }); }}>
+						<IconMaterial name="pageview" size={28} color="white" />
+					</ActionButton.Item>
+					<ActionButton.Item buttonColor="#f08080" title="Delete appointment" onPress={() => { this.deleteAppointmentConfirmationAlert(); }}>
+						<IconMaterial name="delete" size={28} color="white" />
+					</ActionButton.Item>
+				</ActionButton>
+			);
+		} else {
+			if (this.state.appointment._id === '') {
+				return (
+					<ActionButton
+						size={40}
+						buttonColor="#9DBDF2"
+						offsetX={15}
+						offsetY={15}
+						ref={(btn) => {
+							this.floatingBtn = btn;
+						}}
+						onPress={() => { Keyboard.dismiss(); }}
+						icon={<IconMaterial name="settings" size={28} color="white" />}
+					>
+						<ActionButton.Item buttonColor="#8fbc8f" title="Save appointment" onPress={() => { this.saveAppointment(); }}>
+							<IconMaterial name="save" size={28} color="white" />
+						</ActionButton.Item>
+					</ActionButton>
+				);
+			}
+			return (
+				<ActionButton
+					size={40}
+					buttonColor="#9DBDF2"
+					offsetX={15}
+					offsetY={15}
+					ref={(btn) => {
+						this.floatingBtn = btn;
+					}}
+					onPress={() => { Keyboard.dismiss(); }}
+					icon={<IconMaterial name="settings" size={28} color="white" />}
+				>
+					<ActionButton.Item buttonColor="#8fbc8f" title="Update appointment" onPress={() => { this.saveAppointment(); }}>
 						<IconMaterial name="save" size={28} color="white" />
+					</ActionButton.Item>
+					<ActionButton.Item buttonColor="steelblue" title="View details" onPress={() => { Actions.AppointmentsInfo({ appointmentid: this.state.appointment._id, title: 'Appointment', appointmentdate: this.state.todaysDate }); }}>
+						<IconMaterial name="pageview" size={28} color="white" />
+					</ActionButton.Item>
+					<ActionButton.Item buttonColor="#f08080" title="Delete appointment" onPress={() => { this.deleteAppointmentConfirmationAlert(); }}>
+						<IconMaterial name="delete" size={28} color="white" />
 					</ActionButton.Item>
 				</ActionButton>
 			);
 		}
+	}
+
+	renderPopupDialog() {
+		if (this.state.appointment.doctype === 'appointmentamended') {
+			return (
+				<PopupDialog
+					width={fullWidth - 30}
+					height={fullHeight - 180}
+					ref={(popupDialog) => {
+						this.scaleAnimationDialog = popupDialog;
+					}}
+					dialogTitle={<DialogTitle title="Appointment" />}
+					dialogStyle={{
+						marginBottom: 50
+					}}
+				>
+					<View
+						style={{
+							paddingHorizontal: 20,
+							justifyContent: 'center',
+							alignSelf: 'center',
+							alignItems: 'center'
+						}}
+					>
+						<Text style={{ marginTop: 20 }}>
+							{this.state.appointment.date}
+						</Text>
+						<View
+							style={{
+								flexDirection: 'row',
+								marginTop: 20,
+								alignSelf: 'flex-start'
+							}}
+						>
+							<Text note style={{ marginRight: 30, fontStyle: 'italic' }}>This is an extension of the appointment at {this.state.mainappointment.hour}:{this.state.mainappointment.minute} and cannot be edited from this area, click view details if you need to do it.</Text> 
+						</View>
+						<View
+							style={{
+								flexDirection: 'row',
+								height: 60,
+							}}
+						>
+							<IconMaterial
+								name="access-time"
+								size={20}
+								style={{
+									marginTop: 25,
+								}}
+							/>
+							<Text
+								style={{
+									marginTop: 25,
+									marginLeft: 20,
+									fontWeight: 'bold',
+								}}
+							>
+								Hour
+							</Text>
+							<Text
+								style={{
+									marginTop: 25,
+									marginLeft: 20,
+								}}
+							>
+								{this.state.appointment.hour}
+							</Text>
+							<Text
+								style={{
+									marginTop: 25,
+									marginLeft: 20,
+									fontWeight: 'bold',
+								}}
+							>
+								Minute
+							</Text>
+							<Text
+								style={{
+									marginTop: 25,
+									marginLeft: 20,
+								}}
+							>
+								{this.state.appointment.minute}
+							</Text>
+						</View>
+						<View
+							style={{
+								flexDirection: 'row',
+								height: 60,
+							}}
+						>
+							<IconMaterial
+								name="perm-identity"
+								size={20}
+								style={{
+									marginTop: 25,
+								}}
+							/>
+							<Text
+								style={{
+									marginTop: 25,
+									marginLeft: 20,
+									fontWeight: 'bold',
+								}}
+							>Contact</Text>
+							<Text
+								style={{
+									marginTop: 25,
+									marginLeft: 20,
+								}}
+							>
+								{this.state.appointment.contact_name}
+							</Text>
+						</View>
+						<View
+							style={{
+								flexDirection: 'row',
+								height: 60,
+							}}
+						>
+							<IconMaterial
+								name="supervisor-account"
+								size={20}
+								style={{
+									marginTop: 25,
+								}}
+							/>
+							<Text
+								style={{
+									marginTop: 25,
+									marginLeft: 20,
+									fontWeight: 'bold',
+								}}
+							>Staff</Text>
+							<Text
+								style={{
+									marginTop: 25,
+									marginLeft: 20,
+								}}
+							>
+								{this.state.appointment.employee_alias}
+							</Text>
+						</View>
+						<Text note style={{ marginTop: 5, alignSelf: 'flex-start', paddingTop: 2.5, fontStyle: 'italic', backgroundColor: 'transparent' }}>{this.treatmentslist}</Text>
+						<Text style={{ alignSelf: 'flex-start', fontWeight: 'bold', paddingVertical: 10 }}>General notes</Text>
+						<View
+							style={{
+								flexDirection: 'row',
+								height: 70,
+							}}
+						>
+							<Input
+								underlineColorAndroid={'transparent'}
+								disabled
+								autoCorrect={false}
+								multiline
+								numberOfLines={5}
+								returnKeyType="done"
+								style={{
+									backgroundColor: '#fff',
+									borderColor: '#C0C0C0',
+									borderWidth: 1,
+									borderRadius: 6,
+									color: '#424B4F',
+									width: fullWidth - 80,
+								}}
+								value={this.state.appointment.notes}
+							/>
+						</View>
+					</View>
+					{this.renderDialogButtons()}
+				</PopupDialog>
+			);
+		}
 		return (
-			<ActionButton
-				size={40}
-				buttonColor="#9DBDF2"
-				offsetX={15}
-				offsetY={15}
-				ref={(btn) => {
-					this.floatingBtn = btn;
+			<PopupDialog
+				width={fullWidth - 30}
+				height={fullHeight - 180}
+				ref={(popupDialog) => {
+					this.scaleAnimationDialog = popupDialog;
 				}}
-				onPress={() => { Keyboard.dismiss(); }}
-				icon={<IconMaterial name="settings" size={28} color="white" />}
+				dialogTitle={<DialogTitle title="Appointment" />}
+				dialogStyle={{
+					marginBottom: 50
+				}}
 			>
-				<ActionButton.Item buttonColor="#8fbc8f" title="Update appointment" onPress={() => { this.saveAppointment(); }}>
-					<IconMaterial name="save" size={28} color="white" />
-				</ActionButton.Item>
-				<ActionButton.Item buttonColor="#f08080" title="Delete appointment" onPress={() => { this.deleteAppointmentConfirmationAlert(); }}>
-					<IconMaterial name="delete" size={28} color="white" />
-				</ActionButton.Item>
-				<ActionButton.Item buttonColor="steelblue" title="View details" onPress={() => { Actions.AppointmentsInfo({ appointmentid: this.state.appointment._id, title: 'Appointment', appointmentdate: this.state.todaysDate }); }}>
-					<IconMaterial name="pageview" size={28} color="white" />
-				</ActionButton.Item>
-			</ActionButton>
+				<View
+					style={{
+						paddingHorizontal: 20,
+						justifyContent: 'center',
+						alignSelf: 'center',
+						alignItems: 'center'
+					}}
+				>
+					<DatePicker
+						date={this.state.appointment.date}
+						mode="date"
+						placeholder="Select date"
+						format="DD-MM-YYYY"
+						confirmBtnText="Ok"
+						cancelBtnText="Cancel"
+						customStyles={{
+							dateIcon: {
+								alignItems: 'center',
+								alignSelf: 'center'
+							},
+							dateInput: {
+								height: 40,
+								borderColor: 'transparent',
+								backgroundColor: 'white'
+							}
+						}}
+						onDateChange={(date) => {
+							this.onChangeText(date, 'date');
+						}}
+					/>
+					<View
+						style={{
+							flexDirection: 'row',
+							height: 60,
+						}}
+					>
+						<IconMaterial
+							name="access-time"
+							size={20}
+							style={{
+								marginTop: 25,
+							}}
+						/>
+						<Text
+							style={{
+								marginTop: 25,
+								marginLeft: 20,
+								fontWeight: 'bold',
+							}}
+						>
+							Hour
+						</Text>
+						<ModalPicker style={{ marginLeft: 20 }} data={this.hoursList} label="" initValue={this.state.appointment.hour} onChange={(option)=>{ this.onChangeText(option, 'hour'); }} />
+						<Text
+							style={{
+								marginTop: 25,
+								marginLeft: 20,
+								fontWeight: 'bold',
+							}}
+						>
+							Minute
+						</Text>
+						<ModalPicker style={{ marginLeft: 20 }} data={this.minutesList} label="" initValue={this.state.appointment.minute} onChange={(option)=>{ this.onChangeText(option, 'minute'); }} />
+					
+					</View>
+					<View
+						style={{
+							flexDirection: 'row',
+							height: 60,
+						}}
+					>
+						<IconMaterial
+							name="perm-identity"
+							size={20}
+							style={{
+								marginTop: 25,
+							}}
+						/>
+						<Text
+							style={{
+								marginTop: 25,
+								marginLeft: 20,
+								fontWeight: 'bold',
+							}}
+						>Contact</Text>
+						<ModalPicker style={{ marginLeft: 20 }} data={this.contactsList} label="" initValue={this.state.appointment.contact_name} onChange={(option)=>{ this.onChangeText(option, 'contact_id'); }} />
+					</View>
+					<View
+						style={{
+							flexDirection: 'row',
+							height: 60,
+						}}
+					>
+						<IconMaterial
+							name="supervisor-account"
+							size={20}
+							style={{
+								marginTop: 25,
+							}}
+						/>
+						<Text
+							style={{
+								marginTop: 25,
+								marginLeft: 20,
+								fontWeight: 'bold',
+							}}
+						>Staff</Text>
+						<ModalPicker style={{ marginLeft: 20 }} data={this.employeesList} label="" initValue={this.state.appointment.employee_alias} onChange={(option)=>{ this.onChangeText(option, 'employee_id'); }} />
+					</View>
+					<View
+						style={{
+							flexDirection: 'row',
+							height: 20,
+							marginTop: 5,
+							alignSelf: 'flex-start'
+						}}
+					>
+						<Text note style={{ marginRight: 30 }}>Select treatment(s)</Text> 
+						{this.state.appointment._id !== '' &&
+							<ActionButton size={24} icon={<MaterialCommunityIcons name="plus" size={16} color="white" />} buttonColor="#8fbc8f" offsetX={0} offsetY={0} onPress={() => { Actions.AppointmentsTreatmentsList({ title: 'Treatments list', treatmentslistinfo: this.treatmentslistinfo, appointment: this.state.appointment }); }} />
+						}
+					</View>
+					<Text note style={{ marginTop: 5, alignSelf: 'flex-start', paddingTop: 2.5, fontStyle: 'italic', backgroundColor: 'transparent' }}>{this.treatmentslist}</Text>
+					<Text style={{ alignSelf: 'flex-start', fontWeight: 'bold', paddingVertical: 10 }}>General notes</Text>
+					
+					<View
+						style={{
+							flexDirection: 'row',
+							height: 70,
+						}}
+					>
+						<Input
+							underlineColorAndroid={'transparent'}
+							autoCorrect={false}
+							multiline
+							numberOfLines={5}
+							returnKeyType="done"
+							style={{
+								backgroundColor: '#fff',
+								borderColor: '#C0C0C0',
+								borderWidth: 1,
+								borderRadius: 6,
+								color: '#424B4F',
+								width: fullWidth - 80,
+							}}
+							onChangeText={(text) => {
+								this.onChangeText(text, 'notes');
+							}}
+							value={this.state.appointment.notes}
+						/>
+					</View>
+				</View>
+				{this.renderDialogButtons()}
+			</PopupDialog>
 		);
 	}
 
@@ -2843,171 +3307,7 @@ class Dashboard extends Component {
 						</View>
 						<KeyboardAwareScrollView>
 						<Content style={{ minHeight: 800 }} >
-							<PopupDialog
-								width={fullWidth - 30}
-								height={fullHeight - 180}
-								ref={(popupDialog) => {
-									this.scaleAnimationDialog = popupDialog;
-								}}
-								dialogTitle={<DialogTitle title="Appointment" />}
-								dialogStyle={{
-									marginBottom: 50
-								}}
-							>
-								<View
-									style={{
-										paddingHorizontal: 20,
-										justifyContent: 'center',
-										alignSelf: 'center',
-										alignItems: 'center'
-									}}
-								>
-									<DatePicker
-										date={this.state.appointment.date}
-										mode="date"
-										placeholder="Select date"
-										format="DD-MM-YYYY"
-										confirmBtnText="Ok"
-										cancelBtnText="Cancel"
-										customStyles={{
-											dateIcon: {
-												alignItems: 'center',
-												alignSelf: 'center'
-											},
-											dateInput: {
-												height: 40,
-												borderColor: 'transparent',
-												backgroundColor: 'white'
-											}
-										}}
-										onDateChange={(date) => {
-											this.onChangeText(date, 'date');
-										}}
-									/>
-									<View
-										style={{
-											flexDirection: 'row',
-											height: 60,
-										}}
-									>
-										<IconMaterial
-											name="access-time"
-											size={20}
-											style={{
-												marginTop: 25,
-											}}
-										/>
-										<Text
-											style={{
-												marginTop: 25,
-												marginLeft: 20,
-												fontWeight: 'bold',
-											}}
-										>
-											Hour
-										</Text>
-										<ModalPicker style={{ marginLeft: 20 }} data={this.hoursList} label="" initValue={this.state.appointment.hour} onChange={(option)=>{ this.onChangeText(option, 'hour'); }} />
-										<Text
-											style={{
-												marginTop: 25,
-												marginLeft: 20,
-												fontWeight: 'bold',
-											}}
-										>
-											Minute
-										</Text>
-										<ModalPicker style={{ marginLeft: 20 }} data={this.minutesList} label="" initValue={this.state.appointment.minute} onChange={(option)=>{ this.onChangeText(option, 'minute'); }} />
-									
-									</View>
-									<View
-										style={{
-											flexDirection: 'row',
-											height: 60,
-										}}
-									>
-										<IconMaterial
-											name="perm-identity"
-											size={20}
-											style={{
-												marginTop: 25,
-											}}
-										/>
-										<Text
-											style={{
-												marginTop: 25,
-												marginLeft: 20,
-												fontWeight: 'bold',
-											}}
-										>Contact</Text>
-										<ModalPicker style={{ marginLeft: 20 }} data={this.contactsList} label="" initValue={this.state.appointment.contact_name} onChange={(option)=>{ this.onChangeText(option, 'contact_id'); }} />
-									</View>
-									<View
-										style={{
-											flexDirection: 'row',
-											height: 60,
-										}}
-									>
-										<IconMaterial
-											name="supervisor-account"
-											size={20}
-											style={{
-												marginTop: 25,
-											}}
-										/>
-										<Text
-											style={{
-												marginTop: 25,
-												marginLeft: 20,
-												fontWeight: 'bold',
-											}}
-										>Staff</Text>
-										<ModalPicker style={{ marginLeft: 20 }} data={this.employeesList} label="" initValue={this.state.appointment.employee_alias} onChange={(option)=>{ this.onChangeText(option, 'employee_id'); }} />
-									</View>
-									<View
-										style={{
-											flexDirection: 'row',
-											height: 20,
-											marginTop: 5,
-											alignSelf: 'flex-start'
-										}}
-									>
-										<Text note style={{ marginRight: 30 }}>Select treatment(s)</Text> 
-										{this.state.appointment._id !== '' &&
-											<ActionButton size={24} icon={<MaterialCommunityIcons name="plus" size={16} color="white" />} buttonColor="#8fbc8f" offsetX={0} offsetY={0} onPress={() => { Actions.AppointmentsTreatmentsList({ title: 'Treatments list', treatmentslistinfo: this.treatmentslistinfo, appointment: this.state.appointment }); }} />
-										}
-									</View>
-									<Text note style={{ marginTop: 5, alignSelf: 'flex-start', paddingTop: 2.5, fontStyle: 'italic', backgroundColor: 'transparent' }}>{this.treatmentslist}</Text>
-									<Text style={{ alignSelf: 'flex-start', fontWeight: 'bold', paddingVertical: 10 }}>General notes</Text>
-									
-									<View
-										style={{
-											flexDirection: 'row',
-											height: 70,
-										}}
-									>
-										<Input
-											underlineColorAndroid={'transparent'}
-											autoCorrect={false}
-											multiline
-											numberOfLines={5}
-											returnKeyType="done"
-											style={{
-												backgroundColor: '#fff',
-												borderColor: '#C0C0C0',
-												borderWidth: 1,
-												borderRadius: 6,
-												color: '#424B4F',
-												width: fullWidth - 80,
-											}}
-											onChangeText={(text) => {
-												this.onChangeText(text, 'notes');
-											}}
-											value={this.state.appointment.notes}
-										/>
-									</View>
-								</View>
-								{this.renderDialogButtons()}
-							</PopupDialog>
+							{this.renderPopupDialog()}
 							{this.state.showspinner &&
 								<View
 									style={{
@@ -3549,171 +3849,7 @@ class Dashboard extends Component {
 									</View>
 								</View>
 							}
-							<PopupDialog
-								width={fullWidth - 30}
-								height={fullHeight - 180}
-								ref={(popupDialog) => {
-									this.scaleAnimationDialog = popupDialog;
-								}}
-								dialogTitle={<DialogTitle title="Appointment" />}
-								dialogStyle={{
-									marginBottom: 50
-								}}
-							>
-								<View
-									style={{
-										paddingHorizontal: 20,
-										justifyContent: 'center',
-										alignSelf: 'center',
-										alignItems: 'center'
-									}}
-								>
-									<DatePicker
-										date={this.state.weekdatefrom}
-										mode="date"
-										placeholder="Select date"
-										format="DD-MM-YYYY"
-										confirmBtnText="Ok"
-										cancelBtnText="Cancel"
-										customStyles={{
-											dateIcon: {
-												alignItems: 'center',
-												alignSelf: 'center'
-											},
-											dateInput: {
-												height: 40,
-												borderColor: 'transparent',
-												backgroundColor: 'white'
-											}
-										}}
-										onDateChange={(date) => {
-											this.onChangeText(date, 'date');
-										}}
-									/>
-									<View
-										style={{
-											flexDirection: 'row',
-											height: 60,
-										}}
-									>
-										<IconMaterial
-											name="access-time"
-											size={20}
-											style={{
-												marginTop: 25,
-											}}
-										/>
-										<Text
-											style={{
-												marginTop: 25,
-												marginLeft: 20,
-												fontWeight: 'bold',
-											}}
-										>
-											Hour
-										</Text>
-										<ModalPicker style={{ marginLeft: 20 }} data={this.hoursList} label="" initValue={this.state.appointment.hour} onChange={(option)=>{ this.onChangeText(option, 'hour'); }} />
-										<Text
-											style={{
-												marginTop: 25,
-												marginLeft: 20,
-												fontWeight: 'bold',
-											}}
-										>
-											Minute
-										</Text>
-										<ModalPicker style={{ marginLeft: 20 }} data={this.minutesList} label="" initValue={this.state.appointment.minute} onChange={(option)=>{ this.onChangeText(option, 'minute'); }} />
-									
-									</View>
-									<View
-										style={{
-											flexDirection: 'row',
-											height: 60,
-										}}
-									>
-										<IconMaterial
-											name="perm-identity"
-											size={20}
-											style={{
-												marginTop: 25,
-											}}
-										/>
-										<Text
-											style={{
-												marginTop: 25,
-												marginLeft: 20,
-												fontWeight: 'bold',
-											}}
-										>Contact</Text>
-										<ModalPicker style={{ marginLeft: 20 }} data={this.contactsList} label="" initValue={this.state.appointment.contact_name} onChange={(option)=>{ this.onChangeText(option, 'contact_id'); }} />
-									</View>
-									<View
-										style={{
-											flexDirection: 'row',
-											height: 60,
-										}}
-									>
-										<IconMaterial
-											name="supervisor-account"
-											size={20}
-											style={{
-												marginTop: 25,
-											}}
-										/>
-										<Text
-											style={{
-												marginTop: 25,
-												marginLeft: 20,
-												fontWeight: 'bold',
-											}}
-										>Staff</Text>
-										<ModalPicker style={{ marginLeft: 20 }} data={this.employeesList} label="" initValue={this.state.appointment.employee_alias} onChange={(option)=>{ this.onChangeText(option, 'employee_id'); }} />
-									</View>
-									<View
-										style={{
-											flexDirection: 'row',
-											height: 20,
-											marginTop: 5,
-											alignSelf: 'flex-start'
-										}}
-									>
-										<Text note style={{ marginRight: 30 }}>Select treatment(s)</Text> 
-										{this.state.appointment._id !== '' &&
-											<ActionButton size={24} icon={<MaterialCommunityIcons name="plus" size={16} color="white" />} buttonColor="#8fbc8f" offsetX={0} offsetY={0} onPress={() => { Actions.AppointmentsTreatmentsList({ title: 'Treatments list', treatmentslistinfo: this.treatmentslistinfo, appointment: this.state.appointment }); }} />
-										}
-									</View>
-									<Text note style={{ marginTop: 5, alignSelf: 'flex-start', paddingTop: 2.5, fontStyle: 'italic', backgroundColor: 'transparent' }}>{this.treatmentslist}</Text>
-									<Text style={{ alignSelf: 'flex-start', fontWeight: 'bold', paddingVertical: 10 }}>General notes</Text>
-									
-									<View
-										style={{
-											flexDirection: 'row',
-											height: 70,
-										}}
-									>
-										<Input
-											underlineColorAndroid={'transparent'}
-											autoCorrect={false}
-											multiline
-											numberOfLines={5}
-											returnKeyType="done"
-											style={{
-												backgroundColor: '#fff',
-												borderColor: '#C0C0C0',
-												borderWidth: 1,
-												borderRadius: 6,
-												color: '#424B4F',
-												width: fullWidth - 80,
-											}}
-											onChangeText={(text) => {
-												this.onChangeText(text, 'notes');
-											}}
-											value={this.state.appointment.notes}
-										/>
-									</View>
-								</View>
-								{this.renderDialogButtons()}
-							</PopupDialog>
+							{this.renderPopupDialog()}
 							{this.state.showspinner &&
 								<View
 									style={{

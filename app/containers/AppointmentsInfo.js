@@ -208,6 +208,7 @@ class AppointmentsInfo extends Component {
 					if (prop === 'name') {
 						newtreatments[i].name = newValue.label;
 						newtreatments[i].treatment_id = newValue.value;
+						newtreatments[i].duration = newValue.duration;
 					}
 					if (prop === 'notes') {
 						newtreatments[i].notes = newValue;
@@ -221,6 +222,7 @@ class AppointmentsInfo extends Component {
 					if (prop === 'name') {
 						newtreatments[i].name = newValue.label;
 						newtreatments[i].treatment_id = newValue.value;
+						newtreatments[i].duration = newValue.duration;
 					}
 					if (prop === 'notes') {
 						newtreatments[i].notes = newValue;
@@ -297,18 +299,20 @@ class AppointmentsInfo extends Component {
 		treatmentsListObject = {
 			key: '0',
 			value: '',
-			name: ''
+			name: '',
+			duration: ''
 		};
 		if (treatmentInfo.docs.length > 0) {
 			for (let t = 0; t < treatmentInfo.docs.length; t += 1) {
 				treatmentsListObject = {
 					key: treatmentInfo.docs[t]._rev,
 					value: treatmentInfo.docs[t]._id,
-					label: treatmentInfo.docs[t].name
+					label: treatmentInfo.docs[t].name,
+					duration: treatmentInfo.docs[t].duration
 				};
 				this.treatmentsList.push(treatmentsListObject);
 			}
-			this.treatmentsList = _.sortBy(this.treatmentsList, ['name']);
+			this.treatmentsList = _.sortBy(this.treatmentsList, ['label']);
 		}
 		let indexHour = 0;
 		this.hoursList = [
@@ -478,12 +482,24 @@ class AppointmentsInfo extends Component {
 			newappointment.minute = this.state.appointment.minute;
 			newappointment.contact_id = this.state.appointment.contact_id;
 			newappointment.employee_id = this.state.appointment.employee_id;
+			newappointment.treatment_duration = '';
+			newappointment.treatment_id = '';
 			newappointment.notes = this.state.appointment.notes;
 			const savedappointment = await DBCompanyConnection.post(newappointment);
 			const newrev = savedappointment.rev;
 			this.onChangeText(newrev, '_rev');
 			this.saveAppointmentAlert('created', savedappointment.id);
 		} else {
+			const queryAmendments = { selector: { doctype: 'appointmentamended', appointment_id: this.state.appointmentid }, };
+			const appointmentAmendedInfo = await DBCompanyConnection.find(queryAmendments);
+			if (appointmentAmendedInfo.docs.length > 0) {
+				for (let a = 0; a < appointmentAmendedInfo.docs.length; a += 1) {
+					appointmentAmendedInfo.docs[a].date = this.state.appointment.date;
+					appointmentAmendedInfo.docs[a].employee_id = this.state.appointment.employee_id;
+					appointmentAmendedInfo.docs[a].contact_id = this.state.appointment.contact_id;
+					const updatedappointmentAmended = await DBCompanyConnection.put(appointmentAmendedInfo.docs[a]);
+				}
+			}
 			const updatedappointment = await DBCompanyConnection.put(this.state.appointment);
 			const newrev = updatedappointment.rev;
 			this.onChangeText(newrev, '_rev');
@@ -527,6 +543,13 @@ class AppointmentsInfo extends Component {
 				const imageDeleted = await DBCompanyConnection.remove(this.state.images[i]);
 			}
 		}
+		const queryAmendments = { selector: { doctype: 'appointmentamended', appointment_id: this.state.appointmentid }, };
+		const appointmentAmendedInfo = await DBCompanyConnection.find(queryAmendments);
+		if (appointmentAmendedInfo.docs.length > 0) {
+			for (let a = 0; a < appointmentAmendedInfo.docs.length; a += 1) {
+				const appointmentamendeddeleted = await DBCompanyConnection.remove(appointmentAmendedInfo.docs[a]);
+			}
+		}
 		this.deleteAppointmentAlert();
 	}
 
@@ -550,6 +573,7 @@ class AppointmentsInfo extends Component {
 		treatment.appointment_id = this.state.appointmentid;
 		treatment.employee_id = this.state.appointment.employee_id;
 		treatment.contact_id = this.state.appointment.contact_id;
+		treatment.duration = '';
 		const dsTreatments = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 		const newtreatmentlist = this.state.treatments;
 		newtreatmentlist.push(treatment);
@@ -569,16 +593,20 @@ class AppointmentsInfo extends Component {
 	}
 
 	async deleteTreatment(treatment) {
-		const dsTreatments = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
-		for (let i = 0; i < this.state.treatments.length; i += 1) {
-			// remove treatment_id === treatment_id
-			if (this.state.treatments[i]._id === treatment._id) {
+		for (let t = 0; t < this.state.treatments.length; t += 1) {
+			if (this.state.treatments[t]._id === treatment._id) {
+				const treatmentDeleted = await DBCompanyConnection.remove(this.state.treatments[t]);
+				const queryappointmentamended = { selector: { doctype: 'appointmentamended', appointment_id: this.state.appointment._id, treatment_id: this.state.treatments[t]._id }, };
+				this.appointmentamendedinfo = await DBCompanyConnection.find(queryappointmentamended);
+				if (this.appointmentamendedinfo.docs.length > 0) {
+					const appointmentAmendedDeleted = await DBCompanyConnection.remove(this.appointmentamendedinfo.docs[0]);
+				}
 				const index = this.state.treatments.indexOf(treatment);
 				this.state.treatments.splice(index, 1);
 			}
 		}
+		const dsTreatments = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 		this.setState({ treatments: this.state.treatments, treatmentslist: dsTreatments.cloneWithRows(this.state.treatments) });
-		const treatmentDeleted = await DBCompanyConnection.remove(treatment);
 		this.deleteTreatmentAlert();
 	}
 
@@ -613,6 +641,7 @@ class AppointmentsInfo extends Component {
 				newtreatment.employee_id = this.state.appointment.employee_id;
 				newtreatment.notes = treatment.notes;
 				newtreatment.name = treatment.name;
+				newtreatment.duration = treatment.duration;
 				newtreatment.treatment_id = treatment.treatment_id;
 				const savedtreatment = await DBCompanyConnection.post(newtreatment);
 				const newrev = savedtreatment.rev;
@@ -625,15 +654,176 @@ class AppointmentsInfo extends Component {
 						}
 					}
 				}
+				const queryAmendments = { selector: { doctype: 'appointmentamended', appointment_id: this.state.appointmentid }, };
+				const appointmentAmendedInfo = await DBCompanyConnection.find(queryAmendments);
+				this.appointmentAmendedInfo = [];
+				if (appointmentAmendedInfo.docs.length > 0) {
+					for (let a = 0; a < appointmentAmendedInfo.docs.length; a += 1) {
+						appointmentAmendedInfo.docs[a].hour = Math.round(appointmentAmendedInfo.docs[a].hour * 100) / 100;
+						if (parseInt(appointmentAmendedInfo.docs[a].minute < 10)) {
+							appointmentAmendedInfo.docs[a].minute = Math.round(appointmentAmendedInfo.docs[a].minute * 100) / 100;
+						}
+						this.appointmentAmendedInfo.push(appointmentAmendedInfo.docs[a]);
+					}
+				}
+				if (this.state.treatments.length > 1) {
+					if (this.appointmentAmendedInfo.length > 0) {
+						this.appointmentAmendedInfo = _.sortBy(this.appointmentAmendedInfo, ['hour', 'minute']).reverse()
+						const newappointmentamended = {};
+						newappointmentamended.doctype = 'appointmentamended';
+						newappointmentamended.date = this.appointmentAmendedInfo[0].date;
+						if (!_.isEmpty(newtreatment.duration)) {
+							this.newminutes = parseInt(this.appointmentAmendedInfo[0].minute) + parseInt(newtreatment.duration);
+							if (this.newminutes >= 60) {
+								this.newhour = parseInt(this.appointmentAmendedInfo[0].hour) + 1;
+								this.newminutes = this.newminutes - 60;
+							} else {
+								this.newhour = parseInt(this.appointmentAmendedInfo[0].hour);
+							}
+						}
+						if (this.newhour < 10) {
+							this.newhour = String('0'+this.newhour);
+						} else {
+							this.newhour = String(this.newhour);
+						}
+						if (this.newminutes < 10) {
+							this.newminutes = String('0'+this.newminutes);
+						} else {
+							this.newminutes = String(this.newminutes);
+						}
+						newappointmentamended.hour = this.newhour;
+						newappointmentamended.minute = this.newminutes;
+						newappointmentamended.appointment_id = this.appointmentAmendedInfo[0].appointment_id;
+						newappointmentamended.treatment_id = newid;
+						newappointmentamended.treatment_name = newtreatment.name;
+						newappointmentamended.treatment_duration = newtreatment.duration;
+						newappointmentamended.contact_id = this.state.appointment.contact_id;
+						newappointmentamended.employee_id = this.state.appointment.employee_id;
+						const savedappointmentamended = await DBCompanyConnection.post(newappointmentamended);
+					} else {
+						const newappointmentamended = {};
+						newappointmentamended.doctype = 'appointmentamended';
+						newappointmentamended.date = this.state.appointment.date;
+						if (!_.isEmpty(newtreatment.duration)) {
+							this.newminutes = parseInt(this.state.appointment.minute) + parseInt(newtreatment.duration);
+							if (this.newminutes >= 60) {
+								this.newhour = parseInt(this.state.appointment.hour) + 1;
+								this.newminutes = this.newminutes - 60;
+							} else {
+								this.newhour = parseInt(this.state.appointment.hour);
+							}
+						}
+						if (this.newhour < 10) {
+							this.newhour = String('0'+this.newhour);
+						} else {
+							this.newhour = String(this.newhour);
+						}
+						if (this.newminutes < 10) {
+							this.newminutes = String('0'+this.newminutes);
+						} else {
+							this.newminutes = String(this.newminutes);
+						}
+						newappointmentamended.hour = this.newhour;
+						newappointmentamended.minute = this.newminutes;
+						newappointmentamended.appointment_id = this.state.appointment._id;
+						newappointmentamended.treatment_id = newid;
+						newappointmentamended.treatment_name = newtreatment.name;
+						newappointmentamended.treatment_duration = newtreatment.duration;
+						newappointmentamended.contact_id = this.state.appointment.contact_id;
+						newappointmentamended.employee_id = this.state.appointment.employee_id;
+						const savedappointmentamended = await DBCompanyConnection.post(newappointmentamended);
+					}
+				} else {
+					this.state.appointment.treatment_duration = treatment.duration;
+					this.state.appointment.treatment_id = treatment._id;
+					const updatedappointment = await DBCompanyConnection.put(this.state.appointment);
+					const newrev = updatedappointment.rev;
+					this.onChangeText(newrev, '_rev');
+				}
 				const dsTreatments = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 				this.setState({ treatmentslist: dsTreatments.cloneWithRows(this.state.treatments), treatments: this.state.treatments, showspinner: false });
 				this.saveTreatmentAlert('created', newtreatment);
 			} else {
 				const updatedtreatment = await DBCompanyConnection.put(treatment);
 				const newrev = updatedtreatment.rev;
-				this.onChangeTreatmentInfo(newrev, '_rev', treatment);
-				this.saveTreatmentAlert('updated', treatment);
-				this.setState({ showspinner: false });
+				this.queryAppointments = {
+					'selector': {
+						'$or': [
+							{ 'doctype': { '$eq': 'appointment' }},
+							{ 'doctype': { '$eq': 'appointmentamended' }},
+							{ '_id': { '$eq': this.state.appointment._id }},
+							{ 'appointment_id': { '$eq': this.state.appointment._id }},
+						]
+					},
+					'fields': []
+				};
+				const appointmentsamendedinfo = await DBCompanyConnection.find(this.queryAppointments);
+				if (appointmentsamendedinfo.docs.length > 0) {
+					for (let a = 0; a < appointmentsamendedinfo.docs.length; a += 1) {
+						appointmentsamendedinfo.docs[a].hour = Math.round(appointmentsamendedinfo.docs[a].hour * 100) / 100;
+						if (parseInt(appointmentsamendedinfo.docs[a].minute < 10)) {
+							appointmentsamendedinfo.docs[a].minute = Math.round(appointmentsamendedinfo.docs[a].minute * 100) / 100;
+						}
+					}
+				}
+				appointmentsamendedinfo.docs = _.sortBy(appointmentsamendedinfo.docs, ['hour', 'minute']);
+				for (let e = 0; e < appointmentsamendedinfo.docs.length; e += 1) {
+					if (appointmentsamendedinfo.docs[e].treatment_id === treatment.treatment_id) {
+						e += 1;
+						if (!_.isEmpty(appointmentsamendedinfo.docs[e])) {
+							if (appointmentsamendedinfo.docs[e].treatment_duration < treatment.duration) {
+								this.newminutes = parseInt(appointmentsamendedinfo.docs[e].minute) - (parseInt(appointmentsamendedinfo.docs[e].treatment_duration) - parseInt(treatment.duration));
+								if (this.newminutes < 0) {
+									this.newhour = parseInt(appointmentsamendedinfo.docs[e].hour) - 1;
+									this.newminutes = 60 - this.newminutes;
+								} else {
+									this.newhour = parseInt(appointmentsamendedinfo.docs[e].hour);
+								}
+								if (this.newhour < 10) {
+									this.newhour = String('0'+this.newhour);
+								} else {
+									this.newhour = String(this.newhour);
+								}
+								if (this.newminutes < 10) {
+									this.newminutes = String('0'+this.newminutes);
+								} else {
+									this.newminutes = String(this.newminutes);
+								}
+							} else if (appointmentsamendedinfo.docs[e].treatment_duration > treatment.duration) {
+								this.newminutes = parseInt(appointmentsamendedinfo.docs[e].minute) + (parseInt(appointmentsamendedinfo.docs[e].treatment_duration) + parseInt(treatment.duration));
+								if (this.newminutes >= 60) {
+									this.newhour = parseInt(appointmentsamendedinfo.docs[e].hour) + 1;
+									this.newminutes = this.newminutes - 60;
+								} else {
+									this.newhour = parseInt(appointmentsamendedinfo.docs[e].hour);
+								}
+								if (this.newhour < 10) {
+									this.newhour = String('0'+this.newhour);
+								} else {
+									this.newhour = String(this.newhour);
+								}
+								if (this.newminutes < 10) {
+									this.newminutes = String('0'+this.newminutes);
+								} else {
+									this.newminutes = String(this.newminutes);
+								}
+							}
+							appointmentsamendedinfo.docs[e].hour = this.newhour;
+							appointmentsamendedinfo.docs[e].minutes = this.newminutes;
+							appointmentsamendedinfo.docs[e].treatment_duration = treatment.duration;
+							appointmentsamendedinfo.docs[e].appointment_id = this.state.appointment._id;
+							appointmentsamendedinfo.docs[e].treatment_id = treatment.treatment_id;
+							appointmentsamendedinfo.docs[e].treatment_name = treatment.name;
+							appointmentsamendedinfo.docs[e].contact_id = this.state.appointment.contact_id;
+							appointmentsamendedinfo.docs[e].employee_id = this.state.appointment.employee_id;
+							const appointmentamendedupdated = await DBCompanyConnection.put(appointmentsamendedinfo.docs[e]);
+							const newrev = appointmentamendedupdated.rev;
+							this.onChangeTreatmentInfo(newrev, '_rev', treatment);
+							this.saveTreatmentAlert('updated', treatment);
+							this.setState({ showspinner: false, treatmentslist: dsTreatments.cloneWithRows(appointmentsamendedinfo.docs), treatments: appointmentsamendedinfo.docs });
+						}
+					}
+				}
 			}
 		}
 	}
@@ -870,6 +1060,10 @@ class AppointmentsInfo extends Component {
 	}
 
 	renderRowTreatments(treatment) {
+		this.treatmentLabel = `Treatment (${treatment.duration} min)`;
+		if (treatment.duration === '') {
+			this.treatmentLabel = 'Treatment';
+		}
 		return (
 			<View
 				style={{
@@ -887,7 +1081,7 @@ class AppointmentsInfo extends Component {
 						paddingHorizontal: 12,
 					}}
 				>
-					<ModalPicker data={this.treatmentsList} label="Treatments" initValue={treatment.name} onChange={(option)=>{ this.onChangeTreatmentInfo(option, 'name', treatment); }} />
+					<ModalPicker data={this.treatmentsList} label={this.treatmentLabel} initValue={treatment.name} onChange={(option)=>{ this.onChangeTreatmentInfo(option, 'name', treatment); }} />
 				</View>
 				<View
 					style={{
